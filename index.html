@@ -596,8 +596,8 @@ textarea{width:100%;min-height:80px;padding:12px 16px;border:1px solid var(--lin
       var perDay = left / daysLeft, perTxt = perDay >= 1 ? fmtP(perDay) + " pages a day" : "about " + Math.max(1, Math.round(perDay * 15)) + " lines a day";
       card.appendChild(el("p", "meta gm", got >= g.t ? "Goal reached, mā shāʾ Allāh." : fmtP(left) + " pages to go · " + perTxt + " for " + daysLeft + (daysLeft === 1 ? " day" : " days")));
       var tr = el("div", "row"); tr.appendChild(el("span", "meta", "Target"));
-      var ti0 = el("input"); ti0.type = "number"; ti0.min = 0.5; ti0.max = 604; ti0.step = 0.5; ti0.value = g.t; ti0.setAttribute("aria-label", pp.name + " target");
-      ti0.onchange = function () { var v = Math.round((parseFloat(ti0.value) || g.t) * 2) / 2; g.t = Math.max(0.5, Math.min(604, v)); save(); render(); };
+      var ti0 = el("input"); ti0.type = "number"; ti0.min = 0.25; ti0.max = 604; ti0.step = "any"; ti0.value = g.t; ti0.setAttribute("aria-label", pp.name + " target");
+      ti0.onchange = function () { var v = Math.round((parseFloat(ti0.value) || g.t) * 100) / 100; g.t = Math.max(0.25, Math.min(604, v)); save(); render(); };
       tr.appendChild(ti0); tr.appendChild(el("span", "meta", "pages")); card.appendChild(tr);
       var nt = el("input"); nt.type = "text"; nt.maxLength = 120; nt.className = "gnote"; nt.value = g.note || "";
       nt.placeholder = pp.k === "week" ? "e.g. Finish Al-Mulk" : pp.k === "month" ? "e.g. Complete Juz 29" : "e.g. Memorise Juz 28–30";
