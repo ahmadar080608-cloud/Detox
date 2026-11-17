@@ -190,6 +190,15 @@ button.tag{cursor:pointer}
 .mrow.none .mb i{display:none}
 .med{padding:4px 10px 0 42px}
 .med input[type=range]{width:100%;accent-color:var(--accent);margin:4px 0 10px}
+.hgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:6px;max-height:440px;overflow-y:auto;padding-right:4px}
+.hgrid.titled{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.hch{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:8px;font-size:13px;display:flex;gap:8px;align-items:baseline;text-align:left;justify-content:center}
+.hgrid.titled .hch{justify-content:flex-start}
+.hch b{font-size:12px;color:var(--muted);min-width:18px;text-align:center}
+.hch span{line-height:1.3}
+.hch.s1{background:var(--accent-soft);border-color:var(--accent)}
+.hch.s2{background:var(--accent);border-color:var(--accent);color:#fff}.hch.s2 b{color:rgba(255,255,255,.8)}
+:root[data-theme=autumn] .hch.s2{color:#120a04}
 .days{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin:14px 0}
 .day{background:var(--bg);border-radius:12px;padding:8px;text-align:center}
 .day.today{outline:2px solid var(--accent)}
@@ -480,6 +489,7 @@ textarea{width:100%;min-height:80px;padding:12px 16px;border:1px solid var(--lin
     app.appendChild(pageHead(p0, open + " open"));
     if (p0.group === "islamic") app.appendChild(subTabs());
     if (sec === "quran") renderQuranTrackers();
+    if (sec === "hadith") renderHadithTrackers();
 
     var p = el("div", "panel");
     var head = el("div", "panel-h"); head.appendChild(el("h2", null, "Tasks"));
@@ -826,6 +836,131 @@ textarea{width:100%;min-height:80px;padding:12px 16px;border:1px solid var(--lin
       if (c) q.collapsed[id] = true; else delete q.collapsed[id];
       head.setAttribute("aria-expanded", c ? "false" : "true"); save();
     };
+  }
+
+
+  // ---------- Hadith trackers ----------
+  var NAWAWI = ["Actions are by intentions","The hadith of Jibrīl","The pillars of Islam","Creation in the womb","Rejecting innovations","The ḥalāl and ḥarām are clear","The religion is sincerity","The sanctity of a Muslim","What I forbid, avoid","Allah is pure","Leave what makes you doubt","Leaving what does not concern you","Loving for your brother","The blood of a Muslim","Speak good or be silent","Do not become angry","Excellence in everything","Fear Allah wherever you are","Be mindful of Allah","If you feel no shame","Say: I believe, then be steadfast","The obligatory prayers and Paradise","Purity is half of faith","I have forbidden oppression","Every dhikr is charity","Charity for every joint","Righteousness is good character","Hold to my Sunnah","Deeds that lead to Paradise","The limits set by Allah","Zuhd: being loved by Allah and people","No harm and no reciprocating harm","The burden of proof","Changing an evil","Do not envy one another","Relieving a believer's hardship","Good and bad deeds are recorded","The allies of Allah","Mistakes and forgetfulness are forgiven","Be in the world like a stranger","Desires that follow what I brought","O son of Adam, I will forgive you"];
+  var h = state.hadith = state.hadith || {};
+  h.cols = Array.isArray(h.cols) && h.cols.length ? h.cols : [{ id:"nawawi", name:"al-Arbaʿīn al-Nawawiyyah", count:42, preset:true }];
+  h.active = h.cols.some(function (c) { return c.id === h.active; }) ? h.active : h.cols[0].id;
+  h.mem = h.mem || {};          // colId -> { n: 1 learning | 2 memorised }
+  h.rev = h.rev || {};          // colId -> { n: "YYYY-MM-DD" last revised }
+  h.revLog = h.revLog || {};    // "YYYY-MM-DD" -> hadith revised that day
+  h.revTarget = h.revTarget || 10;
+  var hadithAdding = false, showAllDue = false;
+
+  function hTitle(col, n){ return col.id === "nawawi" ? NAWAWI[n-1] : ""; }
+  function hStats(col){ var m = h.mem[col.id] || {}, d = 0, l = 0; for (var k in m) { if (m[k] === 2) d++; else if (m[k] === 1) l++; } return { done:d, learning:l }; }
+  function daysSince(k){ if (!k) return null; var a = new Date(k + "T12:00:00"), b = new Date(); b.setHours(12,0,0,0); return Math.round((b - a) / 86400000); }
+
+  function renderHadithTrackers(){
+    var col = h.cols.find(function (c) { return c.id === h.active; });
+    var allDone = 0, allTotal = 0; h.cols.forEach(function (c) { allDone += hStats(c).done; allTotal += c.count; });
+    var ws = weekStart(new Date()), wsk = dkey(ws), revW = 0;
+    for (var dk in h.revLog) if (dk >= wsk) revW += h.revLog[dk];
+
+    // summary tiles
+    var sum = el("div", "qsum"); sum.style.gridTemplateColumns = "repeat(2,1fr)";
+    [
+      { id:"h-mem", ic:"hadith", v:allDone + "/" + allTotal, l:"Hadith memorised", f:allTotal ? allDone/allTotal : 0, c:"--c5" },
+      { id:"h-rev", ic:"tools",  v:revW + "/" + h.revTarget, l:"Revised this week", f:revW / h.revTarget, c:"--c3" }
+    ].forEach(function (t) {
+      var b = el("button", "qs grain"); b.style.background = "var(" + t.c + ")";
+      var ti = el("div", "qi"); ti.appendChild(icon(t.ic)); b.appendChild(ti);
+      var bot = el("div"); bot.appendChild(el("div", "qv", t.v)); bot.appendChild(el("div", "ql", t.l)); bot.appendChild(barEl(t.f)); b.appendChild(bot);
+      b.onclick = function () { if (q.collapsed[t.id]) { delete q.collapsed[t.id]; save(); render(); }
+        var x = document.getElementById(t.id); if (x) x.scrollIntoView({ behavior:"smooth", block:"start" }); };
+      sum.appendChild(b);
+    });
+    app.appendChild(sum);
+
+    // ---- memorisation ----
+    var pm = el("div", "panel"); pm.id = "h-mem";
+    pm.appendChild(el("h2", null, "Memorisation"));
+    var ctl = el("div", "row"); ctl.style.marginBottom = "12px";
+    var sel = el("select"); sel.setAttribute("aria-label", "Collection");
+    h.cols.forEach(function (c) { var o = el("option", null, c.name + " (" + c.count + ")"); o.value = c.id; sel.appendChild(o); });
+    sel.value = h.active; sel.onchange = function () { h.active = sel.value; save(); render(); };
+    ctl.appendChild(sel);
+    var addB = el("button", "newbtn"); addB.appendChild(icon(hadithAdding ? "x" : "plus")); addB.appendChild(document.createTextNode(hadithAdding ? "Close" : "Collection"));
+    addB.onclick = function () { hadithAdding = !hadithAdding; render(); };
+    ctl.appendChild(addB);
+    if (!col.preset) {
+      var delC = el("button", "ghost danger", "Remove collection"), armed = false;
+      delC.onclick = function () { if (!armed) { armed = true; delC.textContent = "Press again to remove"; return; }
+        h.cols = h.cols.filter(function (c) { return c.id !== col.id; }); delete h.mem[col.id]; delete h.rev[col.id]; h.active = h.cols[0].id; save(); render(); };
+      ctl.appendChild(delC);
+    }
+    pm.appendChild(ctl);
+    if (hadithAdding) {
+      var ar = el("div", "row newrow");
+      var nm = el("input"); nm.type = "text"; nm.maxLength = 80; nm.placeholder = "Collection name, e.g. Riyāḍ al-Ṣāliḥīn: Book of Sincerity"; nm.setAttribute("aria-label", "Collection name");
+      var ct = el("input"); ct.type = "number"; ct.min = 1; ct.max = 2000; ct.placeholder = "No."; ct.setAttribute("aria-label", "Number of hadith");
+      var ok = el("button", "cta", "Add");
+      ok.onclick = function () { var n = nm.value.trim(), c = parseInt(ct.value, 10); if (!n || !(c > 0)) return;
+        var id = "c" + uid(); h.cols.push({ id:id, name:n, count:Math.min(2000, c) }); h.active = id; hadithAdding = false; save(); render(); };
+      ar.appendChild(nm); ar.appendChild(ct); ar.appendChild(el("span", "meta", "hadith")); ar.appendChild(ok);
+      pm.appendChild(ar);
+    }
+    var st = hStats(col);
+    var big = el("div", "bignum", String(st.done)); big.appendChild(el("small", null, "of " + col.count + " memorised · " + st.learning + " learning"));
+    pm.appendChild(big); pm.appendChild(barEl(st.done / col.count));
+    var lg = el("div", "legend");
+    [["Not started","var(--bg)"],["Learning","var(--accent-soft)"],["Memorised","var(--accent)"]].forEach(function (x) { var sp = el("span"); var i = el("i"); i.style.background = x[1]; sp.appendChild(i); sp.appendChild(document.createTextNode(x[0])); lg.appendChild(sp); });
+    lg.appendChild(el("span", null, "· Tap a hadith to change it"));
+    pm.appendChild(lg);
+    var grid = el("div", "hgrid" + (col.id === "nawawi" ? " titled" : ""));
+    var m = h.mem[col.id] = h.mem[col.id] || {};
+    for (var n = 1; n <= col.count; n++) (function (n) {
+      var stt = m[n] || 0, t = hTitle(col, n);
+      var b = el("button", "hch" + (stt ? " s" + stt : "")); b.title = (t ? n + ". " + t : "Hadith " + n);
+      b.appendChild(el("b", null, n)); if (t) b.appendChild(el("span", null, t));
+      b.onclick = function () { var nx = ((m[n] || 0) + 1) % 3; if (nx) m[n] = nx; else delete m[n];
+        if (nx === 2 && !(h.rev[col.id] || {})[n]) { (h.rev[col.id] = h.rev[col.id] || {})[n] = dkey(new Date()); }
+        var y = window.scrollY, gs = grid.scrollTop; save(); render(); window.scrollTo(0, y); var g2 = document.querySelector(".hgrid"); if (g2) g2.scrollTop = gs; };
+      grid.appendChild(b);
+    })(n);
+    pm.appendChild(grid);
+    app.appendChild(pm);
+
+    // ---- revision ----
+    var pr = el("div", "panel"); pr.id = "h-rev";
+    pr.appendChild(el("h2", null, "Revision"));
+    var rtop = el("div", "row"); rtop.style.justifyContent = "space-between";
+    var rb = el("div", "bignum", String(revW)); rb.appendChild(el("small", null, "of " + h.revTarget + " revised this week"));
+    rtop.appendChild(rb);
+    var tg = el("div", "row"); tg.appendChild(el("span", "meta", "Weekly target"));
+    var ti = el("input"); ti.type = "number"; ti.min = 1; ti.max = 500; ti.value = h.revTarget; ti.setAttribute("aria-label", "Weekly revision target");
+    ti.onchange = function () { h.revTarget = Math.max(1, Math.min(500, parseInt(ti.value,10) || h.revTarget)); save(); render(); };
+    tg.appendChild(ti); tg.appendChild(el("span", "meta", "hadith")); rtop.appendChild(tg);
+    pr.appendChild(rtop); pr.appendChild(barEl(revW / h.revTarget));
+
+    var due = [];
+    h.cols.forEach(function (c) { var mm = h.mem[c.id] || {}, rr = h.rev[c.id] || {};
+      for (var k in mm) if (mm[k] === 2) due.push({ col:c, n:+k, last:rr[k] || null }); });
+    due.sort(function (a, b) { if (!a.last && b.last) return -1; if (a.last && !b.last) return 1; if (a.last !== b.last) return a.last < b.last ? -1 : 1; return a.n - b.n; });
+    pr.appendChild(el("h3", null, "Up next: longest since revised"));
+    if (!due.length) pr.appendChild(el("p", "empty", "Mark hadith as memorised above and they'll appear here for revision."));
+    var ul = el("ul"), todayK = dkey(new Date());
+    (showAllDue ? due : due.slice(0, 8)).forEach(function (d) {
+      var li = el("li"), ds = daysSince(d.last), t = hTitle(d.col, d.n);
+      var lab = el("span", "label"); lab.appendChild(el("b", null, d.n + ". ")); lab.appendChild(document.createTextNode(t || d.col.name));
+      li.appendChild(lab);
+      if (h.cols.length > 1 && t) li.appendChild(el("span", "tag", d.col.name.length > 18 ? d.col.name.slice(0, 16) + "…" : d.col.name));
+      li.appendChild(el("span", "meta", d.last === todayK ? "Revised today" : ds == null ? "Not revised yet" : ds + (ds === 1 ? " day ago" : " days ago")));
+      var rv = el("button", d.last === todayK ? "ghost" : "newbtn", d.last === todayK ? "Done" : "Revised");
+      rv.disabled = d.last === todayK;
+      rv.onclick = function () { (h.rev[d.col.id] = h.rev[d.col.id] || {})[d.n] = todayK; h.revLog[todayK] = (h.revLog[todayK] || 0) + 1;
+        var y = window.scrollY; save(); render(); window.scrollTo(0, y); };
+      li.appendChild(rv); ul.appendChild(li);
+    });
+    pr.appendChild(ul);
+    if (due.length > 8) { var more = el("button", "ghost", showAllDue ? "Show fewer" : "Show all " + due.length); more.style.marginTop = "10px";
+      more.onclick = function () { showAllDue = !showAllDue; render(); }; pr.appendChild(more); }
+    app.appendChild(pr);
+
+    ["h-mem","h-rev"].forEach(makeCollapsible);
   }
 
   // ---------- pomodoro (keeps running when you switch pages) ----------
