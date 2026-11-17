@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Focus Hub: tasks, one thing today, Pomodoro</title>
+<title>Focus Hub</title>
 <style>
   :root { --bg:#f7f6f3; --card:#fff; --ink:#1f1f1f; --muted:#6b6b6b; --accent:#2f6f5e; --line:#e4e2dc; --danger:#b5483b; }
   * { box-sizing: border-box; }
@@ -15,31 +15,37 @@
   h2 { font-size: 1.05rem; margin: 0 0 12px; }
   .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   input[type=text] { flex: 1; min-width: 180px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; font: inherit; }
-  select { padding: 10px; border: 1px solid var(--line); border-radius: 8px; font: inherit; background: #fff; }
+  select { padding: 10px; border: 1px solid var(--line); border-radius: 8px; font: inherit; background: #fff; max-width: 100%; }
   button { padding: 10px 14px; border: 0; border-radius: 8px; background: var(--accent); color: #fff; font: inherit; cursor: pointer; }
   button.ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); }
   button.small { padding: 4px 8px; font-size: .85rem; }
   button:disabled { opacity: .5; cursor: default; }
+  .tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+  .tabs button { background: var(--card); color: var(--ink); border: 1px solid var(--line); }
+  .tabs button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .tabs .n { font-size: .75rem; opacity: .75; margin-left: 4px; }
   ul { list-style: none; padding: 0; margin: 0; }
-  li { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  li { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
   li:last-child { border-bottom: 0; }
   li.done .label { text-decoration: line-through; color: var(--muted); }
-  .label { flex: 1; word-break: break-word; }
+  .label { flex: 1; min-width: 140px; word-break: break-word; }
   .tag { font-size: .75rem; padding: 2px 8px; border-radius: 999px; background: #eef; color: #335; }
   .tag.high { background: #fbe3df; color: var(--danger); }
   .tag.low { background: #e7f2ee; color: var(--accent); }
   .onething { font-size: 1.15rem; font-weight: 600; min-height: 1.5em; }
+  .onething small { display: block; font-size: .8rem; font-weight: 400; color: var(--muted); }
   .timer { font-size: 3rem; font-variant-numeric: tabular-nums; text-align: center; margin: 8px 0; }
   .mode { text-align: center; color: var(--muted); margin-bottom: 8px; }
   .controls { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
   .empty { color: var(--muted); font-style: italic; padding: 8px 0; }
   .meta { color: var(--muted); font-size: .85rem; }
+  [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <main>
   <h1>Focus Hub</h1>
-  <p class="sub">Pick one thing, work in short blocks, and keep the list small.</p>
+  <p class="sub">Pick one thing, work in short blocks, and keep each list small.</p>
 
   <section class="card">
     <h2>Today's one thing</h2>
@@ -50,20 +56,10 @@
     </div>
   </section>
 
-  <section class="card">
-    <h2>Pomodoro</h2>
-    <div class="mode" id="mode">Focus: 25 min</div>
-    <div class="timer" id="timer">25:00</div>
-    <div class="controls">
-      <button id="startBtn">Start</button>
-      <button class="ghost" id="resetBtn">Reset</button>
-      <button class="ghost" id="skipBtn">Skip to break</button>
-    </div>
-    <p class="meta" style="text-align:center;margin-top:10px">Completed focus blocks today: <span id="blocks">0</span></p>
-  </section>
+  <nav class="tabs" id="tabs"></nav>
 
-  <section class="card">
-    <h2>Tasks</h2>
+  <section class="card" id="taskView">
+    <h2 id="taskTitle">Tasks</h2>
     <div class="row" style="margin-bottom:12px">
       <input type="text" id="newTask" placeholder="Add a task (keep it specific)" maxlength="200">
       <select id="priority" aria-label="Priority">
@@ -74,27 +70,49 @@
       <button id="addBtn">Add</button>
     </div>
     <ul id="list"></ul>
-    <p class="empty" id="empty" hidden>No tasks yet. Add the things you actually need to do.</p>
+    <p class="empty" id="empty" hidden>No tasks here yet.</p>
     <div class="row" style="margin-top:12px;justify-content:space-between">
       <span class="meta" id="count"></span>
       <button class="ghost small" id="clearDone">Remove completed</button>
+    </div>
+  </section>
+
+  <section id="toolsView" hidden>
+    <div class="card">
+      <h2>Pomodoro</h2>
+      <div class="mode" id="mode">Focus: 25 min</div>
+      <div class="timer" id="timer">25:00</div>
+      <div class="controls">
+        <button id="startBtn">Start</button>
+        <button class="ghost" id="resetBtn">Reset</button>
+        <button class="ghost" id="skipBtn">Skip to break</button>
+      </div>
+      <p class="meta" style="text-align:center;margin-top:10px">Completed focus blocks today: <span id="blocks">0</span></p>
     </div>
   </section>
 </main>
 
 <script>
 (function () {
-  // ---------- storage (one viewer's browser only; fails safely) ----------
+  var SECTIONS = [
+    { id: "islamic", name: "Islamic" },
+    { id: "university", name: "University" },
+    { id: "work", name: "Work" },
+    { id: "tools", name: "Tools" }
+  ];
+  var TASK_SECTIONS = ["islamic", "university", "work"];
+  var nameOf = {}; SECTIONS.forEach(function (s) { nameOf[s.id] = s.name; });
+
+  // ---------- storage (this browser only; fails safely) ----------
   var KEY = "focusHub.v1";
-  function load() {
-    try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; }
-  }
-  function save(state) {
-    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
-  }
+  function load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
   var state = load();
   state.tasks = Array.isArray(state.tasks) ? state.tasks : [];
+  // tasks saved before sections existed go into University
+  state.tasks.forEach(function (t) { if (TASK_SECTIONS.indexOf(t.section) < 0) t.section = "university"; });
   state.oneThingId = state.oneThingId || null;
+  state.tab = SECTIONS.some(function (s) { return s.id === state.tab; }) ? state.tab : "islamic";
   state.blocksToday = state.blocksToday || { date: "", count: 0 };
   var today = new Date().toDateString();
   if (state.blocksToday.date !== today) state.blocksToday = { date: today, count: 0 };
@@ -102,38 +120,56 @@
   function uid() { return Math.random().toString(36).slice(2, 10); }
   var prioOrder = { high: 0, med: 1, low: 2 };
   var prioLabel = { high: "High", med: "Medium", low: "Low" };
+  function $(id) { return document.getElementById(id); }
 
-  // ---------- tasks ----------
-  var list = document.getElementById("list");
-  var empty = document.getElementById("empty");
-  var count = document.getElementById("count");
-  var newTask = document.getElementById("newTask");
-  var priority = document.getElementById("priority");
-  var oneThingEl = document.getElementById("oneThing");
-  var pick = document.getElementById("oneThingPick");
+  var tabsEl = $("tabs"), list = $("list"), empty = $("empty"), count = $("count");
+  var newTask = $("newTask"), priority = $("priority"), oneThingEl = $("oneThing"), pick = $("oneThingPick");
 
-  function activeTasks() { return state.tasks.filter(function (t) { return !t.done; }); }
+  function openIn(sec) { return state.tasks.filter(function (t) { return !t.done && t.section === sec; }); }
+
+  function renderTabs() {
+    tabsEl.innerHTML = "";
+    SECTIONS.forEach(function (s) {
+      var b = document.createElement("button");
+      b.textContent = s.name;
+      if (s.id !== "tools") {
+        var n = document.createElement("span"); n.className = "n"; n.textContent = openIn(s.id).length;
+        b.appendChild(n);
+      }
+      if (s.id === state.tab) b.className = "active";
+      b.addEventListener("click", function () { state.tab = s.id; commit(); });
+      tabsEl.appendChild(b);
+    });
+    var isTools = state.tab === "tools";
+    $("taskView").hidden = isTools;
+    $("toolsView").hidden = !isTools;
+    if (!isTools) {
+      $("taskTitle").textContent = nameOf[state.tab] + " tasks";
+      newTask.placeholder = "Add a " + nameOf[state.tab].toLowerCase() + " task (keep it specific)";
+    }
+  }
 
   function renderPick() {
     pick.innerHTML = "";
-    var opt0 = document.createElement("option");
-    opt0.value = ""; opt0.textContent = "Choose a task...";
-    pick.appendChild(opt0);
-    activeTasks()
-      .slice()
-      .sort(function (a, b) { return prioOrder[a.priority] - prioOrder[b.priority]; })
-      .forEach(function (t) {
-        var o = document.createElement("option");
-        o.value = t.id; o.textContent = t.text;
-        pick.appendChild(o);
-      });
+    var o0 = document.createElement("option"); o0.value = ""; o0.textContent = "Choose a task...";
+    pick.appendChild(o0);
+    TASK_SECTIONS.forEach(function (sec) {
+      var items = openIn(sec).sort(function (a, b) { return prioOrder[a.priority] - prioOrder[b.priority]; });
+      if (!items.length) return;
+      var g = document.createElement("optgroup"); g.label = nameOf[sec];
+      items.forEach(function (t) { var o = document.createElement("option"); o.value = t.id; o.textContent = t.text; g.appendChild(o); });
+      pick.appendChild(g);
+    });
     pick.value = "";
   }
 
   function renderOneThing() {
     var t = state.tasks.find(function (x) { return x.id === state.oneThingId; });
+    oneThingEl.innerHTML = "";
     if (t && !t.done) {
       oneThingEl.textContent = t.text;
+      var s = document.createElement("small"); s.textContent = nameOf[t.section];
+      oneThingEl.appendChild(s);
     } else {
       oneThingEl.textContent = "Nothing chosen yet.";
       state.oneThingId = null;
@@ -141,123 +177,85 @@
   }
 
   function renderList() {
+    if (state.tab === "tools") return;
     list.innerHTML = "";
-    var sorted = state.tasks.slice().sort(function (a, b) {
+    var items = state.tasks.filter(function (t) { return t.section === state.tab; }).sort(function (a, b) {
       if (a.done !== b.done) return a.done ? 1 : -1;
       return prioOrder[a.priority] - prioOrder[b.priority];
     });
-    sorted.forEach(function (t) {
-      var li = document.createElement("li");
-      if (t.done) li.className = "done";
-
-      var cb = document.createElement("input");
-      cb.type = "checkbox"; cb.checked = t.done;
-      cb.setAttribute("aria-label", "Mark done");
+    items.forEach(function (t) {
+      var li = document.createElement("li"); if (t.done) li.className = "done";
+      var cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = t.done; cb.setAttribute("aria-label", "Mark done");
       cb.addEventListener("change", function () { t.done = cb.checked; if (t.done && state.oneThingId === t.id) state.oneThingId = null; commit(); });
-
-      var label = document.createElement("span");
-      label.className = "label"; label.textContent = t.text;
-
-      var tag = document.createElement("span");
-      tag.className = "tag " + t.priority; tag.textContent = prioLabel[t.priority];
-
-      var one = document.createElement("button");
-      one.className = "ghost small"; one.textContent = "Make one thing";
-      one.disabled = t.done;
+      var label = document.createElement("span"); label.className = "label"; label.textContent = t.text;
+      var tag = document.createElement("span"); tag.className = "tag " + t.priority; tag.textContent = prioLabel[t.priority];
+      var one = document.createElement("button"); one.className = "ghost small"; one.textContent = "Make one thing"; one.disabled = t.done;
       one.addEventListener("click", function () { state.oneThingId = t.id; commit(); });
-
-      var del = document.createElement("button");
-      del.className = "ghost small"; del.textContent = "Delete";
+      var del = document.createElement("button"); del.className = "ghost small"; del.textContent = "Delete";
       del.addEventListener("click", function () {
         state.tasks = state.tasks.filter(function (x) { return x.id !== t.id; });
         if (state.oneThingId === t.id) state.oneThingId = null;
         commit();
       });
-
-      li.appendChild(cb); li.appendChild(label); li.appendChild(tag); li.appendChild(one); li.appendChild(del);
+      li.append(cb, label, tag, one, del);
       list.appendChild(li);
     });
-    empty.hidden = state.tasks.length > 0;
-    var open = activeTasks().length;
-    count.textContent = open + " open · " + (state.tasks.length - open) + " done";
+    empty.hidden = items.length > 0;
+    var open = items.filter(function (t) { return !t.done; }).length;
+    count.textContent = open + " open · " + (items.length - open) + " done";
   }
 
-  function commit() {
-    save(state);
-    renderList(); renderPick(); renderOneThing();
-  }
+  function commit() { save(); renderTabs(); renderList(); renderPick(); renderOneThing(); }
 
   function addTask() {
     var text = newTask.value.trim();
-    if (!text) return;
-    state.tasks.push({ id: uid(), text: text, priority: priority.value, done: false });
+    if (!text || state.tab === "tools") return;
+    state.tasks.push({ id: uid(), text: text, priority: priority.value, done: false, section: state.tab });
     newTask.value = "";
     commit();
   }
-
-  document.getElementById("addBtn").addEventListener("click", addTask);
+  $("addBtn").addEventListener("click", addTask);
   newTask.addEventListener("keydown", function (e) { if (e.key === "Enter") addTask(); });
   pick.addEventListener("change", function () { if (pick.value) { state.oneThingId = pick.value; commit(); } });
-  document.getElementById("clearOne").addEventListener("click", function () { state.oneThingId = null; commit(); });
-  document.getElementById("clearDone").addEventListener("click", function () {
-    state.tasks = state.tasks.filter(function (t) { return !t.done; });
+  $("clearOne").addEventListener("click", function () { state.oneThingId = null; commit(); });
+  $("clearDone").addEventListener("click", function () {
+    state.tasks = state.tasks.filter(function (t) { return !(t.done && t.section === state.tab); });
     commit();
   });
 
   // ---------- pomodoro ----------
   var FOCUS = 25 * 60, BREAK = 5 * 60;
   var mode = "focus", remaining = FOCUS, timerId = null, endAt = 0;
-  var timerEl = document.getElementById("timer");
-  var modeEl = document.getElementById("mode");
-  var startBtn = document.getElementById("startBtn");
-  var blocksEl = document.getElementById("blocks");
-
-  function fmt(s) {
-    var m = Math.floor(s / 60), r = s % 60;
-    return (m < 10 ? "0" : "") + m + ":" + (r < 10 ? "0" : "") + r;
-  }
+  var timerEl = $("timer"), modeEl = $("mode"), startBtn = $("startBtn"), blocksEl = $("blocks");
+  function fmt(s) { var m = Math.floor(s / 60), r = s % 60; return (m < 10 ? "0" : "") + m + ":" + (r < 10 ? "0" : "") + r; }
   function paint() {
     timerEl.textContent = fmt(remaining);
-    modeEl.textContent = (mode === "focus" ? "Focus: 25 min" : "Break: 5 min");
+    modeEl.textContent = mode === "focus" ? "Focus: 25 min" : "Break: 5 min";
     blocksEl.textContent = state.blocksToday.count;
-    document.title = fmt(remaining) + " · Focus Hub";
+    document.title = (timerId ? fmt(remaining) + " · " : "") + "Focus Hub";
   }
+  function stop() { if (timerId) clearInterval(timerId); timerId = null; startBtn.textContent = "Start"; }
   function tick() {
     remaining = Math.max(0, Math.round((endAt - Date.now()) / 1000));
     paint();
     if (remaining <= 0) {
       stop();
-      if (mode === "focus") {
-        state.blocksToday.count += 1;
-        save(state);
-        mode = "break"; remaining = BREAK;
-      } else {
-        mode = "focus"; remaining = FOCUS;
-      }
+      if (mode === "focus") { state.blocksToday.count += 1; save(); mode = "break"; remaining = BREAK; }
+      else { mode = "focus"; remaining = FOCUS; }
       paint();
       try { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); } catch (e) {}
     }
   }
-  function stop() {
-    if (timerId) clearInterval(timerId);
-    timerId = null;
-    startBtn.textContent = "Start";
-  }
   startBtn.addEventListener("click", function () {
-    if (timerId) { stop(); return; }
+    if (timerId) { stop(); paint(); return; }
     endAt = Date.now() + remaining * 1000;
     timerId = setInterval(tick, 250);
     startBtn.textContent = "Pause";
   });
-  document.getElementById("resetBtn").addEventListener("click", function () {
-    stop(); mode = "focus"; remaining = FOCUS; paint();
-  });
-  document.getElementById("skipBtn").addEventListener("click", function () {
-    stop(); mode = "break"; remaining = BREAK; paint();
-  });
+  $("resetBtn").addEventListener("click", function () { stop(); mode = "focus"; remaining = FOCUS; paint(); });
+  $("skipBtn").addEventListener("click", function () { stop(); mode = "break"; remaining = BREAK; paint(); });
 
-  // ---------- init ----------
-  renderList(); renderPick(); renderOneThing(); paint();
+  commit(); paint();
 })();
 </script>
 </body>
