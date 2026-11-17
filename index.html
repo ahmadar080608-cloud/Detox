@@ -568,6 +568,8 @@ textarea{width:100%;min-height:80px;padding:12px 16px;border:1px solid var(--lin
   q.revTarget = q.revTarget || 20;  // pages per week
   q.rev = q.rev || {};              // "YYYY-MM-DD" -> pages revised
   q.read = q.read || { page:0, khatmas:0, by:"" };
+  q.readLog = q.readLog || {};      // "YYYY-MM-DD" -> pages read that day
+  q.readTarget = q.readTarget || 35; // pages per week
   q.tad = Array.isArray(q.tad) ? q.tad : [];
   q.tadTarget = q.tadTarget || 3;   // reflections per week
   q.memOrder = q.memOrder || "start";
@@ -586,6 +588,46 @@ textarea{width:100%;min-height:80px;padding:12px 16px;border:1px solid var(--lin
   function barEl(frac){ var b = el("div", "bar"); var i = el("i"); i.style.width = Math.min(100, Math.max(0, frac*100)) + "%"; b.appendChild(i); return b; }
   function panelH(title, iconName){ var h = el("h2", null, title); return h; }
 
+
+  // weekly tracker: Mon–Sun daily inputs, progress vs target, last 6 weeks. Starts fresh every Monday.
+  function weeklyBlock(pnl, log, target, setTarget, unitLabel, maxPerDay, doneMsg, todoMsg){
+    var ws = weekStart(new Date()), got = weekDays(ws).reduce(function (a,d) { return a + (log[dkey(d)] || 0); }, 0);
+    var top = el("div", "row"); top.style.justifyContent = "space-between";
+    var b = el("div", "bignum", String(got)); b.appendChild(el("small", null, "of " + target + " " + unitLabel + " this week"));
+    top.appendChild(b);
+    var tg = el("div", "row"); tg.appendChild(el("span", "meta", "Weekly target"));
+    var ti = el("input"); ti.type = "number"; ti.min = 1; ti.max = 5000; ti.value = target; ti.setAttribute("aria-label", "Weekly target");
+    ti.onchange = function () { setTarget(Math.max(1, Math.min(5000, parseInt(ti.value,10) || target))); save(); render(); };
+    tg.appendChild(ti); tg.appendChild(el("span", "meta", unitLabel)); top.appendChild(tg);
+    pnl.appendChild(top);
+    pnl.appendChild(barEl(got / target));
+    var we = new Date(ws); we.setDate(ws.getDate() + 6);
+    pnl.appendChild(el("p", "meta", (got >= target ? doneMsg : (target - got) + " " + unitLabel + " to go. " + (todoMsg || "")) +
+      " Resets every Monday · this week: " + ws.toLocaleDateString(undefined,{day:"numeric",month:"short"}) + " – " + we.toLocaleDateString(undefined,{day:"numeric",month:"short"}) + "."));
+    var days = el("div", "days"), todayKey = dkey(new Date()), names = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    weekDays(ws).forEach(function (d, i) {
+      var k = dkey(d), box = el("div", "day" + (k === todayKey ? " today" : ""));
+      box.appendChild(el("span", null, names[i]));
+      var inp = el("input"); inp.type = "number"; inp.min = 0; inp.max = maxPerDay; inp.placeholder = "0"; inp.setAttribute("aria-label", names[i] + " " + unitLabel);
+      if (log[k]) inp.value = log[k];
+      inp.onchange = function () { var v = Math.max(0, Math.min(maxPerDay, parseInt(inp.value,10) || 0)); if (v) log[k] = v; else delete log[k];
+        var y = window.scrollY; save(); render(); window.scrollTo(0, y); };
+      box.appendChild(inp); days.appendChild(box);
+    });
+    pnl.appendChild(days);
+    pnl.appendChild(el("h3", null, "Last 6 weeks"));
+    var hist = el("div", "hist"), weeks = [];
+    for (var w = 5; w >= 0; w--) { var s0 = new Date(ws); s0.setDate(ws.getDate() - 7*w);
+      weeks.push({ s:s0, v:weekDays(s0).reduce(function (a,d) { return a + (log[dkey(d)] || 0); }, 0), cur:w === 0 }); }
+    var maxV = Math.max(target, Math.max.apply(null, weeks.map(function (x) { return x.v; })));
+    weeks.forEach(function (x) {
+      var c = el("div", x.cur ? "cur" : null), bar = el("i"); bar.style.height = Math.round(x.v / maxV * 56) + "px";
+      c.appendChild(bar); c.appendChild(document.createTextNode(String(x.v))); c.title = "Week of " + x.s.toDateString();
+      hist.appendChild(c);
+    });
+    pnl.appendChild(hist);
+    return got;
+  }
   var openSurah = null;
   function renderQuranTrackers(){
     var ms = memStats(), ws = weekStart(new Date()), rw = revWeek(ws), tw = tadWeek();
@@ -628,14 +670,14 @@ textarea{width:100%;min-height:80px;padding:12px 16px;border:1px solid var(--lin
     pg0.appendChild(gg);
     pg0.appendChild(el("p", "meta", "Pages follow the 604-page Madinah muṣḥaf (15 lines a page). Progress comes from ayat you add in Memorisation below, converted to pages."));
     app.appendChild(pg0);
-    var readFrac = q.read.page / PAGES_TOTAL;
+    var readW = weekDays(ws).reduce(function (a,d) { return a + (q.readLog[dkey(d)] || 0); }, 0);
 
     // summary tiles (tap to jump)
     var sum = el("div", "qsum");
     [
       { id:"q-mem",  ic:"quran",   v:pct(ms.pct), l:"Memorised", f:ms.pct/100, c:"--c1" },
       { id:"q-rev",  ic:"tools",   v:rw + "/" + q.revTarget, l:"Revision this week", f:rw/q.revTarget, c:"--c3" },
-      { id:"q-read", ic:"hadith",  v:pct(readFrac*100), l:"Khatm " + (q.read.khatmas+1), f:readFrac, c:"--c4" },
+      { id:"q-read", ic:"hadith",  v:readW + "/" + q.readTarget, l:"Reading this week", f:readW/q.readTarget, c:"--c4" },
       { id:"q-tad",  ic:"target",  v:tw + "/" + q.tadTarget, l:"Tadabbur this week", f:tw/q.tadTarget, c:"--c5" }
     ].forEach(function (s) {
       var b = el("button", "qs grain"); b.style.background = "var(" + s.c + ")";
@@ -722,67 +764,25 @@ textarea{width:100%;min-height:80px;padding:12px 16px;border:1px solid var(--lin
     // ---- weekly revision ----
     var pr = el("div", "panel"); pr.id = "q-rev";
     pr.appendChild(el("h2", null, "Weekly revision"));
-    var rtop = el("div", "row"); rtop.style.justifyContent = "space-between";
-    var rb = el("div", "bignum", String(rw)); rb.appendChild(el("small", null, "of " + q.revTarget + " pages this week"));
-    rtop.appendChild(rb);
-    var tg = el("div", "row"); tg.appendChild(el("span", "meta", "Weekly target"));
-    var ti = el("input"); ti.type = "number"; ti.min = 1; ti.max = 604; ti.value = q.revTarget;
-    ti.onchange = function () { q.revTarget = Math.max(1, Math.min(604, parseInt(ti.value,10) || q.revTarget)); save(); render(); };
-    tg.appendChild(ti); tg.appendChild(el("span", "meta", "pages")); rtop.appendChild(tg);
-    pr.appendChild(rtop);
-    pr.appendChild(barEl(rw / q.revTarget));
-    pr.appendChild(el("p", "meta", rw >= q.revTarget ? "Target reached this week, mā shāʾ Allāh." : (q.revTarget - rw) + " pages to go. 1 juz is about 20 pages."));
-    var days = el("div", "days"), todayKey = dkey(new Date()), names = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-    weekDays(ws).forEach(function (d, i) {
-      var k = dkey(d), box = el("div", "day" + (k === todayKey ? " today" : ""));
-      box.appendChild(el("span", null, names[i]));
-      var inp = el("input"); inp.type = "number"; inp.min = 0; inp.max = 604; inp.placeholder = "0"; inp.setAttribute("aria-label", names[i] + " pages");
-      if (q.rev[k]) inp.value = q.rev[k];
-      inp.onchange = function () { var v = Math.max(0, Math.min(604, parseInt(inp.value,10) || 0)); if (v) q.rev[k] = v; else delete q.rev[k]; save(); render(); };
-      box.appendChild(inp); days.appendChild(box);
-    });
-    pr.appendChild(days);
-    pr.appendChild(el("h3", null, "Last 6 weeks"));
-    var hist = el("div", "hist"), weeks = [];
-    for (var w=5; w>=0; w--){ var s0 = new Date(ws); s0.setDate(ws.getDate() - 7*w); weeks.push({ s:s0, v:revWeek(s0), cur:w===0 }); }
-    var maxV = Math.max(q.revTarget, Math.max.apply(null, weeks.map(function (x) { return x.v; })));
-    weeks.forEach(function (x) {
-      var c = el("div", x.cur ? "cur" : null), bar = el("i"); bar.style.height = Math.round(x.v / maxV * 56) + "px";
-      c.appendChild(bar); c.appendChild(document.createTextNode(x.v + "p")); c.title = "Week of " + x.s.toDateString();
-      hist.appendChild(c);
-    });
-    pr.appendChild(hist);
+    weeklyBlock(pr, q.rev, q.revTarget, function (v) { q.revTarget = v; }, "pages", 604, "Target reached this week, mā shāʾ Allāh.", "1 juz is about 20 pages.");
     app.appendChild(pr);
 
-    // ---- reading ----
+    // ---- weekly reading ----
     var pd = el("div", "panel"); pd.id = "q-read";
-    pd.appendChild(el("h2", null, "Reading"));
-    var dtop = el("div", "row"); dtop.style.justifyContent = "space-between";
-    var db = el("div", "bignum", "Page " + q.read.page); db.appendChild(el("small", null, "of " + PAGES_TOTAL + " · Juz " + Math.min(30, Math.floor(Math.max(0,q.read.page-1)/20)+1)));
-    dtop.appendChild(db);
-    dtop.appendChild(el("span", "meta", q.read.khatmas + (q.read.khatmas === 1 ? " khatm" : " khatmas") + " completed"));
-    pd.appendChild(dtop);
-    pd.appendChild(barEl(readFrac));
-    var rc = el("div", "row"); rc.style.marginTop = "10px";
+    pd.appendChild(el("h2", null, "Weekly reading"));
+    weeklyBlock(pd, q.readLog, q.readTarget, function (v) { q.readTarget = v; }, "pages", 604, "Reading target reached this week, mā shāʾ Allāh.", "");
+    // bookmark + khatm count (kept across weeks)
+    pd.appendChild(el("h3", null, "Bookmark"));
+    var rc = el("div", "row");
+    rc.appendChild(el("span", "meta", "I'm on page"));
     var pg = el("input"); pg.type = "number"; pg.min = 0; pg.max = PAGES_TOTAL; pg.value = q.read.page; pg.setAttribute("aria-label", "Current page");
     pg.onchange = function () { q.read.page = Math.max(0, Math.min(PAGES_TOTAL, parseInt(pg.value,10) || 0)); save(); render(); };
-    rc.appendChild(el("span", "meta", "I'm on page")); rc.appendChild(pg);
-    [1,5,20].forEach(function (n) { var b = el("button", "ghost", "+" + n + (n === 20 ? " (1 juz)" : ""));
-      b.onclick = function () { q.read.page = Math.min(PAGES_TOTAL, q.read.page + n); save(); render(); }; rc.appendChild(b); });
+    rc.appendChild(pg);
+    rc.appendChild(el("span", "meta", "of " + PAGES_TOTAL + " · Juz " + Math.min(30, Math.floor(Math.max(0,q.read.page-1)/20)+1) + " · " + q.read.khatmas + (q.read.khatmas === 1 ? " khatm" : " khatmas") + " completed"));
     pd.appendChild(rc);
-    var rc2 = el("div", "row"); rc2.style.marginTop = "12px";
-    rc2.appendChild(el("span", "meta", "Finish this khatm by"));
-    var by = el("input"); by.type = "date"; by.value = q.read.by || ""; by.style.cssText = "padding:9px 14px;border:1px solid var(--line);border-radius:999px;font:inherit;background:var(--bg);color:var(--ink)";
-    by.onchange = function () { q.read.by = by.value; save(); render(); };
-    rc2.appendChild(by);
-    if (q.read.by) {
-      var end = new Date(q.read.by + "T23:59:59"), daysLeft = Math.ceil((end - new Date()) / 86400000), left = PAGES_TOTAL - q.read.page;
-      rc2.appendChild(el("span", "toast", daysLeft > 0 ? Math.ceil(left / daysLeft) + " pages a day for " + daysLeft + " days" : (left ? "That date has passed" : "")));
-    }
-    pd.appendChild(rc2);
     if (q.read.page >= PAGES_TOTAL) {
-      var kb = el("button", "cta", "Mark khatm complete and start again"); kb.style.marginTop = "14px";
-      kb.onclick = function () { q.read.khatmas++; q.read.page = 0; q.read.by = ""; save(); render(); };
+      var kb = el("button", "cta", "Mark khatm complete and start again"); kb.style.marginTop = "12px";
+      kb.onclick = function () { q.read.khatmas++; q.read.page = 0; save(); render(); };
       pd.appendChild(kb);
     }
     app.appendChild(pd);
@@ -917,7 +917,7 @@ textarea{width:100%;min-height:80px;padding:12px 16px;border:1px solid var(--lin
     var col = h.cols.find(function (c) { return c.id === h.active; });
     var allDone = 0, allTotal = 0; h.cols.forEach(function (c) { allDone += hStats(c).done; allTotal += c.count; });
     var ws = weekStart(new Date()), wsk = dkey(ws), revW = 0;
-    for (var dk in h.revLog) if (dk >= wsk) revW += h.revLog[dk];
+    h.cols.forEach(function (c) { var mm = h.mem[c.id] || {}, rr = h.rev[c.id] || {}; for (var k in mm) if (mm[k] === 2 && rr[k] && rr[k] >= wsk) revW++; });
 
     // goals
     app.appendChild(goalsPanel("h-goals", "Memorisation goals", h.goals, h.memLog, ["hadith","hadith"], {
@@ -1004,12 +1004,18 @@ textarea{width:100%;min-height:80px;padding:12px 16px;border:1px solid var(--lin
     ti.onchange = function () { h.revTarget = Math.max(1, Math.min(500, parseInt(ti.value,10) || h.revTarget)); save(); render(); };
     tg.appendChild(ti); tg.appendChild(el("span", "meta", "hadith")); rtop.appendChild(tg);
     pr.appendChild(rtop); pr.appendChild(barEl(revW / h.revTarget));
+    var we0 = new Date(ws); we0.setDate(ws.getDate() + 6);
+    pr.appendChild(el("p", "meta", "Each hadith can be ticked once a week. Resets every Monday · this week: " + ws.toLocaleDateString(undefined,{day:"numeric",month:"short"}) + " – " + we0.toLocaleDateString(undefined,{day:"numeric",month:"short"}) + "."));
 
     var due = [];
     h.cols.forEach(function (c) { var mm = h.mem[c.id] || {}, rr = h.rev[c.id] || {};
-      for (var k in mm) if (mm[k] === 2) due.push({ col:c, n:+k, last:rr[k] || null }); });
-    due.sort(function (a, b) { if (!a.last && b.last) return -1; if (a.last && !b.last) return 1; if (a.last !== b.last) return a.last < b.last ? -1 : 1; return a.n - b.n; });
-    pr.appendChild(el("h3", null, "Up next: longest since revised"));
+      var pv = (h.revPrev || {})[c.id] || {};
+      for (var k in mm) if (mm[k] === 2) due.push({ col:c, n:+k, last:rr[k] || null, prev:pv[k] || null }); });
+    due.forEach(function (d) { d.wk = !!(d.last && d.last >= wsk); });
+    due.sort(function (a, b) { if (a.wk !== b.wk) return a.wk ? 1 : -1;
+      if (!a.last && b.last) return -1; if (a.last && !b.last) return 1; if (a.last !== b.last) return a.last < b.last ? -1 : 1; return a.n - b.n; });
+    var leftW = due.filter(function (d) { return !d.wk; }).length;
+    pr.appendChild(el("h3", null, leftW ? "Still to revise this week (" + leftW + ")" : "All memorised hadith revised this week"));
     if (!due.length) pr.appendChild(el("p", "empty", "Mark hadith as memorised above and they'll appear here for revision."));
     var ul = el("ul"), todayK = dkey(new Date());
     (showAllDue ? due : due.slice(0, 8)).forEach(function (d) {
@@ -1018,10 +1024,14 @@ textarea{width:100%;min-height:80px;padding:12px 16px;border:1px solid var(--lin
       var a0 = hAr(d.col, d.n); if (a0) { lab.appendChild(el("span", "har rl", a0)); }
       li.appendChild(lab);
       if (t) li.appendChild(el("span", "tag", "Arbaʿīn"));
-      li.appendChild(el("span", "meta", d.last === todayK ? "Revised today" : ds == null ? "Not revised yet" : ds + (ds === 1 ? " day ago" : " days ago")));
-      var rv = el("button", d.last === todayK ? "ghost" : "newbtn", d.last === todayK ? "Done" : "Revised");
-      rv.disabled = d.last === todayK;
-      rv.onclick = function () { (h.rev[d.col.id] = h.rev[d.col.id] || {})[d.n] = todayK; h.revLog[todayK] = (h.revLog[todayK] || 0) + 1;
+      if (d.wk) li.classList.add("done");
+      li.appendChild(el("span", "meta", d.last === todayK ? "Revised today" : d.wk ? "Revised this week" : ds == null ? "Not revised yet" : "Last: " + ds + (ds === 1 ? " day ago" : " days ago")));
+      var rv = el("button", d.wk ? "ghost" : "newbtn", d.wk ? "Undo" : "Revised");
+      rv.onclick = function () {
+        if (d.wk) { var rr = h.rev[d.col.id]; if (d.prev) rr[d.n] = d.prev; else delete rr[d.n];
+          if (h.revLog[d.last]) { h.revLog[d.last]--; if (!h.revLog[d.last]) delete h.revLog[d.last]; } }
+        else { h.revPrev = h.revPrev || {}; (h.revPrev[d.col.id] = h.revPrev[d.col.id] || {})[d.n] = d.last || "";
+          (h.rev[d.col.id] = h.rev[d.col.id] || {})[d.n] = todayK; h.revLog[todayK] = (h.revLog[todayK] || 0) + 1; }
         var y = window.scrollY; save(); render(); window.scrollTo(0, y); };
       li.appendChild(rv); ul.appendChild(li);
     });
