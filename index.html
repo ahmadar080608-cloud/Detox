@@ -207,6 +207,21 @@ textarea{width:100%;min-height:80px;padding:12px 16px;border:1px solid var(--lin
 .refl .rr{font-weight:700;color:var(--accent)}
 .refl .rd{font-size:12px;color:var(--muted)}
 .refl p{margin:6px 0 0;white-space:pre-wrap;line-height:1.5}
+.phead{display:flex;justify-content:space-between;align-items:flex-start;width:100%;border:0;background:none;padding:0;text-align:left;color:inherit}
+.phead .chev{color:var(--muted);transition:transform .2s;margin-top:-2px}
+.panel.collapsed .phead .chev{transform:rotate(-90deg)}
+.panel.collapsed .pbody{display:none}
+.panel.collapsed h2{margin-bottom:0}
+.goals{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:12px}
+.goal{background:var(--bg);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:6px}
+.goal.met{outline:2px solid var(--accent)}
+.goal .gh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.goal .gh b{font-weight:800;font-size:12px;letter-spacing:.18em;text-transform:uppercase}
+.goal .bignum{font-size:34px}
+.goal .gm{margin:0 0 4px;font-size:12px}
+.goal input[type=number]{background:var(--card);width:80px}
+.goal .gnote{background:var(--card);margin-top:4px;min-width:0;width:100%;font-size:14px}
+@media (max-width:899px){.goals{grid-template-columns:1fr}}
 @media (max-width:899px){.qsum{grid-template-columns:1fr 1fr}.twocol{grid-template-columns:1fr}.days{gap:4px}.day{padding:6px 2px}.day input{font-size:16px}}
 
 [hidden]{display:none!important}
@@ -510,6 +525,9 @@ textarea{width:100%;min-height:80px;padding:12px 16px;border:1px solid var(--lin
   q.memA = q.memA || {};            // surah number -> ayat memorised (from ayah 1)
   if (q.mem) { for (var k in q.mem) if (q.mem[k] === 2) q.memA[k] = AYAT[k-1]; delete q.mem; }   // old surah-only format
   q.memFilter = q.memFilter || "all";
+  q.memLog = q.memLog || {};        // "YYYY-MM-DD" -> net ayat added that day
+  q.goals = q.goals || { week:{ t:10, note:"" }, month:{ t:40, note:"" }, year:{ t:500, note:"" } };
+  q.collapsed = q.collapsed || {};
   q.revTarget = q.revTarget || 20;  // pages per week
   q.rev = q.rev || {};              // "YYYY-MM-DD" -> pages revised
   q.read = q.read || { page:0, khatmas:0, by:"" };
@@ -534,6 +552,44 @@ textarea{width:100%;min-height:80px;padding:12px 16px;border:1px solid var(--lin
   var openSurah = null;
   function renderQuranTrackers(){
     var ms = memStats(), ws = weekStart(new Date()), rw = revWeek(ws), tw = tadWeek();
+
+    // ---- memorisation goals ----
+    var now = new Date(), d0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    var periods = [
+      { k:"week",  name:"This week",  start:ws, end:(function(){ var e = new Date(ws); e.setDate(ws.getDate()+6); return e; })(),
+        sub:function(){ return ws.toLocaleDateString(undefined,{day:"numeric",month:"short"}) + " – " + this.end.toLocaleDateString(undefined,{day:"numeric",month:"short"}); } },
+      { k:"month", name:"This month", start:new Date(now.getFullYear(), now.getMonth(), 1), end:new Date(now.getFullYear(), now.getMonth()+1, 0),
+        sub:function(){ return now.toLocaleDateString(undefined,{month:"long",year:"numeric"}); } },
+      { k:"year",  name:"This year",  start:new Date(now.getFullYear(), 0, 1), end:new Date(now.getFullYear(), 11, 31),
+        sub:function(){ return String(now.getFullYear()); } }
+    ];
+    var pg0 = el("div", "panel"); pg0.id = "q-goals";
+    pg0.appendChild(el("h2", null, "Memorisation goals"));
+    var gg = el("div", "goals");
+    periods.forEach(function (pp) {
+      var g = q.goals[pp.k], sk = dkey(pp.start), got = 0;
+      for (var dk in q.memLog) if (dk >= sk) got += q.memLog[dk];
+      got = Math.max(0, got);
+      var card = el("div", "goal" + (got >= g.t ? " met" : ""));
+      var gh = el("div", "gh"); gh.appendChild(el("b", null, pp.name)); gh.appendChild(el("span", "meta", pp.sub())); card.appendChild(gh);
+      var gv = el("div", "bignum", String(got)); gv.appendChild(el("small", null, "/ " + g.t + " ayat")); card.appendChild(gv);
+      card.appendChild(barEl(got / g.t));
+      var left = g.t - got, daysLeft = Math.round((pp.end - d0) / 86400000) + 1;
+      card.appendChild(el("p", "meta gm", got >= g.t ? "Goal reached, mā shāʾ Allāh." : left + " to go · about " + Math.ceil(left / daysLeft) + " a day for " + daysLeft + (daysLeft === 1 ? " day" : " days")));
+      var tr = el("div", "row"); tr.appendChild(el("span", "meta", "Target"));
+      var ti0 = el("input"); ti0.type = "number"; ti0.min = 1; ti0.max = 6236; ti0.value = g.t; ti0.setAttribute("aria-label", pp.name + " target");
+      ti0.onchange = function () { g.t = Math.max(1, Math.min(6236, parseInt(ti0.value,10) || g.t)); save(); render(); };
+      tr.appendChild(ti0); tr.appendChild(el("span", "meta", "ayat")); card.appendChild(tr);
+      var nt = el("input"); nt.type = "text"; nt.maxLength = 120; nt.className = "gnote"; nt.value = g.note || "";
+      nt.placeholder = pp.k === "week" ? "e.g. Finish Al-Mulk" : pp.k === "month" ? "e.g. Complete Juz 29" : "e.g. Memorise Juz 28–30";
+      nt.setAttribute("aria-label", pp.name + " goal note");
+      nt.onchange = function () { g.note = nt.value.trim(); save(); };
+      card.appendChild(nt);
+      gg.appendChild(card);
+    });
+    pg0.appendChild(gg);
+    pg0.appendChild(el("p", "meta", "Progress counts ayat you add in the Memorisation section below, from today onwards."));
+    app.appendChild(pg0);
     var readFrac = q.read.page / PAGES_TOTAL;
 
     // summary tiles (tap to jump)
@@ -547,7 +603,8 @@ textarea{width:100%;min-height:80px;padding:12px 16px;border:1px solid var(--lin
       var b = el("button", "qs grain"); b.style.background = "var(" + s.c + ")";
       var ti = el("div", "qi"); ti.appendChild(icon(s.ic)); b.appendChild(ti);
       var bot = el("div"); bot.appendChild(el("div", "qv", s.v)); bot.appendChild(el("div", "ql", s.l)); bot.appendChild(barEl(s.f)); b.appendChild(bot);
-      b.onclick = function () { var t = document.getElementById(s.id); if (t) t.scrollIntoView({ behavior:"smooth", block:"start" }); };
+      b.onclick = function () { if (q.collapsed[s.id]) { delete q.collapsed[s.id]; save(); render(); }
+        var t = document.getElementById(s.id); if (t) t.scrollIntoView({ behavior:"smooth", block:"start" }); };
       sum.appendChild(b);
     });
     app.appendChild(sum);
@@ -594,7 +651,9 @@ textarea{width:100%;min-height:80px;padding:12px 16px;border:1px solid var(--lin
           var ed = el("div", "med");
           var rg = el("input"); rg.type = "range"; rg.min = 0; rg.max = tot; rg.value = c; rg.setAttribute("aria-label", "Ayat memorised");
           var num = el("input"); num.type = "number"; num.min = 0; num.max = tot; num.value = c; num.setAttribute("aria-label", "Ayat memorised");
-          function setC(v){ v = Math.max(0, Math.min(tot, parseInt(v,10) || 0)); if (v) q.memA[n] = v; else delete q.memA[n]; save();
+          function setC(v){ v = Math.max(0, Math.min(tot, parseInt(v,10) || 0)); var d = v - (q.memA[n] || 0);
+            if (d) { var dk = dkey(new Date()); q.memLog[dk] = (q.memLog[dk] || 0) + d; if (!q.memLog[dk]) delete q.memLog[dk]; }
+            if (v) q.memA[n] = v; else delete q.memA[n]; save();
             var y = window.scrollY, ls = list.scrollTop, term0 = srch.value; render(); window.scrollTo(0, y);
             var l2 = document.querySelector(".mlist"), s2 = document.querySelector("#q-mem input[type=text]");
             if (s2 && term0) { s2.value = term0; s2.dispatchEvent(new Event("input")); } if (l2) l2.scrollTop = ls; }
@@ -728,6 +787,25 @@ textarea{width:100%;min-height:80px;padding:12px 16px;border:1px solid var(--lin
       if (q.tad.length > 20) pt.appendChild(el("p", "meta", "Showing your latest 20."));
     }
     app.appendChild(pt);
+
+    ["q-goals","q-mem","q-rev","q-read","q-tad"].forEach(makeCollapsible);
+  }
+
+  function makeCollapsible(id){
+    var panel = document.getElementById(id); if (!panel) return;
+    var h = panel.querySelector("h2"); if (!h) return;
+    var body = el("div", "pbody");
+    while (h.nextSibling) body.appendChild(h.nextSibling);
+    var head = el("button", "phead"); head.setAttribute("aria-expanded", q.collapsed[id] ? "false" : "true");
+    panel.insertBefore(head, h); head.appendChild(h);
+    var chev = el("span", "chev"); chev.innerHTML = '<svg viewBox="0 0 24 24" class="ic"><path d="M6 9l6 6 6-6"/></svg>'; head.appendChild(chev);
+    panel.appendChild(body);
+    if (q.collapsed[id]) panel.classList.add("collapsed");
+    head.onclick = function () {
+      var c = panel.classList.toggle("collapsed");
+      if (c) q.collapsed[id] = true; else delete q.collapsed[id];
+      head.setAttribute("aria-expanded", c ? "false" : "true"); save();
+    };
   }
 
   // ---------- pomodoro (keeps running when you switch pages) ----------
