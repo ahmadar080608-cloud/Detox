@@ -2,260 +2,365 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Focus Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Detox · Focus Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lalezar&display=swap" rel="stylesheet">
 <style>
-  :root { --bg:#f7f6f3; --card:#fff; --ink:#1f1f1f; --muted:#6b6b6b; --accent:#2f6f5e; --line:#e4e2dc; --danger:#b5483b; }
-  * { box-sizing: border-box; }
-  body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--ink); }
-  main { max-width: 760px; margin: 0 auto; padding: 24px 16px 60px; }
-  h1 { font-size: 1.5rem; margin: 0 0 4px; }
-  .sub { color: var(--muted); margin: 0 0 20px; font-size: .95rem; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
-  h2 { font-size: 1.05rem; margin: 0 0 12px; }
-  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-  input[type=text] { flex: 1; min-width: 180px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; font: inherit; }
-  select { padding: 10px; border: 1px solid var(--line); border-radius: 8px; font: inherit; background: #fff; max-width: 100%; }
-  button { padding: 10px 14px; border: 0; border-radius: 8px; background: var(--accent); color: #fff; font: inherit; cursor: pointer; }
-  button.ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); }
-  button.small { padding: 4px 8px; font-size: .85rem; }
-  button:disabled { opacity: .5; cursor: default; }
-  .tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
-  .tabs button { background: var(--card); color: var(--ink); border: 1px solid var(--line); }
-  .tabs button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .tabs .n { font-size: .75rem; opacity: .75; margin-left: 4px; }
-  ul { list-style: none; padding: 0; margin: 0; }
-  li { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
-  li:last-child { border-bottom: 0; }
-  li.done .label { text-decoration: line-through; color: var(--muted); }
-  .label { flex: 1; min-width: 140px; word-break: break-word; }
-  .tag { font-size: .75rem; padding: 2px 8px; border-radius: 999px; background: #eef; color: #335; }
-  .tag.high { background: #fbe3df; color: var(--danger); }
-  .tag.low { background: #e7f2ee; color: var(--accent); }
-  .onething { font-size: 1.15rem; font-weight: 600; min-height: 1.5em; }
-  .onething small { display: block; font-size: .8rem; font-weight: 400; color: var(--muted); }
-  .timer { font-size: 3rem; font-variant-numeric: tabular-nums; text-align: center; margin: 8px 0; }
-  .mode { text-align: center; color: var(--muted); margin-bottom: 8px; }
-  .controls { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
-  .empty { color: var(--muted); font-style: italic; padding: 8px 0; }
-  .meta { color: var(--muted); font-size: .85rem; }
-  [hidden] { display: none !important; }
+:root{
+  --bg:#f4f1ec; --card:#ffffff; --ink:#1b1d1c; --muted:#6d6a66; --line:#e6e0d8;
+  --coral:#e0603f; --coral-soft:#fbe8e1; --teal:#1f4f4a; --slate:#283746; --gold:#b9822b;
+  --hdr:#131816; --r:22px;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0d0f0e; --card:#171a19; --ink:#f2efe9; --muted:#a19c95; --line:#2a2e2c; --coral:#ea6c4a; --coral-soft:#3a201a; --hdr:#0a0c0b;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer}
+
+/* ===== sidebar ===== */
+header{position:fixed;left:0;top:0;bottom:0;width:250px;background:var(--hdr);z-index:10;display:flex;flex-direction:column;padding:34px 26px;gap:30px}
+.brand{cursor:pointer}
+.brand .t1{font-family:Lalezar,Inter,sans-serif;font-size:34px;color:#fff;line-height:1}
+.brand .t2{font-weight:800;font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--coral);margin-top:8px}
+nav{display:flex;flex-direction:column;gap:2px}
+nav button{display:flex;align-items:center;gap:12px;text-align:left;border:0;background:none;color:rgba(255,255,255,.62);
+  padding:10px 0 10px 14px;font-size:15px;font-weight:600;letter-spacing:.02em;border-left:2px solid transparent}
+nav button i{font-style:normal;width:22px;text-align:center}
+nav button small{margin-left:auto;font-size:11px;color:rgba(255,255,255,.35)}
+nav button:hover:not(.on){color:#fff}
+nav button.on{color:#fff;border-left-color:var(--coral)}
+.side-one{margin-top:auto;border-top:1px solid rgba(255,255,255,.08);padding-top:18px;color:rgba(255,255,255,.75)}
+.side-one .lbl{font-size:10px;font-weight:800;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:6px}
+.side-one .txt{font-size:14px;font-weight:600;color:#fff;line-height:1.4}
+.side-one .sec{font-size:11px;color:var(--coral);margin-top:3px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+main{margin-left:250px;padding:48px 56px 80px;max-width:1140px}
+
+/* ===== cards ===== */
+.grain{position:relative;isolation:isolate;overflow:hidden}
+.grain::after{content:"";position:absolute;inset:0;z-index:0;opacity:.5;mix-blend-mode:overlay;pointer-events:none;
+ background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.grain>*{position:relative;z-index:1}
+.bgl{position:absolute!important;z-index:0!important;font-family:Lalezar,serif;line-height:1;color:rgba(0,0,0,.12);white-space:nowrap;pointer-events:none;font-size:260px;left:-20px;top:-50px}
+.g-islamic{background:var(--teal)} .g-university{background:var(--coral)} .g-work{background:var(--slate)} .g-tools{background:var(--gold)}
+.otag{display:inline-block;font-weight:800;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#fff;border:1.5px solid rgba(255,255,255,.6);padding:4px 10px;line-height:1.2;white-space:nowrap}
+
+.pagehead{border-radius:var(--r);padding:26px 30px 30px;color:#fff;margin-bottom:24px;text-align:center;min-height:200px}
+.pagehead .otag{position:absolute;left:24px;top:22px}
+.pagehead .stat{position:absolute;right:24px;top:22px;font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.85}
+.ph-big{font-family:Lalezar,serif;font-size:64px;line-height:1.1;margin-top:46px}
+.ph-sub{font-weight:800;font-size:12px;letter-spacing:.38em;text-transform:uppercase;opacity:.9;margin-top:8px}
+
+.panel{background:var(--card);border-radius:var(--r);padding:24px 26px;margin-bottom:20px}
+h2{font-weight:800;font-size:13px;letter-spacing:.32em;text-transform:uppercase;margin:0 0 18px}
+h2::after{content:"";display:block;width:36px;height:3px;background:var(--coral);margin-top:10px}
+
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input[type=text]{flex:1;min-width:180px;padding:12px 16px;border:1px solid var(--line);border-radius:999px;font:inherit;background:var(--bg);color:var(--ink)}
+select{padding:11px 14px;border:1px solid var(--line);border-radius:999px;font:inherit;background:var(--bg);color:var(--ink);max-width:100%}
+.cta{background:var(--coral);color:#fff;border:0;border-radius:999px;font-weight:700;padding:12px 24px}
+.ghost{background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600}
+.ghost:disabled{opacity:.4;cursor:default}
+
+ul{list-style:none;padding:0;margin:0}
+li{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+li:last-child{border-bottom:0}
+li input[type=checkbox]{width:20px;height:20px;accent-color:var(--coral)}
+.label{flex:1;min-width:140px;word-break:break-word;font-weight:500}
+li.done .label{text-decoration:line-through;color:var(--muted)}
+li.isone .label{font-weight:700}
+.tag{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:999px;background:var(--bg);color:var(--muted)}
+.tag.high{background:var(--coral-soft);color:var(--coral)}
+.empty{color:var(--muted);padding:10px 0}
+.meta{color:var(--muted);font-size:13px}
+
+/* overview */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-bottom:24px}
+.tile{border:0;border-radius:18px;color:#fff;text-align:left;padding:18px;min-height:170px;display:flex;flex-direction:column;justify-content:flex-end}
+.tile .bgl{font-size:150px;left:auto;right:-10px;top:-30px}
+.tile .tn{font-family:Lalezar,serif;font-size:44px;line-height:1}
+.tile .tt{font-weight:800;font-size:12px;letter-spacing:.24em;text-transform:uppercase;margin-top:6px}
+.onecard{border-radius:var(--r);background:var(--hdr);color:#fff;padding:26px 30px;margin-bottom:24px}
+.onecard .lbl{font-weight:800;font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--coral)}
+.onecard .txt{font-family:Lalezar,Inter,sans-serif;font-size:34px;line-height:1.2;margin:10px 0 14px}
+.onecard select{background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.15)}
+.onecard select option,.onecard select optgroup{color:#111}
+
+/* pomodoro */
+.timer{font-family:Lalezar,Inter,sans-serif;font-size:120px;line-height:1;text-align:center;margin:40px 0 4px;font-variant-numeric:tabular-nums}
+.mode{text-align:center}
+.controls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:24px}
+.controls .ghost{padding:12px 22px;font-size:15px;color:#fff;border-color:rgba(255,255,255,.4)}
+.blocks{text-align:center;font-weight:700;font-size:12px;letter-spacing:.2em;text-transform:uppercase;margin-top:22px;opacity:.85}
+
+[hidden]{display:none!important}
+
+/* ===== mobile: sidebar becomes a bottom bar ===== */
+@media (max-width:899px){
+  header{position:sticky;top:0;bottom:auto;width:auto;flex-direction:row;align-items:center;padding:14px 18px;gap:0}
+  .brand .t1{font-size:26px}.brand .t2{font-size:9px;margin-top:4px}
+  nav{position:fixed;left:0;right:0;bottom:0;flex-direction:row;justify-content:space-around;background:var(--hdr);
+      padding:6px 4px calc(6px + env(safe-area-inset-bottom));border-top:1px solid rgba(255,255,255,.08);z-index:10}
+  nav button{flex-direction:column;gap:2px;font-size:11px;padding:6px 8px;border-left:0;border-top:2px solid transparent}
+  nav button.on{border-top-color:var(--coral)}
+  nav button i{font-size:19px}
+  nav button small{display:none}
+  .side-one{display:none}
+  main{margin-left:0;padding:20px 16px 110px}
+  .pagehead{min-height:0;padding:22px 18px 24px}.ph-big{font-size:44px;margin-top:40px}.bgl{font-size:160px}
+  .timer{font-size:84px}
+  .panel{padding:20px 18px}
+}
 </style>
 </head>
 <body>
-<main>
-  <h1>Focus Hub</h1>
-  <p class="sub">Pick one thing, work in short blocks, and keep each list small.</p>
-
-  <section class="card">
-    <h2>Today's one thing</h2>
-    <div class="row">
-      <div class="onething" id="oneThing" style="flex:1">Nothing chosen yet.</div>
-      <select id="oneThingPick" aria-label="Choose today's one thing"></select>
-      <button class="ghost small" id="clearOne">Clear</button>
-    </div>
-  </section>
-
-  <nav class="tabs" id="tabs"></nav>
-
-  <section class="card" id="taskView">
-    <h2 id="taskTitle">Tasks</h2>
-    <div class="row" style="margin-bottom:12px">
-      <input type="text" id="newTask" placeholder="Add a task (keep it specific)" maxlength="200">
-      <select id="priority" aria-label="Priority">
-        <option value="high">High</option>
-        <option value="med" selected>Medium</option>
-        <option value="low">Low</option>
-      </select>
-      <button id="addBtn">Add</button>
-    </div>
-    <ul id="list"></ul>
-    <p class="empty" id="empty" hidden>No tasks here yet.</p>
-    <div class="row" style="margin-top:12px;justify-content:space-between">
-      <span class="meta" id="count"></span>
-      <button class="ghost small" id="clearDone">Remove completed</button>
-    </div>
-  </section>
-
-  <section id="toolsView" hidden>
-    <div class="card">
-      <h2>Pomodoro</h2>
-      <div class="mode" id="mode">Focus: 25 min</div>
-      <div class="timer" id="timer">25:00</div>
-      <div class="controls">
-        <button id="startBtn">Start</button>
-        <button class="ghost" id="resetBtn">Reset</button>
-        <button class="ghost" id="skipBtn">Skip to break</button>
-      </div>
-      <p class="meta" style="text-align:center;margin-top:10px">Completed focus blocks today: <span id="blocks">0</span></p>
-    </div>
-  </section>
-</main>
+<header>
+  <div class="brand" id="brand"><div class="t1">Detox</div><div class="t2">Focus Hub</div></div>
+  <nav id="nav"></nav>
+  <div class="side-one" id="sideOne"></div>
+</header>
+<main id="app"></main>
 
 <script>
 (function () {
   var SECTIONS = [
-    { id: "islamic", name: "Islamic" },
-    { id: "university", name: "University" },
-    { id: "work", name: "Work" },
-    { id: "tools", name: "Tools" }
+    { id:"home",       name:"Overview",   icon:"🏠", sub:"Everything at a glance", bg:"" },
+    { id:"islamic",    name:"Islamic",    icon:"🕌", sub:"Deen & study",            bg:"دين" },
+    { id:"university", name:"University", icon:"🦷", sub:"Dental school",           bg:"Uni" },
+    { id:"work",       name:"Work",       icon:"💼", sub:"Jobs & projects",         bg:"Work" },
+    { id:"tools",      name:"Tools",      icon:"⏱️", sub:"Pomodoro timer",          bg:"25" }
   ];
-  var TASK_SECTIONS = ["islamic", "university", "work"];
-  var nameOf = {}; SECTIONS.forEach(function (s) { nameOf[s.id] = s.name; });
+  var TASK_SECTIONS = ["islamic","university","work"];
+  var byId = {}; SECTIONS.forEach(function (s) { byId[s.id] = s; });
 
   // ---------- storage (this browser only; fails safely) ----------
   var KEY = "focusHub.v1";
-  function load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+  function load(){ try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
   var state = load();
   state.tasks = Array.isArray(state.tasks) ? state.tasks : [];
-  // tasks saved before sections existed go into University
   state.tasks.forEach(function (t) { if (TASK_SECTIONS.indexOf(t.section) < 0) t.section = "university"; });
   state.oneThingId = state.oneThingId || null;
-  state.tab = SECTIONS.some(function (s) { return s.id === state.tab; }) ? state.tab : "islamic";
-  state.blocksToday = state.blocksToday || { date: "", count: 0 };
+  state.tab = byId[state.tab] ? state.tab : "home";
+  state.blocksToday = state.blocksToday || { date:"", count:0 };
   var today = new Date().toDateString();
-  if (state.blocksToday.date !== today) state.blocksToday = { date: today, count: 0 };
+  if (state.blocksToday.date !== today) state.blocksToday = { date:today, count:0 };
 
-  function uid() { return Math.random().toString(36).slice(2, 10); }
-  var prioOrder = { high: 0, med: 1, low: 2 };
-  var prioLabel = { high: "High", med: "Medium", low: "Low" };
-  function $(id) { return document.getElementById(id); }
+  var prioOrder = { high:0, med:1, low:2 };
+  var prioLabel = { high:"High", med:"Medium", low:"Low" };
+  function uid(){ return Math.random().toString(36).slice(2,10); }
+  function el(tag, cls, text){ var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function openIn(sec){ return state.tasks.filter(function (t) { return !t.done && t.section === sec; }); }
+  function oneThing(){ var t = state.tasks.find(function (x) { return x.id === state.oneThingId; }); if (!t || t.done) { state.oneThingId = null; return null; } return t; }
 
-  var tabsEl = $("tabs"), list = $("list"), empty = $("empty"), count = $("count");
-  var newTask = $("newTask"), priority = $("priority"), oneThingEl = $("oneThing"), pick = $("oneThingPick");
+  var app = document.getElementById("app");
+  var navEl = document.getElementById("nav");
 
-  function openIn(sec) { return state.tasks.filter(function (t) { return !t.done && t.section === sec; }); }
-
-  function renderTabs() {
-    tabsEl.innerHTML = "";
+  // ---------- sidebar ----------
+  function renderNav(){
+    navEl.innerHTML = "";
     SECTIONS.forEach(function (s) {
-      var b = document.createElement("button");
-      b.textContent = s.name;
-      if (s.id !== "tools") {
-        var n = document.createElement("span"); n.className = "n"; n.textContent = openIn(s.id).length;
-        b.appendChild(n);
-      }
-      if (s.id === state.tab) b.className = "active";
-      b.addEventListener("click", function () { state.tab = s.id; commit(); });
-      tabsEl.appendChild(b);
+      var b = el("button"); if (s.id === state.tab) b.className = "on";
+      b.appendChild(el("i", null, s.icon));
+      b.appendChild(el("span", null, s.name));
+      if (TASK_SECTIONS.indexOf(s.id) >= 0) { var n = openIn(s.id).length; if (n) b.appendChild(el("small", null, n)); }
+      b.onclick = function () { go(s.id); };
+      navEl.appendChild(b);
     });
-    var isTools = state.tab === "tools";
-    $("taskView").hidden = isTools;
-    $("toolsView").hidden = !isTools;
-    if (!isTools) {
-      $("taskTitle").textContent = nameOf[state.tab] + " tasks";
-      newTask.placeholder = "Add a " + nameOf[state.tab].toLowerCase() + " task (keep it specific)";
-    }
+    var side = document.getElementById("sideOne"); side.innerHTML = "";
+    var t = oneThing();
+    side.appendChild(el("div", "lbl", "Today's one thing"));
+    side.appendChild(el("div", "txt", t ? t.text : "Nothing chosen yet"));
+    if (t) side.appendChild(el("div", "sec", byId[t.section].name));
+  }
+  document.getElementById("brand").onclick = function () { go("home"); };
+
+  function go(id){ state.tab = id; save(); render(); window.scrollTo(0,0); }
+
+  // ---------- pages ----------
+  function pageHead(s, stat){
+    var h = el("div", "pagehead grain g-" + s.id);
+    h.appendChild(el("i", "bgl", s.bg));
+    h.appendChild(el("span", "otag", s.icon + " " + s.name));
+    if (stat) h.appendChild(el("span", "stat", stat));
+    h.appendChild(el("div", "ph-big", s.name));
+    h.appendChild(el("div", "ph-sub", s.sub));
+    return h;
   }
 
-  function renderPick() {
-    pick.innerHTML = "";
-    var o0 = document.createElement("option"); o0.value = ""; o0.textContent = "Choose a task...";
-    pick.appendChild(o0);
+  function oneThingPicker(dark){
+    var sel = el("select"); sel.setAttribute("aria-label", "Choose today's one thing");
+    var o0 = el("option", null, "Choose a task..."); o0.value = ""; sel.appendChild(o0);
     TASK_SECTIONS.forEach(function (sec) {
-      var items = openIn(sec).sort(function (a, b) { return prioOrder[a.priority] - prioOrder[b.priority]; });
+      var items = openIn(sec).sort(function (a,b) { return prioOrder[a.priority] - prioOrder[b.priority]; });
       if (!items.length) return;
-      var g = document.createElement("optgroup"); g.label = nameOf[sec];
-      items.forEach(function (t) { var o = document.createElement("option"); o.value = t.id; o.textContent = t.text; g.appendChild(o); });
-      pick.appendChild(g);
+      var g = el("optgroup"); g.label = byId[sec].name;
+      items.forEach(function (t) { var o = el("option", null, t.text); o.value = t.id; g.appendChild(o); });
+      sel.appendChild(g);
     });
-    pick.value = "";
+    sel.onchange = function () { if (sel.value) { state.oneThingId = sel.value; save(); render(); } };
+    return sel;
   }
 
-  function renderOneThing() {
-    var t = state.tasks.find(function (x) { return x.id === state.oneThingId; });
-    oneThingEl.innerHTML = "";
-    if (t && !t.done) {
-      oneThingEl.textContent = t.text;
-      var s = document.createElement("small"); s.textContent = nameOf[t.section];
-      oneThingEl.appendChild(s);
-    } else {
-      oneThingEl.textContent = "Nothing chosen yet.";
-      state.oneThingId = null;
-    }
+  function renderHome(){
+    var t = oneThing();
+    var c = el("div", "onecard grain");
+    c.appendChild(el("div", "lbl", "Today's one thing"));
+    c.appendChild(el("div", "txt", t ? t.text : "Pick one task to finish today."));
+    var r = el("div", "row"); r.appendChild(oneThingPicker(true));
+    if (t) { var clr = el("button", "ghost", "Clear"); clr.style.color = "#fff"; clr.style.borderColor = "rgba(255,255,255,.3)";
+      clr.onclick = function () { state.oneThingId = null; save(); render(); }; r.appendChild(clr); }
+    c.appendChild(r);
+    app.appendChild(c);
+
+    var grid = el("div", "grid");
+    SECTIONS.slice(1).forEach(function (s) {
+      var b = el("button", "tile grain g-" + s.id);
+      b.appendChild(el("i", "bgl", s.bg));
+      if (s.id === "tools") {
+        b.appendChild(el("div", "tn", String(state.blocksToday.count)));
+        b.appendChild(el("div", "tt", "Focus blocks today"));
+      } else {
+        b.appendChild(el("div", "tn", String(openIn(s.id).length)));
+        b.appendChild(el("div", "tt", s.name + " · open"));
+      }
+      b.onclick = function () { go(s.id); };
+      grid.appendChild(b);
+    });
+    app.appendChild(grid);
+
+    var p = el("div", "panel");
+    p.appendChild(el("h2", null, "High priority"));
+    var high = state.tasks.filter(function (x) { return !x.done && x.priority === "high"; });
+    if (!high.length) p.appendChild(el("p", "empty", "Nothing marked high priority."));
+    var ul = el("ul");
+    high.forEach(function (x) {
+      var li = el("li");
+      li.appendChild(el("span", "label", x.text));
+      li.appendChild(el("span", "tag", byId[x.section].name));
+      var b = el("button", "ghost", "Open"); b.onclick = function () { go(x.section); };
+      li.appendChild(b); ul.appendChild(li);
+    });
+    p.appendChild(ul);
+    app.appendChild(p);
   }
 
-  function renderList() {
-    if (state.tab === "tools") return;
-    list.innerHTML = "";
-    var items = state.tasks.filter(function (t) { return t.section === state.tab; }).sort(function (a, b) {
+  function renderTasks(sec){
+    var s = byId[sec];
+    var items = state.tasks.filter(function (t) { return t.section === sec; }).sort(function (a,b) {
       if (a.done !== b.done) return a.done ? 1 : -1;
       return prioOrder[a.priority] - prioOrder[b.priority];
     });
-    items.forEach(function (t) {
-      var li = document.createElement("li"); if (t.done) li.className = "done";
-      var cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = t.done; cb.setAttribute("aria-label", "Mark done");
-      cb.addEventListener("change", function () { t.done = cb.checked; if (t.done && state.oneThingId === t.id) state.oneThingId = null; commit(); });
-      var label = document.createElement("span"); label.className = "label"; label.textContent = t.text;
-      var tag = document.createElement("span"); tag.className = "tag " + t.priority; tag.textContent = prioLabel[t.priority];
-      var one = document.createElement("button"); one.className = "ghost small"; one.textContent = "Make one thing"; one.disabled = t.done;
-      one.addEventListener("click", function () { state.oneThingId = t.id; commit(); });
-      var del = document.createElement("button"); del.className = "ghost small"; del.textContent = "Delete";
-      del.addEventListener("click", function () {
-        state.tasks = state.tasks.filter(function (x) { return x.id !== t.id; });
-        if (state.oneThingId === t.id) state.oneThingId = null;
-        commit();
-      });
-      li.append(cb, label, tag, one, del);
-      list.appendChild(li);
-    });
-    empty.hidden = items.length > 0;
     var open = items.filter(function (t) { return !t.done; }).length;
-    count.textContent = open + " open · " + (items.length - open) + " done";
+    app.appendChild(pageHead(s, open + " open"));
+
+    var add = el("div", "panel");
+    add.appendChild(el("h2", null, "Add a task"));
+    var r = el("div", "row");
+    var inp = el("input"); inp.type = "text"; inp.maxLength = 200; inp.placeholder = "Something specific you can finish";
+    var pr = el("select"); pr.setAttribute("aria-label", "Priority");
+    [["high","High"],["med","Medium"],["low","Low"]].forEach(function (p) { var o = el("option", null, p[1]); o.value = p[0]; pr.appendChild(o); });
+    pr.value = "med";
+    var btn = el("button", "cta", "Add");
+    function addTask(){ var text = inp.value.trim(); if (!text) return;
+      state.tasks.push({ id:uid(), text:text, priority:pr.value, done:false, section:sec }); save(); render();
+      var again = app.querySelector("input[type=text]"); if (again) again.focus(); }
+    btn.onclick = addTask; inp.onkeydown = function (e) { if (e.key === "Enter") addTask(); };
+    r.appendChild(inp); r.appendChild(pr); r.appendChild(btn);
+    add.appendChild(r);
+    app.appendChild(add);
+
+    var p = el("div", "panel");
+    p.appendChild(el("h2", null, "Tasks"));
+    if (!items.length) p.appendChild(el("p", "empty", "No " + s.name.toLowerCase() + " tasks yet."));
+    var ul = el("ul");
+    items.forEach(function (t) {
+      var li = el("li"); if (t.done) li.classList.add("done"); if (t.id === state.oneThingId) li.classList.add("isone");
+      var cb = el("input"); cb.type = "checkbox"; cb.checked = t.done; cb.setAttribute("aria-label", "Mark done");
+      cb.onchange = function () { t.done = cb.checked; if (t.done && state.oneThingId === t.id) state.oneThingId = null; save(); render(); };
+      li.appendChild(cb);
+      li.appendChild(el("span", "label", (t.id === state.oneThingId ? "★ " : "") + t.text));
+      li.appendChild(el("span", "tag " + t.priority, prioLabel[t.priority]));
+      var one = el("button", "ghost", t.id === state.oneThingId ? "Today's one thing" : "Make one thing");
+      one.disabled = t.done || t.id === state.oneThingId;
+      one.onclick = function () { state.oneThingId = t.id; save(); render(); };
+      var del = el("button", "ghost", "Delete");
+      del.onclick = function () { state.tasks = state.tasks.filter(function (x) { return x.id !== t.id; });
+        if (state.oneThingId === t.id) state.oneThingId = null; save(); render(); };
+      li.appendChild(one); li.appendChild(del);
+      ul.appendChild(li);
+    });
+    p.appendChild(ul);
+    if (items.length > open) {
+      var f = el("div", "row"); f.style.justifyContent = "space-between"; f.style.marginTop = "14px";
+      f.appendChild(el("span", "meta", (items.length - open) + " completed"));
+      var cd = el("button", "ghost", "Remove completed");
+      cd.onclick = function () { state.tasks = state.tasks.filter(function (t) { return !(t.done && t.section === sec); }); save(); render(); };
+      f.appendChild(cd); p.appendChild(f);
+    }
+    app.appendChild(p);
   }
 
-  function commit() { save(); renderTabs(); renderList(); renderPick(); renderOneThing(); }
-
-  function addTask() {
-    var text = newTask.value.trim();
-    if (!text || state.tab === "tools") return;
-    state.tasks.push({ id: uid(), text: text, priority: priority.value, done: false, section: state.tab });
-    newTask.value = "";
-    commit();
-  }
-  $("addBtn").addEventListener("click", addTask);
-  newTask.addEventListener("keydown", function (e) { if (e.key === "Enter") addTask(); });
-  pick.addEventListener("change", function () { if (pick.value) { state.oneThingId = pick.value; commit(); } });
-  $("clearOne").addEventListener("click", function () { state.oneThingId = null; commit(); });
-  $("clearDone").addEventListener("click", function () {
-    state.tasks = state.tasks.filter(function (t) { return !(t.done && t.section === state.tab); });
-    commit();
-  });
-
-  // ---------- pomodoro ----------
-  var FOCUS = 25 * 60, BREAK = 5 * 60;
+  // ---------- pomodoro (keeps running when you switch pages) ----------
+  var FOCUS = 25*60, BREAK = 5*60;
   var mode = "focus", remaining = FOCUS, timerId = null, endAt = 0;
-  var timerEl = $("timer"), modeEl = $("mode"), startBtn = $("startBtn"), blocksEl = $("blocks");
-  function fmt(s) { var m = Math.floor(s / 60), r = s % 60; return (m < 10 ? "0" : "") + m + ":" + (r < 10 ? "0" : "") + r; }
-  function paint() {
-    timerEl.textContent = fmt(remaining);
-    modeEl.textContent = mode === "focus" ? "Focus: 25 min" : "Break: 5 min";
-    blocksEl.textContent = state.blocksToday.count;
-    document.title = (timerId ? fmt(remaining) + " · " : "") + "Focus Hub";
+  function fmt(s){ var m = Math.floor(s/60), r = s%60; return (m<10?"0":"")+m+":"+(r<10?"0":"")+r; }
+  function paintTimer(){
+    document.title = (timerId ? fmt(remaining) + " · " : "") + "Detox · Focus Hub";
+    var t = document.getElementById("timer"); if (!t) return;
+    t.textContent = fmt(remaining);
+    document.getElementById("mode").textContent = mode === "focus" ? "Focus · 25 min" : "Break · 5 min";
+    document.getElementById("startBtn").textContent = timerId ? "Pause" : "Start";
+    document.getElementById("blocks").textContent = "Completed focus blocks today: " + state.blocksToday.count;
   }
-  function stop() { if (timerId) clearInterval(timerId); timerId = null; startBtn.textContent = "Start"; }
-  function tick() {
-    remaining = Math.max(0, Math.round((endAt - Date.now()) / 1000));
-    paint();
+  function stop(){ if (timerId) clearInterval(timerId); timerId = null; }
+  function tick(){
+    remaining = Math.max(0, Math.round((endAt - Date.now())/1000));
     if (remaining <= 0) {
       stop();
       if (mode === "focus") { state.blocksToday.count += 1; save(); mode = "break"; remaining = BREAK; }
       else { mode = "focus"; remaining = FOCUS; }
-      paint();
-      try { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); } catch (e) {}
+      try { if (navigator.vibrate) navigator.vibrate([200,100,200]); } catch (e) {}
+      if (state.tab === "home") render();
     }
+    paintTimer();
   }
-  startBtn.addEventListener("click", function () {
-    if (timerId) { stop(); paint(); return; }
-    endAt = Date.now() + remaining * 1000;
-    timerId = setInterval(tick, 250);
-    startBtn.textContent = "Pause";
-  });
-  $("resetBtn").addEventListener("click", function () { stop(); mode = "focus"; remaining = FOCUS; paint(); });
-  $("skipBtn").addEventListener("click", function () { stop(); mode = "break"; remaining = BREAK; paint(); });
+  function renderTools(){
+    var s = byId.tools;
+    var h = el("div", "pagehead grain g-tools");
+    h.appendChild(el("i", "bgl", s.bg));
+    h.appendChild(el("span", "otag", s.icon + " Pomodoro"));
+    var m = el("div", "ph-sub"); m.id = "mode"; m.style.marginTop = "46px"; h.appendChild(m);
+    var t = el("div", "timer"); t.id = "timer"; h.appendChild(t);
+    var c = el("div", "controls");
+    var start = el("button", "cta", "Start"); start.id = "startBtn"; start.style.background = "#fff"; start.style.color = "var(--ink)";
+    start.onclick = function () { if (timerId) { stop(); } else { endAt = Date.now() + remaining*1000; timerId = setInterval(tick, 250); } paintTimer(); };
+    var reset = el("button", "ghost", "Reset"); reset.onclick = function () { stop(); mode = "focus"; remaining = FOCUS; paintTimer(); };
+    var skip = el("button", "ghost", "Skip to break"); skip.onclick = function () { stop(); mode = "break"; remaining = BREAK; paintTimer(); };
+    c.appendChild(start); c.appendChild(reset); c.appendChild(skip); h.appendChild(c);
+    var b = el("div", "blocks"); b.id = "blocks"; h.appendChild(b);
+    app.appendChild(h);
 
-  commit(); paint();
+    var t1 = oneThing();
+    var p = el("div", "panel");
+    p.appendChild(el("h2", null, "Working on"));
+    p.appendChild(el("p", null, t1 ? t1.text : "No one thing chosen. Pick one so this block has a purpose."));
+    p.appendChild(oneThingPicker());
+    app.appendChild(p);
+    paintTimer();
+  }
+
+  function render(){
+    app.innerHTML = "";
+    renderNav();
+    if (state.tab === "home") renderHome();
+    else if (state.tab === "tools") renderTools();
+    else renderTasks(state.tab);
+  }
+  render();
 })();
 </script>
 </body>
