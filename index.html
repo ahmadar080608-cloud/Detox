@@ -199,6 +199,15 @@ button.tag{cursor:pointer}
 .hch.s1{background:var(--accent-soft);border-color:var(--accent)}
 .hch.s2{background:var(--accent);border-color:var(--accent);color:#fff}.hch.s2 b{color:rgba(255,255,255,.8)}
 :root[data-theme=autumn] .hch.s2{color:#120a04}
+.colar{font-family:Amiri,serif;direction:rtl;text-align:right;font-size:26px;font-weight:700;color:var(--accent);margin:2px 0 8px}
+.hgrid.titled{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.hch .htx{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.hch .har{font-family:Amiri,serif;direction:rtl;text-align:right;font-size:17px;line-height:1.5}
+.hch .hen{font-size:12px;color:var(--muted)}
+.hch.s2 .hen{color:rgba(255,255,255,.8)}
+.hdiv{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 4px 4px;border-top:1px solid var(--line);margin-top:6px;font-weight:800;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.hdiv .ar{font-family:Amiri,serif;font-size:20px;letter-spacing:0;text-transform:none;color:var(--accent)}
+.label .har.rl{display:block;font-family:Amiri,serif;direction:rtl;text-align:left;font-size:16px;color:var(--muted);margin-top:2px}
 .days{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin:14px 0}
 .day{background:var(--bg);border-radius:12px;padding:8px;text-align:center}
 .day.today{outline:2px solid var(--accent)}
@@ -840,9 +849,19 @@ textarea{width:100%;min-height:80px;padding:12px 16px;border:1px solid var(--lin
 
 
   // ---------- Hadith trackers ----------
-  var NAWAWI = ["Actions are by intentions","The hadith of Jibrīl","The pillars of Islam","Creation in the womb","Rejecting innovations","The ḥalāl and ḥarām are clear","The religion is sincerity","The sanctity of a Muslim","What I forbid, avoid","Allah is pure","Leave what makes you doubt","Leaving what does not concern you","Loving for your brother","The blood of a Muslim","Speak good or be silent","Do not become angry","Excellence in everything","Fear Allah wherever you are","Be mindful of Allah","If you feel no shame","Say: I believe, then be steadfast","The obligatory prayers and Paradise","Purity is half of faith","I have forbidden oppression","Every dhikr is charity","Charity for every joint","Righteousness is good character","Hold to my Sunnah","Deeds that lead to Paradise","The limits set by Allah","Zuhd: being loved by Allah and people","No harm and no reciprocating harm","The burden of proof","Changing an evil","Do not envy one another","Relieving a believer's hardship","Good and bad deeds are recorded","The allies of Allah","Mistakes and forgetfulness are forgiven","Be in the world like a stranger","Desires that follow what I brought","O son of Adam, I will forgive you"];
+  var NAWAWI = ["Actions are by intentions","The hadith of Jibrīl","The pillars of Islam","Creation in the womb","Rejecting innovations","The ḥalāl and ḥarām are clear","The religion is sincerity","The sanctity of a Muslim","What I forbid, avoid","Allah is pure","Leave what makes you doubt","Leaving what does not concern you","Loving for your brother","The blood of a Muslim","Speak good or be silent","Do not become angry","Excellence in everything","Fear Allah wherever you are","Be mindful of Allah","If you feel no shame","Say: I believe, then be steadfast","The obligatory prayers and Paradise","Purity is half of faith","I have forbidden oppression","Every dhikr is charity","Charity for every joint","Righteousness is good character","Hold to my Sunnah","Deeds that lead to Paradise","The limits set by Allah","Zuhd: being loved by Allah and people","No harm and no reciprocating harm","The burden of proof","Changing an evil","Do not envy one another","Relieving a believer's hardship","Good and bad deeds are recorded","The allies of Allah","Mistakes and forgetfulness are forgiven","Be in the world like a stranger","Desires that follow what I brought","O son of Adam, I will forgive you",
+    "Give the inheritance shares to their people","Breastfeeding forbids what birth forbids","Selling wine, carrion, swine and idols","Every intoxicant is ḥarām","No vessel is worse than the stomach","Four traits of the hypocrite","If you truly relied upon Allah","Keep your tongue moist with dhikr"];
+  var NAWAWI_AR = ["إنما الأعمال بالنيات","حديث جبريل","بني الإسلام على خمس","إن أحدكم يجمع خلقه في بطن أمه","من أحدث في أمرنا هذا ما ليس منه فهو رد","إن الحلال بين وإن الحرام بين","الدين النصيحة","أمرت أن أقاتل الناس","ما نهيتكم عنه فاجتنبوه","إن الله طيب لا يقبل إلا طيبا","دع ما يريبك إلى ما لا يريبك","من حسن إسلام المرء تركه ما لا يعنيه","لا يؤمن أحدكم حتى يحب لأخيه ما يحب لنفسه","لا يحل دم امرئ مسلم إلا بإحدى ثلاث","فليقل خيرا أو ليصمت","لا تغضب","إن الله كتب الإحسان على كل شيء","اتق الله حيثما كنت","احفظ الله يحفظك","إذا لم تستح فاصنع ما شئت","قل آمنت بالله ثم استقم","أرأيت إذا صليت المكتوبات","الطهور شطر الإيمان","يا عبادي إني حرمت الظلم على نفسي","ذهب أهل الدثور بالأجور","كل سلامى من الناس عليه صدقة","البر حسن الخلق","أوصيكم بتقوى الله والسمع والطاعة","أخبرني بعمل يدخلني الجنة","إن الله فرض فرائض فلا تضيعوها","ازهد في الدنيا يحبك الله","لا ضرر ولا ضرار","لو يعطى الناس بدعواهم","من رأى منكم منكرا فليغيره بيده","لا تحاسدوا","من نفس عن مؤمن كربة","إن الله كتب الحسنات والسيئات","من عادى لي وليا فقد آذنته بالحرب","إن الله تجاوز لي عن أمتي الخطأ والنسيان","كن في الدنيا كأنك غريب","حتى يكون هواه تبعا لما جئت به","يا ابن آدم إنك ما دعوتني ورجوتني",
+    "ألحقوا الفرائض بأهلها","الرضاعة تحرم ما تحرم الولادة","إن الله ورسوله حرم بيع الخمر","كل مسكر حرام","ما ملأ آدمي وعاء شرا من بطن","أربع من كن فيه كان منافقا","لو أنكم توكلتم على الله حق توكله","لا يزال لسانك رطبا من ذكر الله"];
+  var PRESETS = [
+    { id:"nawawi",  name:"al-Arbaʿīn al-Nawawiyyah + Ibn Rajab", ar:"الأربعون النووية وزيادات ابن رجب", count:50, preset:true },
+    { id:"jawami",  name:"Jawāmiʿ al-Akhbār (al-Saʿdī)",          ar:"جوامع الأخبار للسعدي",             count:99, preset:true }
+  ];
   var h = state.hadith = state.hadith || {};
-  h.cols = Array.isArray(h.cols) && h.cols.length ? h.cols : [{ id:"nawawi", name:"al-Arbaʿīn al-Nawawiyyah", count:42, preset:true }];
+  h.cols = Array.isArray(h.cols) ? h.cols : [];
+  h.cols = PRESETS.map(function (pr) { return Object.assign({}, pr); }).concat(h.cols.filter(function (c) { return !c.preset; }));
+  h.memLog = h.memLog || {};    // "YYYY-MM-DD" -> net hadith memorised that day
+  h.goals = h.goals || { week:{ t:2, note:"" }, month:{ t:8, note:"" }, year:{ t:50, note:"" } };
   h.active = h.cols.some(function (c) { return c.id === h.active; }) ? h.active : h.cols[0].id;
   h.mem = h.mem || {};          // colId -> { n: 1 learning | 2 memorised }
   h.rev = h.rev || {};          // colId -> { n: "YYYY-MM-DD" last revised }
@@ -851,14 +870,59 @@ textarea{width:100%;min-height:80px;padding:12px 16px;border:1px solid var(--lin
   var hadithAdding = false, showAllDue = false;
 
   function hTitle(col, n){ return col.id === "nawawi" ? NAWAWI[n-1] : ""; }
+  function hAr(col, n){ return col.id === "nawawi" ? NAWAWI_AR[n-1] : ""; }
+  function colLabel(c){ return (c.ar ? c.ar + " · " : "") + c.name; }
   function hStats(col){ var m = h.mem[col.id] || {}, d = 0, l = 0; for (var k in m) { if (m[k] === 2) d++; else if (m[k] === 1) l++; } return { done:d, learning:l }; }
   function daysSince(k){ if (!k) return null; var a = new Date(k + "T12:00:00"), b = new Date(); b.setHours(12,0,0,0); return Math.round((b - a) / 86400000); }
 
+
+  function goalsPanel(id, title, goals, log, unit, opts){
+    opts = opts || {};
+    var now = new Date(), d0 = new Date(now.getFullYear(), now.getMonth(), now.getDate()), ws = weekStart(now);
+    var we = new Date(ws); we.setDate(ws.getDate() + 6);
+    var periods = [
+      { k:"week",  name:"This week",  start:ws, end:we, sub:ws.toLocaleDateString(undefined,{day:"numeric",month:"short"}) + " – " + we.toLocaleDateString(undefined,{day:"numeric",month:"short"}) },
+      { k:"month", name:"This month", start:new Date(now.getFullYear(), now.getMonth(), 1), end:new Date(now.getFullYear(), now.getMonth()+1, 0), sub:now.toLocaleDateString(undefined,{month:"long",year:"numeric"}) },
+      { k:"year",  name:"This year",  start:new Date(now.getFullYear(), 0, 1), end:new Date(now.getFullYear(), 11, 31), sub:String(now.getFullYear()) }
+    ];
+    var pnl = el("div", "panel"); pnl.id = id;
+    pnl.appendChild(el("h2", null, title));
+    var gg = el("div", "goals");
+    periods.forEach(function (pp) {
+      var g = goals[pp.k], sk = dkey(pp.start), got = 0;
+      for (var dk in log) if (dk >= sk) got += log[dk];
+      got = Math.max(0, got);
+      var card = el("div", "goal" + (got >= g.t ? " met" : ""));
+      var gh = el("div", "gh"); gh.appendChild(el("b", null, pp.name)); gh.appendChild(el("span", "meta", pp.sub)); card.appendChild(gh);
+      var gv = el("div", "bignum", String(got)); gv.appendChild(el("small", null, "/ " + g.t + " " + (g.t === 1 ? unit[0] : unit[1]))); card.appendChild(gv);
+      card.appendChild(barEl(got / g.t));
+      var left = g.t - got, daysLeft = Math.round((pp.end - d0) / 86400000) + 1, perDay = left / daysLeft;
+      var pace = perDay >= 1 ? Math.ceil(perDay) + " " + unit[1] + " a day" : "1 every " + Math.max(1, Math.floor(1 / perDay)) + " days";
+      card.appendChild(el("p", "meta gm", got >= g.t ? "Goal reached, mā shāʾ Allāh." : left + " to go · " + pace + " for " + daysLeft + (daysLeft === 1 ? " day" : " days")));
+      var tr = el("div", "row"); tr.appendChild(el("span", "meta", "Target"));
+      var ti0 = el("input"); ti0.type = "number"; ti0.min = 1; ti0.max = 5000; ti0.value = g.t; ti0.setAttribute("aria-label", pp.name + " target");
+      ti0.onchange = function () { g.t = Math.max(1, Math.min(5000, parseInt(ti0.value,10) || g.t)); save(); render(); };
+      tr.appendChild(ti0); tr.appendChild(el("span", "meta", unit[1])); card.appendChild(tr);
+      var nt = el("input"); nt.type = "text"; nt.maxLength = 120; nt.className = "gnote"; nt.value = g.note || "";
+      nt.placeholder = (opts.placeholders || {})[pp.k] || "Goal note"; nt.setAttribute("aria-label", pp.name + " goal note");
+      nt.onchange = function () { g.note = nt.value.trim(); save(); };
+      card.appendChild(nt);
+      gg.appendChild(card);
+    });
+    pnl.appendChild(gg);
+    if (opts.foot) pnl.appendChild(el("p", "meta", opts.foot));
+    return pnl;
+  }
   function renderHadithTrackers(){
     var col = h.cols.find(function (c) { return c.id === h.active; });
     var allDone = 0, allTotal = 0; h.cols.forEach(function (c) { allDone += hStats(c).done; allTotal += c.count; });
     var ws = weekStart(new Date()), wsk = dkey(ws), revW = 0;
     for (var dk in h.revLog) if (dk >= wsk) revW += h.revLog[dk];
+
+    // goals
+    app.appendChild(goalsPanel("h-goals", "Memorisation goals", h.goals, h.memLog, ["hadith","hadith"], {
+      placeholders:{ week:"e.g. Hadith 13–14 of the Arbaʿīn", month:"e.g. Finish Ibn Rajab's additions", year:"e.g. Complete Jawāmiʿ al-Akhbār" },
+      foot:"Counts hadith you mark as memorised below, from today onwards." }));
 
     // summary tiles
     var sum = el("div", "qsum"); sum.style.gridTemplateColumns = "repeat(2,1fr)";
@@ -880,7 +944,7 @@ textarea{width:100%;min-height:80px;padding:12px 16px;border:1px solid var(--lin
     pm.appendChild(el("h2", null, "Memorisation"));
     var ctl = el("div", "row"); ctl.style.marginBottom = "12px";
     var sel = el("select"); sel.setAttribute("aria-label", "Collection");
-    h.cols.forEach(function (c) { var o = el("option", null, c.name + " (" + c.count + ")"); o.value = c.id; sel.appendChild(o); });
+    h.cols.forEach(function (c) { var o = el("option", null, colLabel(c) + " (" + c.count + ")"); o.value = c.id; sel.appendChild(o); });
     sel.value = h.active; sel.onchange = function () { h.active = sel.value; save(); render(); };
     ctl.appendChild(sel);
     var addB = el("button", "newbtn"); addB.appendChild(icon(hadithAdding ? "x" : "plus")); addB.appendChild(document.createTextNode(hadithAdding ? "Close" : "Collection"));
@@ -903,6 +967,7 @@ textarea{width:100%;min-height:80px;padding:12px 16px;border:1px solid var(--lin
       ar.appendChild(nm); ar.appendChild(ct); ar.appendChild(el("span", "meta", "hadith")); ar.appendChild(ok);
       pm.appendChild(ar);
     }
+    if (col.ar) pm.appendChild(el("div", "colar", col.ar));
     var st = hStats(col);
     var big = el("div", "bignum", String(st.done)); big.appendChild(el("small", null, "of " + col.count + " memorised · " + st.learning + " learning"));
     pm.appendChild(big); pm.appendChild(barEl(st.done / col.count));
@@ -913,10 +978,14 @@ textarea{width:100%;min-height:80px;padding:12px 16px;border:1px solid var(--lin
     var grid = el("div", "hgrid" + (col.id === "nawawi" ? " titled" : ""));
     var m = h.mem[col.id] = h.mem[col.id] || {};
     for (var n = 1; n <= col.count; n++) (function (n) {
-      var stt = m[n] || 0, t = hTitle(col, n);
+      if (col.id === "nawawi" && n === 43) { var dv = el("div", "hdiv"); dv.appendChild(el("span", "ar", "زيادات ابن رجب")); dv.appendChild(el("span", null, "Ibn Rajab's additions")); grid.appendChild(dv); }
+      var stt = m[n] || 0, t = hTitle(col, n), a = hAr(col, n);
       var b = el("button", "hch" + (stt ? " s" + stt : "")); b.title = (t ? n + ". " + t : "Hadith " + n);
-      b.appendChild(el("b", null, n)); if (t) b.appendChild(el("span", null, t));
-      b.onclick = function () { var nx = ((m[n] || 0) + 1) % 3; if (nx) m[n] = nx; else delete m[n];
+      b.appendChild(el("b", null, n));
+      if (t) { var tx = el("span", "htx"); if (a) tx.appendChild(el("span", "har", a)); tx.appendChild(el("span", "hen", t)); b.appendChild(tx); }
+      b.onclick = function () { var was = m[n] || 0, nx = (was + 1) % 3; if (nx) m[n] = nx; else delete m[n];
+        var dlt = (nx === 2 ? 1 : 0) - (was === 2 ? 1 : 0);
+        if (dlt) { var dk0 = dkey(new Date()); h.memLog[dk0] = (h.memLog[dk0] || 0) + dlt; if (!h.memLog[dk0]) delete h.memLog[dk0]; }
         if (nx === 2 && !(h.rev[col.id] || {})[n]) { (h.rev[col.id] = h.rev[col.id] || {})[n] = dkey(new Date()); }
         var y = window.scrollY, gs = grid.scrollTop; save(); render(); window.scrollTo(0, y); var g2 = document.querySelector(".hgrid"); if (g2) g2.scrollTop = gs; };
       grid.appendChild(b);
@@ -946,8 +1015,9 @@ textarea{width:100%;min-height:80px;padding:12px 16px;border:1px solid var(--lin
     (showAllDue ? due : due.slice(0, 8)).forEach(function (d) {
       var li = el("li"), ds = daysSince(d.last), t = hTitle(d.col, d.n);
       var lab = el("span", "label"); lab.appendChild(el("b", null, d.n + ". ")); lab.appendChild(document.createTextNode(t || d.col.name));
+      var a0 = hAr(d.col, d.n); if (a0) { lab.appendChild(el("span", "har rl", a0)); }
       li.appendChild(lab);
-      if (h.cols.length > 1 && t) li.appendChild(el("span", "tag", d.col.name.length > 18 ? d.col.name.slice(0, 16) + "…" : d.col.name));
+      if (t) li.appendChild(el("span", "tag", "Arbaʿīn"));
       li.appendChild(el("span", "meta", d.last === todayK ? "Revised today" : ds == null ? "Not revised yet" : ds + (ds === 1 ? " day ago" : " days ago")));
       var rv = el("button", d.last === todayK ? "ghost" : "newbtn", d.last === todayK ? "Done" : "Revised");
       rv.disabled = d.last === todayK;
@@ -960,7 +1030,7 @@ textarea{width:100%;min-height:80px;padding:12px 16px;border:1px solid var(--lin
       more.onclick = function () { showAllDue = !showAllDue; render(); }; pr.appendChild(more); }
     app.appendChild(pr);
 
-    ["h-mem","h-rev"].forEach(makeCollapsible);
+    ["h-goals","h-mem","h-rev"].forEach(makeCollapsible);
   }
 
   // ---------- pomodoro (keeps running when you switch pages) ----------
