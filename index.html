@@ -664,6 +664,19 @@ li.mrow2{gap:12px}
 .memento.card .men{font-size:13px}
 @media (max-width:1100px){.toprow{grid-template-columns:1fr}}
 
+
+/* merged Arabic website */
+#arWrap{margin-left:250px;padding:0 56px 60px;max-width:1140px}
+body.ar-on main{padding-bottom:12px}
+.arbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.arbar b{font-family:Amiri,Inter,serif;font-size:18px}
+.arbar .ghost{text-decoration:none;padding:9px 16px}
+#arFrame{width:100%;height:calc(100vh - 90px);min-height:620px;border:0;border-radius:var(--r);background:#fff;box-shadow:0 2px 14px rgba(0,0,0,.12)}
+body.arfull #arWrap{position:fixed;inset:0;margin:0;padding:10px;max-width:none;z-index:95;background:var(--bg)}
+body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
+.subtabs.artabs{margin-top:-8px}
+@media (max-width:899px){#arWrap{margin-left:0;padding:0 10px 100px}#arFrame{height:calc(100vh - 170px);min-height:480px;border-radius:14px}.arbar b{font-size:15px}}
+
 [hidden]{display:none!important}
 
 /* ===== mobile: sidebar becomes a bottom bar ===== */
@@ -691,6 +704,11 @@ li.mrow2{gap:12px}
   <div class="side-one" id="sideOne"></div>
 </header>
 <main id="app"></main>
+<section id="arWrap" hidden>
+  <div class="arbar"><b>رِحْلَتِي مَعَ العَرَبِيَّةِ · My Arabic Journey</b>
+    <span class="row"><a class="ghost" id="arNewTab" target="_blank" rel="noopener">Open in new tab</a><button class="cta" id="arFullBtn">Full screen</button></span></div>
+  <div id="arFrameHost"></div>
+</section>
 
 <script src="schedule.js?v=20261118e"></script>
 <script>
@@ -1050,7 +1068,15 @@ li.mrow2{gap:12px}
     var open = items.filter(function (t) { return !t.done; }).length;
     app.appendChild(pageHead(p0, open + " open"));
     if (p0.group === "islamic") app.appendChild(subTabs());
-    if (sec === "arabic") renderArabicGoals();
+    if (sec === "arabic") {
+      var at = el("div", "subtabs artabs");
+      [["practice","Practice"],["goals","Goals & tasks"]].forEach(function (o) {
+        var b = el("button", (state.arTab || "practice") === o[0] ? "on" : null, o[1]);
+        b.onclick = function () { state.arTab = o[0]; save(); render(); window.scrollTo(0, 0); }; at.appendChild(b); });
+      app.appendChild(at);
+      if ((state.arTab || "practice") === "practice") return;
+      renderArabicGoals();
+    }
     if (NAV_GROUPS[sec]) { app.appendChild(groupTabs(sec, NAV_GROUPS[sec])); renderGroupHome(sec, NAV_GROUPS[sec]); }
     if (NAV_GROUPS[p0.parent]) app.appendChild(groupTabs(p0.parent, NAV_GROUPS[p0.parent]));
     if (TRK[sec]) renderTracker(sec);
@@ -2268,6 +2294,21 @@ li.mrow2{gap:12px}
     return d;
   }
 
+  // the Arabic website, shown inside the Arabic page
+  var AR_URL = "https://ahmadar080608-cloud.github.io/Arabic-Website/", arFrame = null;
+  function syncArabic(){
+    var wrap = document.getElementById("arWrap"), show = state.tab === "arabic" && (state.arTab || "practice") === "practice";
+    wrap.hidden = !show; document.body.classList.toggle("ar-on", show);
+    if (!show) { document.body.classList.remove("arfull"); return; }
+    if (!arFrame) {
+      arFrame = document.createElement("iframe"); arFrame.id = "arFrame"; arFrame.title = "My Arabic Journey";
+      arFrame.src = AR_URL; arFrame.setAttribute("allow", "clipboard-write; fullscreen; autoplay");
+      document.getElementById("arFrameHost").appendChild(arFrame);
+      document.getElementById("arNewTab").href = AR_URL;
+      document.getElementById("arFullBtn").onclick = function () { var on = document.body.classList.toggle("arfull"); this.textContent = on ? "Exit full screen" : "Full screen"; };
+      document.addEventListener("keydown", function (e) { if (e.key === "Escape" && document.body.classList.contains("arfull")) document.getElementById("arFullBtn").click(); });
+    }
+  }
   function render(){
     app.innerHTML = "";
     renderNav();
@@ -2279,6 +2320,7 @@ li.mrow2{gap:12px}
     else if (t === "tools") renderTools();
     else if (t === "settings") renderSettings();
     else renderTasks(t);
+    syncArabic();
   }
   window.addEventListener("resize", function () { renderNav(); });
   render();
