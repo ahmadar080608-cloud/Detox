@@ -455,10 +455,7 @@ ul.wgl .iconbtn{padding:2px}
     { id:"islamic",    name:"Islamic",         icon:"islamic",    group:null,      ar:"العُلُومُ الشَّرْعِيَّةُ", sub:"Deen & study", bg:"دين", color:"--c1" },
     { id:"quran",      name:"Qur'an",          icon:"quran",      group:"islamic", parent:"islamic", ar:"القُرْآنُ الكَرِيمُ", sub:"Hifz, revision & reading", bg:"قرآن", color:"--c1" },
     { id:"hadith",     name:"Hadith",          icon:"hadith",     group:"islamic", parent:"islamic", ar:"الحَدِيثُ", sub:"Memorise & understand", bg:"حديث", color:"--c5" },
-    { id:"studies",    name:"Islamic Studies", icon:"studies",    group:"islamic", parent:"islamic", ar:"الدِّرَاسَاتُ الإِسْلَامِيَّةُ", sub:"Courses & lessons", bg:"علم", color:"--c3" },
-    { id:"amau",       name:"AMAU",            icon:"amau",       group:"islamic", parent:"studies", ar:"أكاديمية أماو", sub:"Courses & modules", bg:"معهد", color:"--c3" },
-    { id:"yunus",      name:"Sheikh Yunus",    icon:"teacher",    group:"islamic", parent:"studies", ar:"دروس الشيخ يونس", sub:"Lessons", bg:"دروس", color:"--c6" },
-    { id:"abutorab",   name:"Abu Torab",       icon:"teacher",    group:"islamic", parent:"studies", ar:"دروس أبي تراب", sub:"Lessons", bg:"مجلس", color:"--c5" },
+    { id:"studies",    name:"Islamic Studies", icon:"studies",    group:"islamic", parent:"islamic", ar:"الدِّرَاسَاتُ الإِسْلَامِيَّةُ", sub:"Fiqh, ʿaqīdah & mutoon", bg:"علم", color:"--c3" },
     { id:"arabic",     name:"Arabic",          icon:"arabic",     group:"islamic", parent:"islamic", ar:"اللُّغَةُ العَرَبِيَّةُ", sub:"Vocabulary & grammar", bg:"عربي", color:"--c4" },
     { id:"university", name:"University",      icon:"university", group:null,      sub:"Dental school", bg:"جامعة", color:"--c2" },
     { id:"work",       name:"Work",            icon:"work",       group:null,      sub:"Jobs & projects", bg:"عمل", color:"--c6" },
@@ -468,7 +465,7 @@ ul.wgl .iconbtn{padding:2px}
 
   var byId = {}; PAGES.forEach(function (p) { byId[p.id] = p; });
   var ISLAMIC_SUBS = ["quran","hadith","studies","arabic"];
-  var STUDY_SUBS = ["amau","yunus","abutorab"];
+  var STUDY_SUBS = [];
   var TASK_SECTIONS = ["quran","hadith","studies"].concat(STUDY_SUBS, ["arabic","university","work"]);
   function isUnder(id, anc){ var p = byId[id]; while (p) { if (p.id === anc) return true; p = p.parent ? byId[p.parent] : null; } return false; }
   var THEMES = [
@@ -489,7 +486,7 @@ ul.wgl .iconbtn{padding:2px}
   var state = load();
   state.tasks = Array.isArray(state.tasks) ? state.tasks : [];
   state.tasks.forEach(function (t) {
-    if (t.section === "islamic") t.section = "studies";             // old single Islamic list
+    if (t.section === "islamic" || ["amau","yunus","abutorab"].indexOf(t.section) >= 0) t.section = "studies";             // old single Islamic list
     if (TASK_SECTIONS.indexOf(t.section) < 0) t.section = "university";
   });
   state.oneThingId = state.oneThingId || null;
@@ -674,9 +671,6 @@ ul.wgl .iconbtn{padding:2px}
     var open = items.filter(function (t) { return !t.done; }).length;
     app.appendChild(pageHead(p0, open + " open"));
     if (p0.group === "islamic") app.appendChild(subTabs());
-    if (sec === "studies" || p0.parent === "studies") app.appendChild(studyTabs());
-    if (sec === "studies") renderStudiesHome();
-    if (p0.parent === "studies") renderLessons(sec);
     if (sec === "arabic") renderArabicGoals();
     if (sec === "quran") renderQuranTrackers();
     if (sec === "hadith") renderHadithTrackers();
