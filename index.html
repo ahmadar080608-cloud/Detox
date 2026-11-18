@@ -402,6 +402,29 @@ select option,select optgroup{background:var(--card);color:var(--ink)}
 .sch-sheet input.sch-htitle:focus{border-bottom-color:#fff!important}
 .sch-line2 select option{font-size:15px}
 
+
+/* schedule suggestions */
+.sch-sugg{background:var(--card);border-radius:18px;padding:14px 14px 6px;margin-bottom:14px;border:1.5px dashed var(--line)}
+.sch-sugg-h{display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.sch-sugg-h svg.ic{width:15px;height:15px;color:var(--accent)}
+.sch-sugg-h b{font-weight:800}
+.sch-srow{display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid var(--line)}
+.sch-srow:first-of-type{border-top:0}
+.sch-srow .ci{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;flex:none;opacity:.85}
+.sch-srow .ci svg.ic{width:17px;height:17px}
+.sch-srow .stx{flex:1;min-width:0;display:flex;flex-direction:column}
+.sch-srow .stx b{font-weight:700}
+.sch-srow .stx span{font-size:12px;color:var(--muted)}
+.sch-sadd{width:34px;height:34px;border-radius:50%;border:0;background:var(--accent);color:#fff;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.sch-sadd svg.ic{width:18px;height:18px;stroke-width:2.4}
+.sch-srow .sch-ib{background:none;color:var(--muted);width:30px;height:30px}
+.sch-recent{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.sch-recent .meta{margin-right:2px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:11px}
+.sch-rchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:4px 10px 4px 4px;font-size:13px;font-weight:600}
+.sch-rchip i{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff}
+.sch-rchip i svg.ic{width:12px;height:12px;stroke-width:2.4}
+.sch-rchip small{color:var(--muted);font-weight:500}
+
 [hidden]{display:none!important}
 
 /* ===== mobile: sidebar becomes a bottom bar ===== */

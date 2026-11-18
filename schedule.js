@@ -146,6 +146,66 @@
     return { daily: "Daily", weekdays: "Weekdays", weekly: "Weekly", monthly: "Monthly", yearly: "Yearly" }[r.type] + ((r.interval || 1) > 1 ? " ×" + r.interval : "");
   }
 
+  // ---------- suggestions from past days ----------
+  var WD = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+  function norm(t) { return String(t || "").trim().toLowerCase(); }
+  // one-off tasks from the last 4 weeks, grouped by title + start time
+  function history(beforeKey) {
+    var from = addDays(beforeKey, -28), groups = {};
+    S().items.forEach(function (it) {
+      if (it.source === "ics" || it.allDay || !it.start) return;
+      if (it.repeat && it.repeat.type && it.repeat.type !== "none") return;
+      if (it.date >= beforeKey || it.date < from) return;
+      var key = norm(it.title) + "@" + it.start;
+      var g = groups[key] = groups[key] || { item: it, dates: [], last: it.date };
+      g.dates.push(it.date); if (it.date >= g.last) { g.last = it.date; g.item = it; }
+    });
+    return Object.keys(groups).map(function (k) { return groups[k]; });
+  }
+  function suggestionsFor(k) {
+    var s = S(); if (k < today()) return [];
+    var dism = (s.dismissed || {})[k] || {};
+    var onDay = itemsOn(k), names = {}, spans = [];
+    onDay.forEach(function (it) { names[norm(it.title)] = 1; if (it.start && !it.allDay) spans.push([hm(it.start), hm(it.start) + Math.max(it.dur || 0, 1)]); });
+    var wd = (pk(k).getDay() + 6) % 7;
+    var list = history(k).filter(function (g) {
+      var it = g.item, st = hm(it.start), en = st + Math.max(it.dur || 0, 1);
+      if (names[norm(it.title)] || dism[norm(it.title) + "@" + it.start]) return false;
+      if (k === today() && st < nowMin()) return false;   // don't suggest times already gone today
+      return !spans.some(function (sp) { return st < sp[1] && en > sp[0]; });
+    }).map(function (g) {
+      var same = g.dates.filter(function (d) { return (pk(d).getDay() + 6) % 7 === wd; }).length;
+      var days = g.dates.map(function (d) { return (pk(d).getDay() + 6) % 7; }).filter(function (v, i, a) { return a.indexOf(v) === i; }).sort();
+      g.score = g.dates.length + same * 2 + (g.last >= addDays(k, -7) ? 1 : 0);
+      g.label = (g.dates.length > 1 ? g.dates.length + "× recently · " : "Did this ") + days.map(function (x) { return WD[x]; }).join(", ");
+      return g;
+    });
+    list.sort(function (a, b) { return b.score - a.score; });
+    // avoid suggesting two things for the same slot
+    var picked = [];
+    list.forEach(function (g) {
+      var st = hm(g.item.start), en = st + Math.max(g.item.dur || 0, 1);
+      if (picked.length < 5 && !picked.some(function (p) { var a = hm(p.item.start), b = a + Math.max(p.item.dur || 0, 1); return st < b && en > a; })) picked.push(g);
+    });
+    return picked.sort(function (a, b) { return hm(a.item.start) - hm(b.item.start); });
+  }
+  function copyTo(it, k) {
+    S().items.push({ id: uid(), title: it.title, icon: it.icon, color: it.color, date: k, start: it.start, dur: it.dur || 0, allDay: false,
+      repeat: { type: "none" }, remind: it.remind == null ? 0 : it.remind, notes: it.notes || "",
+      subtasks: (it.subtasks || []).map(function (x) { return { id: uid(), text: x.text, done: false }; }), done: {} });
+    C.save();
+  }
+  // recent tasks for the editor, closest in time first
+  function recents(startMin, excludeId) {
+    var seen = {}, out = [];
+    S().items.slice().sort(function (a, b) { return (b.date || "").localeCompare(a.date || ""); }).forEach(function (it) {
+      if (it.id === excludeId || it.source === "ics" || !it.title) return;
+      var n = norm(it.title); if (seen[n]) return; seen[n] = 1; out.push(it);
+    });
+    if (startMin != null) out.sort(function (a, b) { var da = a.start ? Math.abs(hm(a.start) - startMin) : 999, db = b.start ? Math.abs(hm(b.start) - startMin) : 999; return da - db; });
+    return out.slice(0, 8);
+  }
+
   // ---------- reminders ----------
   function notifyOK() { return typeof Notification !== "undefined" && Notification.permission === "granted"; }
   function checkReminders() {
@@ -314,6 +374,30 @@
         ad.appendChild(c);
       });
       root.appendChild(ad);
+    }
+
+    // suggestions from past days
+    var sugg = suggestionsFor(k);
+    if (sugg.length) {
+      var sg = el("div", "sch-sugg");
+      var sh0 = el("div", "sch-sugg-h"); sh0.appendChild(svg("star")); sh0.appendChild(el("b", null, "Suggested from your past days")); sg.appendChild(sh0);
+      sugg.forEach(function (g) {
+        var it = g.item, st0 = hm(it.start);
+        var row = el("div", "sch-srow");
+        var ic = el("span", "ci"); ic.style.background = it.color; ic.appendChild(svg(it.icon)); row.appendChild(ic);
+        var tx = el("div", "stx");
+        tx.appendChild(el("b", null, it.title));
+        tx.appendChild(el("span", null, fmtT(st0) + (it.dur ? " – " + fmtT(st0 + it.dur) : "") + " · " + g.label));
+        row.appendChild(tx);
+        var add = el("button", "sch-sadd"); add.title = "Add to this day"; add.appendChild(svg("plus"));
+        add.onclick = function () { copyTo(it, k); V.toast = "Added " + it.title + " at " + fmtT(st0) + "."; C.rerender(); };
+        var no = el("button", "sch-ib"); no.title = "Not today"; no.appendChild(svg("x"));
+        no.onclick = function () { var s0 = S(); s0.dismissed = s0.dismissed || {}; (s0.dismissed[k] = s0.dismissed[k] || {})[norm(it.title) + "@" + it.start] = 1;
+          Object.keys(s0.dismissed).forEach(function (d) { if (d < addDays(today(), -2)) delete s0.dismissed[d]; }); C.save(); C.rerender(); };
+        row.appendChild(add); row.appendChild(no);
+        sg.appendChild(row);
+      });
+      root.appendChild(sg);
     }
 
     // timeline
@@ -495,6 +579,27 @@
     if (E.isNew) setTimeout(function () { ti.focus(); }, 30);
 
     var bd = el("div", "sch-ebody");
+
+    // recent tasks: one tap fills the form
+    var rec = recents(dr.allDay ? null : hm(dr.start), dr.id);
+    if (rec.length && E.isNew) {
+      var rc = el("div", "sch-recent");
+      rc.appendChild(el("span", "meta", "Recent"));
+      rec.forEach(function (it) {
+        var b = el("button", "sch-rchip"); var ci = el("i"); ci.style.background = it.color; ci.appendChild(svg(it.icon)); b.appendChild(ci);
+        b.appendChild(document.createTextNode(it.title));
+        if (it.start && !it.allDay) b.appendChild(el("small", null, fmtT(hm(it.start))));
+        b.onclick = function () {
+          dr.title = it.title; dr.icon = it.icon; dr.color = it.color; dr.dur = it.dur || 0; E.iconPicked = true;
+          if (it.start && !it.allDay) { dr.start = it.start; dr.allDay = false; }
+          dr.remind = it.remind == null ? dr.remind : it.remind;
+          dr.subtasks = (it.subtasks || []).map(function (x) { return { id: uid(), text: x.text, done: false }; });
+          C.rerender();
+        };
+        rc.appendChild(b);
+      });
+      bd.appendChild(rc);
+    }
 
     // icons + colours
     if (E.iconsOpen) {
