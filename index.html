@@ -1191,11 +1191,11 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
     if (p0.group === "islamic") app.appendChild(subTabs());
     if (sec === "arabic") {
       var at = el("div", "subtabs artabs");
-      [["practice","Practice"],["goals","Goals & tasks"]].forEach(function (o) {
-        var b = el("button", (state.arTab || "practice") === o[0] ? "on" : null, o[1]);
+      [["goals","Goals & tasks"],["practice","Practice"]].forEach(function (o) {
+        var b = el("button", (state.arTab || "goals") === o[0] ? "on" : null, o[1]);
         b.onclick = function () { state.arTab = o[0]; save(); render(); window.scrollTo(0, 0); }; at.appendChild(b); });
       app.appendChild(at);
-      if ((state.arTab || "practice") === "practice") return;
+      if ((state.arTab || "goals") === "practice") return;
       renderArabicGoals();
     }
     if (NAV_GROUPS[sec]) { app.appendChild(groupTabs(sec, NAV_GROUPS[sec])); renderGroupHome(sec, NAV_GROUPS[sec]); }
@@ -2481,9 +2481,10 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
   }
 
   // the Arabic website, shown inside the Arabic page
+  if (!state.arTabV2) { state.arTab = "goals"; state.arTabV2 = true; }
   var AR_URL = "https://ahmadar080608-cloud.github.io/Arabic-Website/", arFrame = null;
   function syncArabic(){
-    var wrap = document.getElementById("arWrap"), show = state.tab === "arabic" && (state.arTab || "practice") === "practice";
+    var wrap = document.getElementById("arWrap"), show = state.tab === "arabic" && (state.arTab || "goals") === "practice";
     wrap.hidden = !show; document.body.classList.toggle("ar-on", show);
     if (!show) { document.body.classList.remove("arfull"); return; }
     if (!arFrame) {
