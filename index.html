@@ -695,6 +695,58 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
 .mini-d .dots i{width:5px;height:5px;border-radius:50%}
 @media (max-width:899px){.sch-mini{max-width:none}}
 
+
+/* tools: focus stats */
+.fstat3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.fs3{background:var(--bg);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column}
+.fs3 span{font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.fs3 b{font-family:Lalezar,Inter,sans-serif;font-weight:400;font-size:26px;line-height:1.2}
+.fs3 small{font-size:12px;color:var(--muted)}
+.fbars{display:flex;align-items:flex-end;gap:6px;height:130px}
+.fbar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;height:100%}
+.fbar i{width:100%;max-width:26px;border-radius:6px 6px 2px 2px;background:var(--accent-soft);min-height:3px}
+.fbar.today i{background:var(--accent)}
+.fbar em{font-style:normal;font-size:11px;font-weight:700;color:var(--muted)}
+.fbar span{font-size:11px;color:var(--muted)}
+.fsec{display:grid;grid-template-columns:160px 1fr 70px;align-items:center;gap:12px;padding:5px 0}
+.fsec .fsn{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fsec .bar{margin:0}
+.fsec b{text-align:right;font-size:14px}
+/* tools: prayer */
+.prgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:14px 0 6px}
+.prc{border:1.5px solid var(--line);background:var(--bg);border-radius:16px;padding:12px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--ink)}
+.prc .prar{font-family:Amiri,serif;font-size:20px;line-height:1.3}
+.prc b{font-size:14px}
+.prc .prt{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.prc .prs{font-size:11px;font-weight:700;color:var(--muted);margin-top:4px}
+.prc.s{color:#fff}.prc.s .prt,.prc.s .prs{color:rgba(255,255,255,.9)}
+.prweek{display:flex;gap:8px}
+.prday{flex:1;background:var(--bg);border-radius:12px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.prday.today{outline:2px solid var(--accent)}
+.prday .pdw{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.prday i{width:12px;height:12px;border-radius:50%;background:var(--line)}
+.prset{margin-top:12px}
+.prset summary{cursor:pointer;font-weight:700;font-size:13px;color:var(--muted)}
+.prset .row{margin-top:10px}
+.prset input[type=text]{min-width:120px}
+/* tools: countdowns */
+.cdgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-top:8px}
+.cd{position:relative;background:var(--bg);border-radius:16px;padding:14px;border-top:4px solid var(--k);display:flex;flex-direction:column;gap:2px}
+.cd .cdk{font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--k)}
+.cd .cdn{font-family:Lalezar,Inter,sans-serif;font-size:44px;line-height:1}
+.cd .cdu{font-size:12px;color:var(--muted)}
+.cd b{margin-top:6px}
+.cd .cdd{font-size:12px;color:var(--muted)}
+.cd .iconbtn{position:absolute;top:8px;right:8px}
+.cd.soon .cdn{color:var(--k)}
+.cd.past{opacity:.55}
+.cdstrip{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.cdchip{border:0;background:var(--card);border-left:4px solid var(--k);border-radius:12px;padding:8px 14px;display:flex;align-items:baseline;gap:8px;color:var(--ink)}
+.cdchip b{font-family:Lalezar,Inter,sans-serif;font-weight:400;font-size:20px}
+.cdchip.soon b{color:var(--k)}
+.cdchip span{font-size:14px;font-weight:600}
+@media (max-width:899px){.prgrid{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}.prc{padding:10px 2px}.prc .prar{font-size:16px}.prc .prs{display:none}.fsec{grid-template-columns:110px 1fr 56px}.fs3 b{font-size:20px}}
+
 [hidden]{display:none!important}
 
 /* ===== mobile: sidebar becomes a bottom bar ===== */
@@ -796,7 +848,7 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
     { id:"business",   name:"Business ideas",  icon:"business",   group:"work", parent:"work", sub:"Ideas, research & tests", bg:"أفكار", color:"--c4" },
     { id:"tutoring",   name:"Tutoring",        icon:"tutoring",   group:"work", parent:"work", sub:"Students & sessions", bg:"تدريس", color:"--c1" },
     { id:"finance",    name:"Finance",         icon:"finance",    group:"work", parent:"work", sub:"Money in & out", bg:"مال", color:"--c5" },
-    { id:"tools",      name:"Tools",           icon:"tools",      group:null,      sub:"Pomodoro timer", bg:"تركيز", color:"--c4" },
+    { id:"tools",      name:"Tools",           icon:"tools",      group:null,      sub:"Focus, prayer & countdowns", bg:"تركيز", color:"--c4" },
     { id:"settings",   name:"Settings",        icon:"settings",   group:null,      bg:"إعدادات" }
   ];
 
@@ -1037,6 +1089,7 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
   }
   function renderHome(){
     var toprow = el("div", "toprow"); toprow.appendChild(ayahCard()); toprow.appendChild(mementoEl("card")); app.appendChild(toprow);
+    var cds = countdownStrip(); if (cds) app.appendChild(cds);
     var t = oneThing();
     var c = el("div", "onecard grain");
     var lbl = el("div", "lbl"); lbl.appendChild(icon("target")); lbl.appendChild(document.createTextNode("Today's one thing")); c.appendChild(lbl);
@@ -1683,7 +1736,7 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
     remaining = Math.max(0, Math.round((endAt - Date.now())/1000));
     if (remaining <= 0) {
       stop();
-      if (mode === "focus") { state.blocksToday.count += 1; save(); mode = "break"; remaining = state.breakMin*60; }
+      if (mode === "focus") { state.blocksToday.count += 1; logFocus(state.focusMin); save(); mode = "break"; remaining = state.breakMin*60; }
       else { mode = "focus"; remaining = state.focusMin*60; }
       try { if (navigator.vibrate) navigator.vibrate([200,100,200]); } catch (e) {}
       if (state.tab === "home") render();
@@ -1712,6 +1765,9 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
     p.appendChild(el("p", null, t1 ? t1.text : "No one thing chosen. Pick one so this block has a purpose."));
     p.appendChild(oneThingPicker());
     app.appendChild(p);
+    renderFocusStats();
+    renderPrayer();
+    renderCountdowns();
     paintTimer();
   }
 
@@ -2346,6 +2402,191 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
       document.addEventListener("keydown", function (e) { if (e.key === "Escape" && document.body.classList.contains("arfull")) document.getElementById("arFullBtn").click(); });
     }
   }
+
+  // ---------- Tools: focus stats ----------
+  state.focusLog = state.focusLog || {};   // "YYYY-MM-DD" -> { n: blocks, m: minutes, s: { section: minutes } }
+  (function migrateBlocks(){ var b = state.blocksToday, k = dkey(new Date());
+    if (b && b.count && !state.focusLog[k] && b.date === new Date().toDateString()) state.focusLog[k] = { n:b.count, m:b.count * (state.focusMin || 25), s:{} }; })();
+  function logFocus(mins){
+    var k = dkey(new Date()), e = state.focusLog[k] = state.focusLog[k] || { n:0, m:0, s:{} };
+    var t = oneThing(), sec = t ? t.section : "general";
+    e.n += 1; e.m += mins; e.s[sec] = (e.s[sec] || 0) + mins;
+  }
+  function fmtMins(m){ var h = Math.floor(m / 60), r = m % 60; return h ? h + "h" + (r ? " " + r + "m" : "") : r + "m"; }
+  function renderFocusStats(){
+    var p = el("div", "panel"); p.id = "tl-focus";
+    p.appendChild(el("h2", null, "Focus stats"));
+    var now = new Date(), tk = dkey(now), ws = weekStart(now), wk = dkey(ws);
+    var today = state.focusLog[tk] || { n:0, m:0 }, week = { n:0, m:0, s:{} }, streak = 0;
+    Object.keys(state.focusLog).forEach(function (k) { if (k >= wk) { var e = state.focusLog[k]; week.n += e.n; week.m += e.m; for (var s in e.s) week.s[s] = (week.s[s] || 0) + e.s[s]; } });
+    for (var i = 0; i < 365; i++) { var d = new Date(now); d.setDate(d.getDate() - i); var e0 = state.focusLog[dkey(d)]; if (e0 && e0.n) streak++; else if (i > 0) break; }
+    var stats = el("div", "fstat3");
+    [["Today", today.n + (today.n === 1 ? " block" : " blocks"), fmtMins(today.m)], ["This week", week.n + (week.n === 1 ? " block" : " blocks"), fmtMins(week.m)], ["Streak", streak + (streak === 1 ? " day" : " days"), "with a focus block"]]
+      .forEach(function (x) { var c = el("div", "fs3"); c.appendChild(el("span", null, x[0])); c.appendChild(el("b", null, x[1])); c.appendChild(el("small", null, x[2])); stats.appendChild(c); });
+    p.appendChild(stats);
+    // last 14 days
+    p.appendChild(el("h3", null, "Last 14 days"));
+    var bars = el("div", "fbars"), days = [], mx = 1;
+    for (var j = 13; j >= 0; j--) { var dd = new Date(now); dd.setDate(dd.getDate() - j); var ee = state.focusLog[dkey(dd)] || { n:0, m:0 }; days.push({ d:dd, e:ee }); mx = Math.max(mx, ee.m); }
+    days.forEach(function (x) {
+      var c = el("div", "fbar" + (dkey(x.d) === tk ? " today" : "")), b = el("i"); b.style.height = Math.round(x.e.m / mx * 90) + "px";
+      c.title = x.d.toDateString() + ": " + x.e.n + " blocks · " + fmtMins(x.e.m);
+      c.appendChild(el("em", null, x.e.n ? String(x.e.n) : "")); c.appendChild(b);
+      c.appendChild(el("span", null, x.d.toLocaleDateString(undefined, { weekday:"narrow" }))); bars.appendChild(c);
+    });
+    p.appendChild(bars);
+    // by section this week
+    var secs = Object.keys(week.s).sort(function (a, b) { return week.s[b] - week.s[a]; });
+    p.appendChild(el("h3", null, "Where your focus went this week"));
+    if (!secs.length) p.appendChild(el("p", "empty", "Finish a focus block to see it here. Blocks count towards the section of today's one thing."));
+    secs.forEach(function (s) {
+      var r = el("div", "fsec"), nm = s === "general" ? "No one thing chosen" : (byId[s] ? byId[s].name : s);
+      r.appendChild(el("span", "fsn", nm));
+      var bb = el("div", "bar"), ii = el("i"); ii.style.width = Math.round(week.s[s] / week.m * 100) + "%"; if (byId[s] && byId[s].color) ii.style.background = "var(" + byId[s].color + ")"; bb.appendChild(ii); r.appendChild(bb);
+      r.appendChild(el("b", null, fmtMins(week.s[s])));
+      p.appendChild(r);
+    });
+    app.appendChild(p); makeCollapsible("tl-focus");
+  }
+
+  // ---------- Tools: prayer times & tracker ----------
+  state.prayer = state.prayer || {};
+  var PR = state.prayer;
+  PR.city = PR.city || "London"; PR.country = PR.country || "United Kingdom";
+  PR.method = PR.method == null ? 15 : PR.method; PR.school = PR.school == null ? 0 : PR.school;
+  PR.times = PR.times || {}; PR.log = PR.log || {};
+  var PRAYERS = [["Fajr","الفجر"],["Dhuhr","الظهر"],["Asr","العصر"],["Maghrib","المغرب"],["Isha","العشاء"]];
+  var PST = [null, { n:"Prayed", c:"#d9a33a" }, { n:"On time", c:"#6c9bd2" }, { n:"In jamāʿah", c:"#3f9a78" }];
+  var METHODS = [[15,"Moonsighting Committee"],[3,"Muslim World League"],[2,"ISNA (North America)"],[4,"Umm al-Qura, Makkah"],[5,"Egyptian Authority"],[1,"Karachi University"]];
+  var prayerLoading = {}, prayerErr = "";
+  function timesKey(k){ return k + "|" + PR.city + "|" + PR.country + "|" + PR.method + "|" + PR.school; }
+  function loadTimes(k){
+    var key = timesKey(k); if (PR.times[key] || prayerLoading[key]) return;
+    prayerLoading[key] = true; prayerErr = "";
+    var a = k.split("-");
+    fetch("https://api.aladhan.com/v1/timingsByCity/" + a[2] + "-" + a[1] + "-" + a[0] + "?city=" + encodeURIComponent(PR.city) + "&country=" + encodeURIComponent(PR.country) + "&method=" + PR.method + "&school=" + PR.school)
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j || j.code !== 200 || !j.data || !j.data.timings) throw new Error((j && j.data) || "No times found");
+        var t = {}; ["Fajr","Sunrise","Dhuhr","Asr","Maghrib","Isha"].forEach(function (n) { t[n] = String(j.data.timings[n] || "").slice(0, 5); });
+        var hj = j.data.date && j.data.date.hijri; t._hijri = hj ? hj.day + " " + hj.month.en + " " + hj.year + " AH" : "";
+        PR.times[key] = t;
+        var ks = Object.keys(PR.times); if (ks.length > 40) ks.sort().slice(0, ks.length - 30).forEach(function (x) { delete PR.times[x]; });
+        save(); if (state.tab === "tools") render();
+      })
+      .catch(function (e) { prayerErr = "Couldn't get prayer times for " + PR.city + ". Check the city name or your connection."; if (state.tab === "tools") render(); })
+      .then(function () { delete prayerLoading[key]; });
+  }
+  function hmm(t){ var a = t.split(":"); return (+a[0]) * 60 + (+a[1]); }
+  function fmt12(t){ var m = hmm(t), h = Math.floor(m / 60), mi = m % 60; return (h % 12 || 12) + ":" + ("0" + mi).slice(-2) + (h < 12 ? " AM" : " PM"); }
+  function renderPrayer(){
+    var p = el("div", "panel"); p.id = "tl-prayer";
+    p.appendChild(el("h2", null, "Prayer"));
+    var now = new Date(), tk = dkey(now), times = PR.times[timesKey(tk)];
+    if (!times) loadTimes(tk);
+    var log = PR.log[tk] = PR.log[tk] || {};
+    var head = el("div", "row"); head.style.justifyContent = "space-between";
+    var left = el("div");
+    if (times) {
+      var nm = now.getHours() * 60 + now.getMinutes(), next = null;
+      PRAYERS.forEach(function (x) { if (!next && hmm(times[x[0]]) > nm) next = x; });
+      if (next) { var diff = hmm(times[next[0]]) - nm; var bn = el("div", "bignum", next[0]); bn.appendChild(el("small", null, "in " + fmtMins(diff) + " · " + fmt12(times[next[0]]))); left.appendChild(bn); }
+      else { var bf = el("div", "bignum", "Fajr"); bf.appendChild(el("small", null, "next · tomorrow morning")); left.appendChild(bf); }
+      left.appendChild(el("p", "meta", PR.city + " · " + now.toLocaleDateString(undefined, { weekday:"long", day:"numeric", month:"long" }) + (times._hijri ? " · " + times._hijri : "")));
+    } else left.appendChild(el("p", "meta", prayerErr || "Getting today's prayer times…"));
+    head.appendChild(left); p.appendChild(head);
+    var grid = el("div", "prgrid");
+    PRAYERS.forEach(function (x) {
+      var st = log[x[0]] || 0, c = el("button", "prc" + (st ? " s" : ""));
+      if (st) { c.style.background = PST[st].c; c.style.borderColor = PST[st].c; }
+      c.appendChild(el("span", "prar", x[1])); c.appendChild(el("b", null, x[0]));
+      c.appendChild(el("span", "prt", times ? fmt12(times[x[0]]) : "–"));
+      c.appendChild(el("span", "prs", st ? PST[st].n : "Tap when prayed"));
+      c.title = "Tap to change: Prayed → On time → In jamāʿah → clear";
+      c.onclick = function () { var n = ((log[x[0]] || 0) + 1) % 4; if (n) log[x[0]] = n; else delete log[x[0]]; save(); render(); };
+      grid.appendChild(c);
+    });
+    p.appendChild(grid);
+    if (times && times.Sunrise) p.appendChild(el("p", "meta", "Sunrise " + fmt12(times.Sunrise) + " (Fajr ends). Tap a prayer to mark it: Prayed → On time → In jamāʿah."));
+    // last 7 days
+    p.appendChild(el("h3", null, "Last 7 days"));
+    var wk = el("div", "prweek"), full = 0, streak = 0, counting = true;
+    for (var i = 6; i >= 0; i--) {
+      var d = new Date(now); d.setDate(d.getDate() - i); var dk = dkey(d), lg = PR.log[dk] || {};
+      var col = el("div", "prday" + (dk === tk ? " today" : ""));
+      col.appendChild(el("span", "pdw", d.toLocaleDateString(undefined, { weekday:"short" })));
+      var cnt = 0;
+      PRAYERS.forEach(function (x) { var s0 = lg[x[0]] || 0; var dot = el("i"); if (s0) { dot.style.background = PST[s0].c; cnt++; } dot.title = x[0] + ": " + (s0 ? PST[s0].n : "not marked"); col.appendChild(dot); });
+      if (cnt === 5) full++;
+      wk.appendChild(col);
+    }
+    for (var j = 0; j < 400; j++) { var d2 = new Date(now); d2.setDate(d2.getDate() - j); var lg2 = PR.log[dkey(d2)] || {};
+      var all = PRAYERS.every(function (x) { return lg2[x[0]]; }); if (all) streak++; else if (j > 0) break; }
+    p.appendChild(wk);
+    p.appendChild(el("p", "meta", full + "/7 days with all five marked · " + streak + (streak === 1 ? " day" : " days") + " in a row"));
+    // settings
+    var set = el("details", "prset");
+    set.appendChild(el("summary", null, "Location & calculation"));
+    var r = el("div", "row");
+    var ci = el("input"); ci.type = "text"; ci.value = PR.city; ci.setAttribute("aria-label", "City"); ci.placeholder = "City";
+    var co = el("input"); co.type = "text"; co.value = PR.country; co.setAttribute("aria-label", "Country"); co.placeholder = "Country";
+    var me = el("select"); me.setAttribute("aria-label", "Calculation method"); METHODS.forEach(function (m) { var o = el("option", null, m[1]); o.value = m[0]; me.appendChild(o); }); me.value = String(PR.method);
+    var sc = el("select"); sc.setAttribute("aria-label", "Asr"); [[0,"Asr: Shāfiʿī, Mālikī, Ḥanbalī"],[1,"Asr: Ḥanafī"]].forEach(function (m) { var o = el("option", null, m[1]); o.value = m[0]; sc.appendChild(o); }); sc.value = String(PR.school);
+    var ok = el("button", "cta", "Update");
+    ok.onclick = function () { PR.city = ci.value.trim() || "London"; PR.country = co.value.trim() || "United Kingdom"; PR.method = +me.value; PR.school = +sc.value; save(); render(); };
+    r.appendChild(ci); r.appendChild(co); r.appendChild(me); r.appendChild(sc); r.appendChild(ok);
+    set.appendChild(r);
+    set.appendChild(el("p", "meta", "Times come from AlAdhan.com. Your local masjid's timetable may differ by a few minutes."));
+    p.appendChild(set);
+    app.appendChild(p); makeCollapsible("tl-prayer");
+  }
+
+  // ---------- Tools: exam & deadline countdowns ----------
+  state.countdowns = Array.isArray(state.countdowns) ? state.countdowns : [];
+  var CD_KIND = { exam:{ n:"Exam", c:"#d93c3c" }, deadline:{ n:"Deadline", c:"#d9a33a" }, event:{ n:"Event", c:"#6c9bd2" } };
+  function daysUntil(k){ var a = k.split("-"), t = new Date(+a[0], +a[1] - 1, +a[2]), n = new Date(); n.setHours(0,0,0,0); return Math.round((t - n) / 864e5); }
+  function cdLabel(d){ return d === 0 ? "Today" : d === 1 ? "Tomorrow" : d < 0 ? (-d) + (d === -1 ? " day ago" : " days ago") : d + " days"; }
+  function upcomingCountdowns(){ return state.countdowns.filter(function (c) { return daysUntil(c.date) >= 0; }).sort(function (a, b) { return a.date.localeCompare(b.date); }); }
+  function renderCountdowns(){
+    var p = el("div", "panel"); p.id = "tl-count";
+    p.appendChild(el("h2", null, "Exams & deadlines"));
+    var r = el("div", "row"); r.style.marginBottom = "8px";
+    var ti = el("input"); ti.type = "text"; ti.maxLength = 100; ti.placeholder = "e.g. Anatomy exam, Essay due"; ti.setAttribute("aria-label", "Name");
+    var dt = el("input"); dt.type = "date"; dt.className = "dateinp"; dt.setAttribute("aria-label", "Date");
+    var kd = el("select"); kd.setAttribute("aria-label", "Type"); Object.keys(CD_KIND).forEach(function (k) { var o = el("option", null, CD_KIND[k].n); o.value = k; kd.appendChild(o); });
+    var ab = el("button", "cta"); ab.appendChild(icon("plus")); ab.appendChild(document.createTextNode("Add"));
+    var add = function () { if (!ti.value.trim() || !dt.value) return; state.countdowns.push({ id:uid(), title:ti.value.trim(), date:dt.value, kind:kd.value }); save(); render(); };
+    ab.onclick = add; ti.onkeydown = function (e) { if (e.key === "Enter") add(); };
+    r.appendChild(ti); r.appendChild(dt); r.appendChild(kd); r.appendChild(ab); p.appendChild(r);
+    var list = state.countdowns.slice().sort(function (a, b) { var da = daysUntil(a.date), db = daysUntil(b.date); if ((da < 0) !== (db < 0)) return da < 0 ? 1 : -1; return da < 0 ? db - da : da - db; });
+    if (!list.length) p.appendChild(el("p", "empty", "Add your exams and deadlines. The next ones also show on your Overview."));
+    var g = el("div", "cdgrid");
+    list.forEach(function (c) {
+      var d = daysUntil(c.date), k = CD_KIND[c.kind] || CD_KIND.event;
+      var card = el("div", "cd" + (d < 0 ? " past" : d <= 7 ? " soon" : "")); card.style.setProperty("--k", k.c);
+      card.appendChild(el("span", "cdk", k.n));
+      card.appendChild(el("div", "cdn", d < 0 ? "Done" : d === 0 ? "Today" : String(d)));
+      if (d > 1) card.appendChild(el("span", "cdu", "days to go"));
+      card.appendChild(el("b", null, c.title));
+      card.appendChild(el("span", "cdd", new Date(c.date + "T12:00").toLocaleDateString(undefined, { weekday:"short", day:"numeric", month:"short", year:"numeric" })));
+      var del = el("button", "iconbtn"), armed = false; del.title = "Remove"; del.appendChild(icon("trash"));
+      del.onclick = function () { if (!armed) { armed = true; del.classList.add("armed"); return; } state.countdowns = state.countdowns.filter(function (x) { return x.id !== c.id; }); save(); render(); };
+      card.appendChild(del);
+      g.appendChild(card);
+    });
+    p.appendChild(g);
+    app.appendChild(p); makeCollapsible("tl-count");
+  }
+  function countdownStrip(){
+    var up = upcomingCountdowns().slice(0, 4); if (!up.length) return null;
+    var s = el("div", "cdstrip");
+    up.forEach(function (c) { var d = daysUntil(c.date), k = CD_KIND[c.kind] || CD_KIND.event;
+      var b = el("button", "cdchip" + (d <= 7 ? " soon" : "")); b.style.setProperty("--k", k.c);
+      b.appendChild(el("b", null, d === 0 ? "Today" : d === 1 ? "1 day" : d + " days")); b.appendChild(el("span", null, c.title));
+      b.title = k.n + " · " + c.date; b.onclick = function () { go("tools"); }; s.appendChild(b); });
+    return s;
+  }
+
   function render(){
     app.innerHTML = "";
     renderNav();
