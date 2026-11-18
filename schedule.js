@@ -139,6 +139,8 @@
       return (hm(a.start) || 0) - (hm(b.start) || 0) || (a.dur || 0) - (b.dur || 0);
     });
   }
+  function isFixed(it) { return !!(it.fixed || it.source === "ics" || it.source === "gcal"); }
+  function fixedOn(k) { return itemsOn(k).filter(isFixed); }
   function isDone(it, k) { return !!(it.done && it.done[k]); }
   function repeatLabel(r) {
     if (!r || r.type === "none") return "";
@@ -523,9 +525,8 @@
     var title = el("div", "sch-title"); title.appendChild(el("b", null, d.toLocaleDateString(undefined, { month: "long" }))); title.appendChild(document.createTextNode(" " + d.getFullYear()));
     top.appendChild(title);
     var tools = el("div", "sch-tools");
-    if (PAGE === "calendar") { if (s.calView !== "week" && s.calView !== "month") s.calView = (s.view === "week" || s.view === "month") ? s.view : "month"; }
-    else if (s.view !== "day" && s.view !== "multi") s.view = "day";
-    var view = PAGE === "calendar" ? s.calView : s.view;
+    PAGE = "schedule";
+    var view = s.view || "day";
     function shift(dir) {
       if (view === "month") { var dd = pk(k); V.day = dkey(new Date(dd.getFullYear(), dd.getMonth() + dir, 1)); }
       else V.day = addDays(k, dir * (view === "multi" ? 3 : view === "day" ? 1 : 7));
@@ -541,9 +542,9 @@
     root.appendChild(top);
 
     var seg = el("div", "sch-views");
-    (PAGE === "calendar" ? [["week","Week"],["month","Month"]] : [["day","Day"],["multi","Multi-Day"]]).forEach(function (o) {
+    [["day","Day"],["multi","Multi-Day"],["week","Week"],["month","Month"]].forEach(function (o) {
       var b = el("button", view === o[0] ? "on" : null, o[1]);
-      b.onclick = function () { if (PAGE === "calendar") s.calView = o[0]; else s.view = o[0]; C.save(); C.rerender(); };
+      b.onclick = function () { s.view = o[0]; C.save(); C.rerender(); };
       seg.appendChild(b);
     });
     root.appendChild(seg);
@@ -553,6 +554,7 @@
       if (V.toast) { var t0 = el("div", "sch-toast", V.toast); var tx0 = el("button", "sch-ib"); tx0.appendChild(svg("x")); tx0.onclick = function () { V.toast = ""; C.rerender(); }; t0.appendChild(tx0); root.appendChild(t0); }
       if (view === "month") root.appendChild(monthView(k, tk));
       else root.appendChild(columnsView(view === "multi" ? [k, addDays(k, 1), addDays(k, 2)] : weekDaysOf(k), tk, view));
+      if (view === "week" || view === "month") root.appendChild(el("p", "meta sch-fixnote", "The calendar shows fixed tasks only, like lectures, appointments and events. Turn on “Fixed task” when adding one. Your full daily plan is in Day and Multi-Day."));
     } else {
 
     // day heading
@@ -633,7 +635,7 @@
 
     // reminders / calendar tools
     var tp = el("div", "panel sch-panel");
-    tp.appendChild(el("h2", null, PAGE === "calendar" ? "Connect your calendars" : "Reminders"));
+    tp.appendChild(el("h2", null, "Calendar & reminders"));
     var r1 = el("div", "setrow");
     var l1 = el("div", "sl"); l1.appendChild(el("b", null, "Reminders"));
     l1.appendChild(el("span", null, typeof Notification === "undefined" ? "This browser can't show notifications, so reminders appear at the top of this page." :
@@ -646,9 +648,8 @@
       if (s.remindersOn && typeof Notification !== "undefined" && Notification.permission === "default") { try { Notification.requestPermission().then(function () { C.rerender(); }); } catch (e) {} }
       C.rerender();
     };
-    r1.appendChild(sw);
-    if (PAGE === "schedule") tp.appendChild(r1);
-    else googleRow(tp);
+    r1.appendChild(sw); tp.appendChild(r1);
+    googleRow(tp);
 
     var r2 = el("div", "setrow");
     var l2 = el("div", "sl"); l2.appendChild(el("b", null, "Import a calendar file"));
@@ -663,7 +664,6 @@
         C.rerender();
       }; rd.readAsText(f);
     };
-    if (PAGE === "calendar") {
     var ib = el("button", "ghost"); ib.appendChild(svg("upload")); ib.appendChild(document.createTextNode("Import .ics")); ib.onclick = function () { fi.click(); };
     r2.appendChild(ib); r2.appendChild(fi); tp.appendChild(r2);
 
@@ -681,7 +681,6 @@
       rb.onclick = function () { if (!armed) { armed = true; rb.textContent = "Press again to remove"; return; } s.items = s.items.filter(function (x) { return x.source !== "ics"; }); C.save(); C.rerender(); };
       r4.appendChild(rb); tp.appendChild(r4);
     }
-    }
     root.appendChild(tp);
 
     // add button
@@ -694,7 +693,7 @@
   }
 
   function weekDaysOf(k) { var m = mondayOf(k), a = []; for (var i = 0; i < 7; i++) a.push(addDays(m, i)); return a; }
-  function openDay(dk) { V.day = dk; V.miniMonth = null; S().view = "day"; C.save(); if (PAGE === "calendar" && C.go) C.go("schedule"); else C.rerender(); }
+  function openDay(dk) { V.day = dk; V.miniMonth = null; S().view = "day"; C.save(); C.rerender(); }
 
   // Multi-Day and Week: one column per day
   function columnsView(days, tk, view) {
@@ -711,8 +710,8 @@
       ad.onclick = function () { openEditor(null, dk, dk === tk ? Math.ceil((nowMin() + 1) / 15) * 15 : 9 * 60); };
       hd.appendChild(ad);
       col.appendChild(hd);
-      var its = itemsOn(dk), list = el("div", "sch-clist"), placedNow = dk !== tk, nm = nowMin();
-      if (!its.length) list.appendChild(el("p", "sch-cempty", "Nothing planned"));
+      var its = view === "week" ? fixedOn(dk) : itemsOn(dk), list = el("div", "sch-clist"), placedNow = dk !== tk, nm = nowMin();
+      if (!its.length) list.appendChild(el("p", "sch-cempty", view === "week" ? "No fixed tasks" : "Nothing planned"));
       its.forEach(function (it) {
         var st = it.start && !it.allDay ? hm(it.start) : null;
         if (!placedNow && st != null && st > nm) { list.appendChild(el("div", "sch-cnow")); placedNow = true; }
@@ -744,7 +743,7 @@
       var dd = pk(dk), inMonth = dd.getMonth() === d.getMonth();
       var c = el("button", "sch-mday" + (inMonth ? "" : " out") + (dk === tk ? " today" : "") + (dk === k ? " sel" : ""));
       c.appendChild(el("span", "mdn", String(dd.getDate())));
-      var its = itemsOn(dk), box = el("span", "mits");
+      var its = fixedOn(dk), box = el("span", "mits");
       its.slice(0, 3).forEach(function (it) {
         var ch = el("span", "mchip" + (isDone(it, dk) ? " done" : "")); ch.style.setProperty("--c", it.color);
         var dot = el("i"); dot.style.background = it.color; dot.appendChild(svg(it.icon)); ch.appendChild(dot);
@@ -777,7 +776,7 @@
     var start = mondayOf(dkey(m0)), days = new Date(m0.getFullYear(), m0.getMonth() + 1, 0).getDate();
     var cells = Math.ceil(((m0.getDay() + 6) % 7 + days) / 7) * 7;
     for (var i = 0; i < cells; i++) (function (dk) {
-      var dd = pk(dk), its = itemsOn(dk);
+      var dd = pk(dk), its = fixedOn(dk);
       var b = el("button", "mini-d" + (dd.getMonth() !== m0.getMonth() ? " out" : "") + (dk === tk ? " today" : "") + (dk === k ? " sel" : ""));
       b.appendChild(el("span", "n", String(dd.getDate())));
       var dots = el("span", "dots"); its.slice(0, 3).forEach(function (it) { var x = el("i"); x.style.background = it.color; dots.appendChild(x); });
@@ -810,6 +809,7 @@
     meta.appendChild(document.createTextNode(fmtT(st) + (it.dur ? " – " + fmtT(en) + " (" + fmtDur(it.dur) + ")" : "")));
     if (it.repeat && it.repeat.type !== "none") meta.appendChild(svg("repeat", "sm"));
     if (it.remind != null && it.remind >= 0) meta.appendChild(svg("bell", "sm"));
+    if (isFixed(it)) { var fb = el("span", "sch-fixtag", "Fixed"); meta.appendChild(fb); }
     body.appendChild(meta);
     body.appendChild(el("div", "sch-name", it.title));
     var subs = it.subtasks || [];
@@ -975,6 +975,16 @@
       });
       c2.appendChild(wd);
     }
+    var rF = el("div", "sch-line2");
+    rF.appendChild(svg("calendar", "acc"));
+    var fx = el("span"); fx.style.flex = "1"; fx.appendChild(document.createTextNode("Fixed task"));
+    fx.appendChild(el("small", "sch-fixhint", dr.source === "gcal" || dr.source === "ics" ? " · from your calendar, always shown" : " · shows on the calendar (lectures, appointments, events)"));
+    rF.appendChild(fx);
+    var fsw = el("button", "switch" + (isFixed(dr) ? " on" : "")); fsw.setAttribute("role", "switch"); fsw.setAttribute("aria-label", "Fixed task");
+    fsw.disabled = dr.source === "gcal" || dr.source === "ics";
+    fsw.onclick = function () { dr.fixed = !dr.fixed; dr.title = ti.value; C.rerender(); };
+    rF.appendChild(fsw);
+    c2.appendChild(rF);
     var rM = el("div", "sch-line2"); rM.appendChild(svg("bell", "acc"));
     var ms = el("select"); ms.setAttribute("aria-label", "Reminder");
     [["-1","No reminder"],["0","At start time"],["5","5 min before"],["10","10 min before"],["15","15 min before"],["30","30 min before"],["60","1 hour before"]].forEach(function (o) { var x = el("option", null, o[1]); x.value = o[0]; ms.appendChild(x); });
