@@ -769,6 +769,11 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
 @media (max-width:899px){.goals.earn{grid-template-columns:1fr}}
 
 .goal .bar{background:var(--card)}
+
+.ipswitch{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap}
+.ipswitch.on{color:var(--accent)}
+.ipswitch .switch{width:40px;height:23px}.ipswitch .switch::after{width:17px;height:17px}.ipswitch .switch.on::after{left:20px}
+
 [hidden]{display:none!important}
 
 /* ===== mobile: sidebar becomes a bottom bar ===== */
@@ -2261,7 +2266,8 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
       var lastKey = cfg.statuses[cfg.statuses.length - 1][0];
       var headKey = sec === "business" ? "live" : sec === "tutoring" ? "done" : lastKey;
       var bn = el("div", "bignum", String(sec === "tutoring" ? counts.done + counts.paid : counts[headKey]));
-      bn.appendChild(el("small", null, "of " + L.length + " · " + (sec === "business" ? "running" : sec === "tutoring" ? "taught" : sec === "isoc" ? "done" : sec === "ambitions" ? "achieved" : "can teach")));
+      if (sec === "business") { bn.firstChild.nodeValue = String(L.filter(function (x) { return x.active; }).length); }
+      bn.appendChild(el("small", null, "of " + L.length + " · " + (sec === "business" ? "in progress" : sec === "tutoring" ? "taught" : sec === "isoc" ? "done" : sec === "ambitions" ? "achieved" : "can teach")));
       top.appendChild(bn); p.appendChild(top);
       var bar = el("div", "stack");
       cfg.statuses.forEach(function (st) { if (!counts[st[0]]) return; var seg = el("i"); seg.style.background = st[2]; seg.style.width = (counts[st[0]] / L.length * 100) + "%"; seg.title = st[1] + ": " + counts[st[0]]; bar.appendChild(seg); });
@@ -2304,7 +2310,12 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
       }
     }
     // list
-    var shown = L.filter(function (x) { return !trkFilter[sec] || trkFilter[sec] === "all" || x.status === trkFilter[sec]; });
+    if (sec === "business" && L.length) {
+      var onlyA = el("label", "chk"); onlyA.style.margin = "8px 0 0"; var oc = el("input"); oc.type = "checkbox"; oc.checked = !!state.bizActiveOnly;
+      oc.onchange = function () { state.bizActiveOnly = oc.checked; save(); render(); };
+      onlyA.appendChild(oc); onlyA.appendChild(document.createTextNode("Show only ideas in progress")); p.appendChild(onlyA);
+    }
+    var shown = L.filter(function (x) { return (!trkFilter[sec] || trkFilter[sec] === "all" || x.status === trkFilter[sec]) && !(sec === "business" && state.bizActiveOnly && !x.active); });
     if (cfg.dated) shown = shown.slice().sort(function (a, b) { return (b.date || "").localeCompare(a.date || "") || b.added - a.added; });
     if (!L.length) p.appendChild(el("p", "empty", "Nothing here yet. Add your first " + cfg.noun + " above."));
     var ul = el("ul", "trklist"), lastArea = null;
@@ -2324,6 +2335,13 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
       var nb = el("button", "linkbtn", x.notes ? "Notes ✓" : "Add notes"); nb.onclick = function () { trkNote = trkNote === x.id ? null : x.id; render(); };
       meta.appendChild(nb); tb.appendChild(meta);
       li.appendChild(tb);
+      if (sec === "business") {
+        var tg = el("label", "ipswitch" + (x.active ? " on" : ""));
+        var sw = el("button", "switch" + (x.active ? " on" : "")); sw.setAttribute("role", "switch"); sw.setAttribute("aria-checked", x.active ? "true" : "false"); sw.setAttribute("aria-label", "In progress");
+        sw.onclick = function () { x.active = !x.active; save(); render(); };
+        tg.appendChild(sw); tg.appendChild(el("span", null, x.active ? "In progress" : "Not in progress"));
+        li.appendChild(tg);
+      }
       var del = el("button", "iconbtn"), armed = false; del.title = "Delete"; del.appendChild(icon("trash"));
       del.onclick = function () { if (!armed) { armed = true; del.classList.add("armed"); del.title = "Press again to delete"; return; }
         state.trk[sec] = L.filter(function (y) { return y.id !== x.id; }); save(); render(); };
@@ -2438,7 +2456,7 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
       var n = 0, lbl = byId[id].name;
       if (TRK[id]) { var L = state.trk[id] || [], cfg = TRK[id], last = cfg.statuses[cfg.statuses.length - 1][0];
         if (cfg.statuses === UNI_STATUS) { n = L.filter(function (x) { return x.status === "teach"; }).length; lbl += " · " + n + "/" + L.length + " can teach"; }
-        else if (id === "business") { n = L.length; lbl += " · " + L.filter(function (x) { return x.status === "live"; }).length + " running"; }
+        else if (id === "business") { n = L.length; lbl += " · " + L.filter(function (x) { return x.active; }).length + " in progress"; }
         else { n = L.filter(function (x) { return x.status === "plan"; }).length; lbl += " · planned"; } }
       else if (id === "finance") { var mk = dkey(new Date()).slice(0, 7); n = state.money.filter(function (x) { return (x.date || "").slice(0, 7) === mk; }).length; lbl += " · entries this month"; }
       grid.appendChild(tile(byId[id], n, lbl));
