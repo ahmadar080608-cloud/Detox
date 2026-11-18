@@ -470,6 +470,32 @@ nav button small + .navfold{margin-left:8px}
 .navfold.closed svg.ic{transform:rotate(-90deg)}
 @media (max-width:899px){.navfold{display:none}}
 
+
+/* lesson PDFs */
+.dropzone{width:100%;border:2px dashed var(--line);background:var(--bg);border-radius:18px;padding:26px 16px;margin-top:14px;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--muted);text-align:center}
+.dropzone svg.ic{width:34px;height:34px;color:var(--accent)}
+.dropzone b{color:var(--ink);font-size:15px}
+.dropzone span{font-size:13px}
+.dropzone:hover{border-color:var(--accent)}
+li.frow{align-items:center;gap:12px}
+.fic{width:40px;height:46px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:inline-flex;align-items:center;justify-content:center;flex:none}
+.fic svg.ic{width:22px;height:22px}
+.ftx{flex:1;min-width:180px;display:flex;flex-direction:column;gap:4px}
+.panel input.ftitle{border:0;background:transparent;border-radius:6px;padding:2px 4px;margin-left:-4px;font-weight:700;font-size:15px;min-width:0}
+.panel input.ftitle:focus{background:var(--bg);outline:1px solid var(--line)}
+.fmeta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.fmeta input[type=date]{border:0;background:none;color:var(--muted);font:inherit;padding:0}
+.linkbtn{border:0;background:none;color:var(--accent);font-weight:700;font-size:12px;padding:0}
+.iconbtn.armed{color:#d93c3c;background:#fbe0dc}
+.panel p.toast{margin:8px 0 0}
+.pdfov{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.75);display:flex;flex-direction:column;padding:16px;gap:10px}
+.pdfbar{display:flex;justify-content:space-between;align-items:center;gap:10px;color:#fff;flex-wrap:wrap}
+.pdfbar b{font-size:16px}
+.pdfbar .ghost{color:#fff;border-color:rgba(255,255,255,.35);text-decoration:none;padding:9px 16px}
+.pdfframe{flex:1;width:100%;border:0;border-radius:14px;background:#fff}
+.floatmsg{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:var(--hdr);color:#fff;padding:12px 18px;border-radius:14px;z-index:70;max-width:90vw;font-weight:600}
+@media (max-width:899px){.pdfov{padding:8px}.floatmsg{bottom:90px}}
+
 [hidden]{display:none!important}
 
 /* ===== mobile: sidebar becomes a bottom bar ===== */
@@ -516,6 +542,16 @@ nav button small + .navfold{margin-left:8px}
     schedule:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/><path d="M12 13v3l2 1.5"/>',
     todo:'<path d="M10 6h10M10 12h10M10 18h10"/><path d="M3.5 6l1.5 1.5L7.5 5M3.5 12l1.5 1.5 2.5-2.5"/><circle cx="5.5" cy="18" r="1.5"/>',
     amau:'<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M10 8.5v5l4-2.5z"/><path d="M8 21h8M12 17v4"/>',
+    aqeedah:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+    fiqh:'<path d="M12 3v18M7 21h10M4 7h16"/><path d="M4 7l-2.5 6a3 3 0 0 0 5 0zM20 7l-2.5 6a3 3 0 0 0 5 0z"/>',
+    tazkiyah:'<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/><path d="M12 10.5v3M10.5 12h3"/>',
+    tafsir:'<path d="M2 5.5C4.5 4 7.5 4 12 6c4.5-2 7.5-2 10-.5V11"/><path d="M2 5.5V19c2.5-1.5 5.5-1.5 10 .5"/><path d="M12 6v7"/><circle cx="17.5" cy="16.5" r="3"/><path d="M19.7 18.7L22 21"/>',
+    seerah:'<circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h7.5a3.5 3.5 0 0 0 0-7h-7a3.5 3.5 0 0 1 0-7H16"/>',
+    logic:'<path d="M8 3H7a2 2 0 0 0-2 2v4l-2 3 2 3v4a2 2 0 0 0 2 2h1M16 3h1a2 2 0 0 1 2 2v4l2 3-2 3v4a2 2 0 0 1-2 2h-1"/><path d="M9.5 12h5"/>',
+    pdf:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/>',
+    upload:'<path d="M12 15V3M7 8l5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/>',
+    download:'<path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/>',
+    open:'<path d="M14 3h7v7"/><path d="M10 14L21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/>',
     teacher:'<circle cx="8" cy="7" r="3"/><path d="M3 20v-2a5 5 0 0 1 10 0v2"/><path d="M13 4h8v9h-6"/><path d="M15 8h4"/>',
     calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
     trash:'<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/>',
@@ -532,8 +568,14 @@ nav button small + .navfold{margin-left:8px}
     { id:"todo",       name:"To-do",           icon:"todo",       group:null,      sub:"Everything else, by importance", bg:"مهام", color:"--c2" },
     { id:"islamic",    name:"Islamic",         icon:"islamic",    group:null,      ar:"العُلُومُ الشَّرْعِيَّةُ", sub:"Deen & study", bg:"دين", color:"--c1" },
     { id:"quran",      name:"Qur'an",          icon:"quran",      group:"islamic", parent:"islamic", ar:"القُرْآنُ الكَرِيمُ", sub:"Hifz, revision & reading", bg:"قرآن", color:"--c1" },
-    { id:"hadith",     name:"Hadith",          icon:"hadith",     group:"islamic", parent:"islamic", ar:"الحَدِيثُ", sub:"Memorise & understand", bg:"حديث", color:"--c5" },
-    { id:"studies",    name:"Islamic Studies", icon:"studies",    group:"islamic", parent:"islamic", ar:"الدِّرَاسَاتُ الإِسْلَامِيَّةُ", sub:"Fiqh, ʿaqīdah & mutoon", bg:"علم", color:"--c3" },
+    { id:"aqeedah",    name:"Aqeedah",          icon:"aqeedah",    group:"islamic", parent:"islamic", ar:"العَقِيدَةُ", sub:"Creed & belief", bg:"عقيدة", color:"--c1" },
+    { id:"fiqh",       name:"Fiqh",             icon:"fiqh",       group:"islamic", parent:"islamic", ar:"الفِقْهُ", sub:"Rulings & worship", bg:"فقه", color:"--c3" },
+    { id:"tazkiyah",   name:"Tazkiyatun Nafs",  icon:"tazkiyah",   group:"islamic", parent:"islamic", ar:"تَزْكِيَةُ النَّفْسِ", sub:"Purifying the soul", bg:"تزكية", color:"--c5" },
+    { id:"tafsir",     name:"Tafsir",           icon:"tafsir",     group:"islamic", parent:"islamic", ar:"التَّفْسِيرُ", sub:"Understanding the Qur'an", bg:"تفسير", color:"--c6" },
+    { id:"hadith",     name:"Hadith",           icon:"hadith",     group:"islamic", parent:"islamic", ar:"الحَدِيثُ", sub:"Memorise & understand", bg:"حديث", color:"--c5" },
+    { id:"seerah",     name:"Seerah",           icon:"seerah",     group:"islamic", parent:"islamic", ar:"السِّيرَةُ النَّبَوِيَّةُ", sub:"Life of the Prophet ﷺ", bg:"سيرة", color:"--c4" },
+    { id:"logic",      name:"Language & Logic", icon:"logic",      group:"islamic", parent:"islamic", ar:"اللُّغَةُ وَالمَنْطِقُ", sub:"Naḥw, ṣarf, balāghah & manṭiq", bg:"منطق", color:"--c3" },
+    { id:"studies",    name:"Islamic Studies",  icon:"studies",    group:"islamic", parent:"islamic", ar:"الدِّرَاسَاتُ الإِسْلَامِيَّةُ", sub:"Earlier general tasks", bg:"علم", color:"--c3", hidden:true },
     { id:"arabic",     name:"Arabic",          icon:"arabic",     group:"islamic", parent:"islamic", ar:"اللُّغَةُ العَرَبِيَّةُ", sub:"Vocabulary & grammar", bg:"عربي", color:"--c4" },
     { id:"university", name:"University",      icon:"university", group:null,      sub:"Dental school", bg:"جامعة", color:"--c2" },
     { id:"work",       name:"Work",            icon:"work",       group:null,      sub:"Jobs & projects", bg:"عمل", color:"--c6" },
@@ -542,9 +584,10 @@ nav button small + .navfold{margin-left:8px}
   ];
 
   var byId = {}; PAGES.forEach(function (p) { byId[p.id] = p; });
-  var ISLAMIC_SUBS = ["quran","hadith","studies","arabic"];
+  var SCIENCES = ["aqeedah","fiqh","tazkiyah","tafsir","hadith","seerah","logic"];
+  var ISLAMIC_SUBS = ["quran"].concat(SCIENCES, ["arabic"]);
   var STUDY_SUBS = [];
-  var TASK_SECTIONS = ["quran","hadith","studies"].concat(STUDY_SUBS, ["arabic","university","work"]);
+  var TASK_SECTIONS = ["quran"].concat(SCIENCES, ["studies"], STUDY_SUBS, ["arabic","university","work"]);
   function isUnder(id, anc){ var p = byId[id]; while (p) { if (p.id === anc) return true; p = p.parent ? byId[p.parent] : null; } return false; }
   var THEMES = [
     { id:"auto",    name:"Auto",    note:"Follows your device", sw:["#f4f1ec","#131816","#e0603f","#1f4f4a"] },
@@ -763,6 +806,7 @@ nav button small + .navfold{margin-left:8px}
     if (sec === "arabic") renderArabicGoals();
     if (sec === "quran") renderQuranTrackers();
     if (sec === "hadith") renderHadithTrackers();
+    if (SCIENCES.indexOf(sec) >= 0) { if (sec !== "hadith") renderSciGoals(sec); renderPdfs(sec); }
 
     var p = el("div", "panel");
     var head = el("div", "panel-h"); head.appendChild(el("h2", null, "Tasks"));
@@ -1616,6 +1660,142 @@ nav button small + .navfold{margin-left:8px}
     app.appendChild(writtenGoals("ar-goals", "Goals", state.arGoals, { week:"e.g. Learn 20 new words", month:"e.g. Finish the past-tense chapter", year:"e.g. Read a children's book without a dictionary" }));
     makeCollapsible("ar-goals");
   }
+
+
+  // ---------- Islamic sciences: goals you write + lesson PDFs ----------
+  state.sciGoals = state.sciGoals || {};
+  state.sciFiles = state.sciFiles || {};
+  var SCI_HINTS = {
+    aqeedah:{ week:"e.g. Revise the six pillars of īmān", month:"e.g. Finish al-Uṣūl ath-Thalāthah", year:"e.g. Complete Kitāb at-Tawḥīd" },
+    fiqh:{ week:"e.g. Notes on the chapter of wuḍūʾ", month:"e.g. Finish the book of ṣalāh", year:"e.g. Complete a primer in my madhhab" },
+    tazkiyah:{ week:"e.g. Night prayer twice this week", month:"e.g. Read a chapter on sincerity", year:"e.g. Finish a book on the diseases of the heart" },
+    tafsir:{ week:"e.g. Tafsīr of Sūrat al-Mulk 1–10", month:"e.g. Complete Juz ʿAmma tafsīr", year:"e.g. Tafsīr of the last three juz" },
+    hadith:{ week:"e.g. Explanation of hadith 6", month:"e.g. Read the sharḥ of 10 hadith", year:"e.g. Finish a sharḥ of the Arbaʿīn" },
+    seerah:{ week:"e.g. The Makkan period, part 1", month:"e.g. Finish the Battle of Badr", year:"e.g. Complete ar-Raḥīq al-Makhtūm" },
+    logic:{ week:"e.g. Learn the signs of the ism", month:"e.g. Finish al-Ājurrūmiyyah", year:"e.g. Start an intro to manṭiq" }
+  };
+  function renderSciGoals(sec){
+    var store = state.sciGoals[sec] = state.sciGoals[sec] || {};
+    app.appendChild(writtenGoals("g-" + sec, "Goals", store, SCI_HINTS[sec] || { week:"Add a goal", month:"Add a goal", year:"Add a goal" }));
+    makeCollapsible("g-" + sec);
+  }
+
+  // files live in the browser's IndexedDB; the list of lessons lives with the rest of your data
+  var FDB = null;
+  function fdb(){
+    if (FDB) return FDB;
+    FDB = new Promise(function (res, rej) {
+      if (!window.indexedDB) return rej(new Error("This browser can't store files."));
+      var rq = indexedDB.open("detoxFiles", 1);
+      rq.onupgradeneeded = function () { rq.result.createObjectStore("files", { keyPath:"id" }); };
+      rq.onsuccess = function () { res(rq.result); };
+      rq.onerror = function () { rej(rq.error || new Error("Couldn't open file storage.")); };
+    });
+    return FDB;
+  }
+  function fPut(rec){ return fdb().then(function (db) { return new Promise(function (res, rej) { var tx = db.transaction("files", "readwrite"); tx.objectStore("files").put(rec); tx.oncomplete = function () { res(); }; tx.onerror = function () { rej(tx.error); }; tx.onabort = function () { rej(tx.error || new Error("Storage is full.")); }; }); }); }
+  function fGet(id){ return fdb().then(function (db) { return new Promise(function (res, rej) { var rq = db.transaction("files").objectStore("files").get(id); rq.onsuccess = function () { res(rq.result); }; rq.onerror = function () { rej(rq.error); }; }); }); }
+  function fDel(id){ return fdb().then(function (db) { return new Promise(function (res) { var tx = db.transaction("files", "readwrite"); tx.objectStore("files").delete(id); tx.oncomplete = function () { res(); }; tx.onerror = function () { res(); }; }); }); }
+  function fmtSize(b){ return b > 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(b / 1024)) + " KB"; }
+  var pdfMsg = {}, openPdfNote = null, viewer = null;
+
+  function renderPdfs(sec){
+    var L = state.sciFiles[sec] = state.sciFiles[sec] || [], tk = dkey(new Date());
+    var p = el("div", "panel"); p.id = "f-" + sec;
+    p.appendChild(el("h2", null, "Lessons & PDFs"));
+    var top = el("div", "row"); top.style.justifyContent = "space-between";
+    var big = el("div", "bignum", String(L.length)); big.appendChild(el("small", null, L.length === 1 ? "lesson saved" : "lessons saved")); top.appendChild(big);
+    var fi = el("input"); fi.type = "file"; fi.accept = "application/pdf,.pdf"; fi.multiple = true; fi.style.display = "none";
+    var ub = el("button", "cta"); ub.appendChild(icon("upload")); ub.appendChild(document.createTextNode("Upload PDFs"));
+    ub.onclick = function () { fi.click(); };
+    fi.onchange = function () {
+      var files = Array.prototype.slice.call(fi.files || []); if (!files.length) return;
+      try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+      pdfMsg[sec] = "Saving " + files.length + (files.length === 1 ? " file…" : " files…"); render();
+      var done = 0, failed = [];
+      files.reduce(function (chain, f) {
+        return chain.then(function () {
+          if (!/\.pdf$/i.test(f.name) && f.type !== "application/pdf") { failed.push(f.name + " (not a PDF)"); return; }
+          var id = uid();
+          return fPut({ id:id, sec:sec, name:f.name, type:"application/pdf", blob:f }).then(function () {
+            L.unshift({ id:id, title:f.name.replace(/\.pdf$/i, "").replace(/[_-]+/g, " ").trim(), name:f.name, size:f.size, date:tk, added:Date.now(), notes:"" });
+            done++; save();
+          }).catch(function (e) { failed.push(f.name + (e && /quota|full/i.test(String(e.name || e.message)) ? " (storage full)" : "")); });
+        });
+      }, Promise.resolve()).then(function () {
+        pdfMsg[sec] = (done ? "Saved " + done + (done === 1 ? " PDF." : " PDFs.") : "") + (failed.length ? " Couldn't save: " + failed.join(", ") + "." : "");
+        render();
+      });
+    };
+    var tr = el("div", "row"); tr.appendChild(ub); tr.appendChild(fi); top.appendChild(tr);
+    p.appendChild(top);
+    if (pdfMsg[sec]) p.appendChild(el("p", "toast", pdfMsg[sec]));
+    if (!L.length) {
+      var em = el("button", "dropzone");
+      em.appendChild(icon("pdf")); em.appendChild(el("b", null, "Upload the PDFs from your " + byId[sec].name + " lessons"));
+      em.appendChild(el("span", null, "They're saved on this device in this browser, and you can open them here any time."));
+      em.onclick = function () { fi.click(); };
+      p.appendChild(em);
+    }
+    var ul = el("ul");
+    L.slice().sort(function (a, b) { return (b.date || "").localeCompare(a.date || "") || b.added - a.added; }).forEach(function (x) {
+      var li = el("li", "frow");
+      var ic = el("span", "fic"); ic.appendChild(icon("pdf")); li.appendChild(ic);
+      var tb = el("div", "ftx");
+      var ti = el("input"); ti.type = "text"; ti.className = "ftitle"; ti.value = x.title; ti.maxLength = 140; ti.setAttribute("aria-label", "Lesson title");
+      ti.onchange = function () { x.title = ti.value.trim() || x.name; save(); };
+      tb.appendChild(ti);
+      var meta = el("div", "fmeta");
+      var dt = el("input"); dt.type = "date"; dt.value = x.date || tk; dt.setAttribute("aria-label", "Lesson date");
+      dt.onchange = function () { x.date = dt.value || x.date; save(); render(); };
+      meta.appendChild(dt); meta.appendChild(el("span", null, fmtSize(x.size || 0)));
+      var nb = el("button", "linkbtn", x.notes ? "Notes ✓" : "Add notes"); nb.onclick = function () { openPdfNote = openPdfNote === x.id ? null : x.id; render(); };
+      meta.appendChild(nb);
+      tb.appendChild(meta);
+      li.appendChild(tb);
+      var ob = el("button", "newbtn"); ob.appendChild(icon("open")); ob.appendChild(document.createTextNode("Open"));
+      ob.onclick = function () { openPdf(x); };
+      var db0 = el("button", "iconbtn"); db0.title = "Download"; db0.appendChild(icon("download"));
+      db0.onclick = function () { fGet(x.id).then(function (r) { if (!r) throw 0; var a = document.createElement("a"); a.href = URL.createObjectURL(r.blob); a.download = x.name || (x.title + ".pdf"); document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 2000); })
+        .catch(function () { pdfMsg[sec] = "That file isn't on this device any more."; render(); }); };
+      var del = el("button", "iconbtn"), armed = false; del.title = "Delete"; del.appendChild(icon("trash"));
+      del.onclick = function () { if (!armed) { armed = true; del.classList.add("armed"); del.title = "Press again to delete"; pdfMsg[sec] = "Press the bin again to delete “" + x.title + "”."; var m = p.querySelector(".toast"); if (m) m.textContent = pdfMsg[sec]; else { var t = el("p", "toast", pdfMsg[sec]); top.after(t); } return; }
+        fDel(x.id); state.sciFiles[sec] = L.filter(function (y) { return y.id !== x.id; }); pdfMsg[sec] = "Deleted “" + x.title + "”."; save(); render(); };
+      li.appendChild(ob); li.appendChild(db0); li.appendChild(del);
+      if (openPdfNote === x.id) {
+        var nt = el("textarea"); nt.placeholder = "Key points, benefits, questions…"; nt.value = x.notes || "";
+        nt.onchange = function () { x.notes = nt.value; save(); };
+        var w = el("div"); w.style.flexBasis = "100%"; w.appendChild(nt); li.appendChild(w);
+      }
+      ul.appendChild(li);
+    });
+    p.appendChild(ul);
+    if (L.length) p.appendChild(el("p", "meta", "PDFs are kept in this browser on this device only. Keep your originals too: clearing browsing data removes them."));
+    app.appendChild(p);
+    makeCollapsible("f-" + sec);
+  }
+
+  function openPdf(x){
+    fGet(x.id).then(function (r) {
+      if (!r) throw 0;
+      var url = URL.createObjectURL(r.blob);
+      if (viewer) viewer.remove();
+      var ov = el("div", "pdfov"); viewer = ov;
+      var bar = el("div", "pdfbar");
+      bar.appendChild(el("b", null, x.title));
+      var nw = el("a", "ghost", "Open in new tab"); nw.href = url; nw.target = "_blank"; nw.rel = "noopener";
+      var cl = el("button", "cta", "Close");
+      var close = function () { ov.remove(); viewer = null; setTimeout(function () { URL.revokeObjectURL(url); }, 60000); document.removeEventListener("keydown", esc); };
+      var esc = function (e) { if (e.key === "Escape") close(); };
+      cl.onclick = close; document.addEventListener("keydown", esc);
+      var rt = el("div", "row"); rt.appendChild(nw); rt.appendChild(cl); bar.appendChild(rt);
+      ov.appendChild(bar);
+      var fr = el("iframe", "pdfframe"); fr.src = url; fr.title = x.title;
+      ov.appendChild(fr);
+      document.body.appendChild(ov);
+    }).catch(function () { alertMsg("That file isn't on this device any more. It may have been uploaded on another device or browser."); });
+  }
+  function alertMsg(m){ var t = el("div", "floatmsg", m); document.body.appendChild(t); setTimeout(function () { t.remove(); }, 4500); }
 
   function render(){
     app.innerHTML = "";
