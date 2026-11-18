@@ -668,7 +668,7 @@ li.mrow2{gap:12px}
 /* merged Arabic website */
 #arWrap{margin-left:250px;padding:0 56px 60px;max-width:1140px}
 body.ar-on main{padding-bottom:12px}
-.arbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.arbar{display:flex;justify-content:flex-end;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
 .arbar b{font-family:Amiri,Inter,serif;font-size:18px}
 .arbar .ghost{text-decoration:none;padding:9px 16px}
 #arFrame{width:100%;height:calc(100vh - 90px);min-height:620px;border:0;border-radius:var(--r);background:#fff;box-shadow:0 2px 14px rgba(0,0,0,.12)}
@@ -705,7 +705,7 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
 </header>
 <main id="app"></main>
 <section id="arWrap" hidden>
-  <div class="arbar"><b>رِحْلَتِي مَعَ العَرَبِيَّةِ · My Arabic Journey</b>
+  <div class="arbar">
     <span class="row"><a class="ghost" id="arNewTab" target="_blank" rel="noopener">Open in new tab</a><button class="cta" id="arFullBtn">Full screen</button></span></div>
   <div id="arFrameHost"></div>
 </section>
