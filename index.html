@@ -747,6 +747,23 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
 .cdchip span{font-size:14px;font-weight:600}
 @media (max-width:899px){.prgrid{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}.prc{padding:10px 2px}.prc .prar{font-size:16px}.prc .prs{display:none}.fsec{grid-template-columns:110px 1fr 56px}.fs3 b{font-size:20px}}
 
+
+/* advice & notes */
+.nadd{background:var(--bg);border-radius:16px;padding:12px;margin-bottom:12px}
+.nadd textarea{background:var(--card);min-height:70px;margin-bottom:8px}
+.nadd .row input[type=text]{background:var(--card)}
+.nlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.ncard{background:var(--bg);border-radius:16px;padding:14px 14px 8px;display:flex;flex-direction:column;border:1.5px solid transparent}
+.ncard.pin{border-color:var(--accent)}
+.ncard.adv{border-left:4px solid var(--accent)}
+.ncard .ntext{margin:0 0 8px;white-space:pre-wrap;line-height:1.55;font-size:15px;flex:1}
+.ncard.adv .ntext{font-style:italic}
+.ncard textarea{background:var(--card);min-height:90px}
+.ncard input[type=text]{background:var(--card)}
+.nmeta{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.nmeta .nfrom{font-weight:700;color:var(--ink)}
+.nmeta .iconbtn{padding:4px}
+
 [hidden]{display:none!important}
 
 /* ===== mobile: sidebar becomes a bottom bar ===== */
@@ -1176,6 +1193,8 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
     if (sec === "quran") renderQuranTrackers();
     if (sec === "hadith") renderHadithTrackers();
     if (SCIENCES.indexOf(sec) >= 0) { if (sec !== "hadith") renderSciGoals(sec); renderPdfs(sec); }
+
+    renderNotes(sec);
 
     var p = el("div", "panel");
     var head = el("div", "panel-h"); head.appendChild(el("h2", null, "Tasks"));
@@ -2585,6 +2604,73 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
       b.appendChild(el("b", null, d === 0 ? "Today" : d === 1 ? "1 day" : d + " days")); b.appendChild(el("span", null, c.title));
       b.title = k.n + " · " + c.date; b.onclick = function () { go("tools"); }; s.appendChild(b); });
     return s;
+  }
+
+
+  // ---------- Advice & notes (every section page) ----------
+  state.notes = state.notes || {};
+  var notesTab = {}, noteEdit = null;
+  function renderNotes(sec){
+    var N = state.notes[sec] = state.notes[sec] || { advice:[], notes:[] };
+    var tab = notesTab[sec] || "advice", tk = dkey(new Date());
+    var p = el("div", "panel"); p.id = "n-" + sec;
+    p.appendChild(el("h2", null, "Advice & notes"));
+    var seg = el("div", "subtabs"); seg.style.margin = "0 0 14px";
+    [["advice", "Advice", N.advice.length], ["notes", "Notes", N.notes.length]].forEach(function (o) {
+      var b = el("button", tab === o[0] ? "on" : null, o[1] + (o[2] ? " · " + o[2] : ""));
+      b.onclick = function () { notesTab[sec] = o[0]; noteEdit = null; render(); }; seg.appendChild(b);
+    });
+    p.appendChild(seg);
+    var L = tab === "advice" ? N.advice : N.notes;
+
+    // add
+    var box = el("div", "nadd");
+    var ta = el("textarea"); ta.maxLength = 3000; ta.setAttribute("aria-label", tab === "advice" ? "New advice" : "New note");
+    ta.placeholder = tab === "advice" ? "Advice you were given, e.g. “Revise each lecture within 24 hours.”" : "Anything on your mind: ideas, reminders, questions to ask…";
+    box.appendChild(ta);
+    var r = el("div", "row");
+    var from = null;
+    if (tab === "advice") { from = el("input"); from.type = "text"; from.maxLength = 80; from.placeholder = "From whom? (optional)"; from.setAttribute("aria-label", "From whom"); r.appendChild(from); }
+    var ab = el("button", "cta"); ab.appendChild(icon("plus")); ab.appendChild(document.createTextNode(tab === "advice" ? "Save advice" : "Save note"));
+    var add = function () { var t = ta.value.trim(); if (!t) return;
+      L.unshift({ id:uid(), text:t, from:from ? from.value.trim() : "", date:tk, pinned:false }); save(); render(); };
+    ab.onclick = add; ta.onkeydown = function (e) { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) add(); };
+    r.appendChild(ab); box.appendChild(r); p.appendChild(box);
+
+    if (!L.length) p.appendChild(el("p", "empty", tab === "advice" ? "No advice saved yet." : "No notes yet."));
+    var list = el("div", "nlist");
+    L.slice().sort(function (a, b) { return (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0); }).forEach(function (x) {
+      var c = el("div", "ncard" + (tab === "advice" ? " adv" : "") + (x.pinned ? " pin" : ""));
+      if (noteEdit === x.id) {
+        var et = el("textarea"); et.value = x.text; c.appendChild(et);
+        var ef = null; if (tab === "advice") { ef = el("input"); ef.type = "text"; ef.value = x.from || ""; ef.placeholder = "From whom?"; ef.style.marginTop = "6px"; c.appendChild(ef); }
+        var er = el("div", "row"); er.style.marginTop = "8px";
+        var sv = el("button", "cta", "Save"); sv.onclick = function () { x.text = et.value.trim() || x.text; if (ef) x.from = ef.value.trim(); noteEdit = null; save(); render(); };
+        var cn = el("button", "ghost", "Cancel"); cn.onclick = function () { noteEdit = null; render(); };
+        er.appendChild(sv); er.appendChild(cn); c.appendChild(er);
+        setTimeout(function () { et.focus(); }, 20);
+      } else {
+        c.appendChild(el("p", "ntext", x.text));
+        var m = el("div", "nmeta");
+        if (x.from) m.appendChild(el("span", "nfrom", "— " + x.from));
+        m.appendChild(el("span", null, new Date(x.date + "T12:00").toLocaleDateString(undefined, { day:"numeric", month:"short", year:"numeric" })));
+        var sp = el("span"); sp.style.flex = "1"; m.appendChild(sp);
+        var pb = el("button", "iconbtn" + (x.pinned ? " starred" : "")); pb.title = x.pinned ? "Unpin" : "Pin to top"; pb.appendChild(icon("star"));
+        if (x.pinned) pb.querySelector("svg").style.fill = "currentColor";
+        pb.onclick = function () { x.pinned = !x.pinned; save(); render(); };
+        var ed = el("button", "linkbtn", "Edit"); ed.onclick = function () { noteEdit = x.id; render(); };
+        var del = el("button", "iconbtn"), armed = false; del.title = "Delete"; del.appendChild(icon("trash"));
+        del.onclick = function () { if (!armed) { armed = true; del.classList.add("armed"); del.title = "Press again to delete"; return; }
+          if (tab === "advice") N.advice = N.advice.filter(function (y) { return y.id !== x.id; }); else N.notes = N.notes.filter(function (y) { return y.id !== x.id; });
+          save(); render(); };
+        m.appendChild(ed); m.appendChild(pb); m.appendChild(del);
+        c.appendChild(m);
+      }
+      list.appendChild(c);
+    });
+    p.appendChild(list);
+    app.appendChild(p);
+    makeCollapsible("n-" + sec);
   }
 
   function render(){
