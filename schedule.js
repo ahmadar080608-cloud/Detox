@@ -571,6 +571,7 @@
         document.querySelectorAll(".sch-icb").forEach(function (b) { var on = b.dataset.icon === g; b.classList.toggle("on", on); b.style.background = on ? dr.color : ""; });
       }
     };
+    ti.onkeyup = ti.onchange = function () { ti.oninput(); };
     ti.onkeydown = function (e) { if (e.key === "Enter") saveEdit(); };
     hm0.appendChild(ti);
     hd.appendChild(hm0);
@@ -726,6 +727,7 @@
     var E = V.edit, dr = E.draft, s = S();
     var t = document.querySelector(".sch-htitle"); if (t) dr.title = t.value;
     dr.title = (dr.title || "").trim() || "Untitled";
+    if (!E.iconPicked) { var g = guessIcon(dr.title); if (g) dr.icon = g; }
     if (dr.allDay) { dr.start = null; dr.dur = 0; }
     if (E.isNew) { dr.id = uid(); s.items.push(dr); }
     else { var i = s.items.findIndex(function (x) { return x.id === dr.id; }); if (i >= 0) s.items[i] = dr; }
