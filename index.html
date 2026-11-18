@@ -503,6 +503,29 @@ nav button.child2 svg.ic{width:15px;height:15px}
 @media (max-width:899px){nav button.child2{display:none}}
 .subtabs.sub2{margin-top:-12px}
 
+
+/* Sūrat an-Najm card */
+.ayahcard{background:var(--hdr);color:#fff;border-radius:var(--r);padding:28px 30px 24px;margin-bottom:22px;text-align:center}
+.ayar{font-family:Amiri,serif;direction:rtl;font-size:30px;line-height:2;color:#fff}
+.ayar .ayn{font-size:22px;color:var(--accent);margin:0 2px}
+.ayen{font-size:15px;line-height:1.6;opacity:.85;margin:10px auto 0;max-width:720px}
+.ayref{font-weight:800;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--accent);margin-top:12px}
+:root[data-theme=ink] .ayref,:root[data-theme=ink] .ayar .ayn{color:#bbb}
+@media (max-width:899px){.ayahcard{padding:22px 18px}.ayar{font-size:23px}}
+
+/* renew-your-intention pop-up */
+.niyyah-ov{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:20px;animation:nfade .18s ease}
+.niyyah-ov.out{opacity:0;transition:opacity .18s}
+.niyyah{background:var(--hdr);color:#fff;border-radius:24px;max-width:440px;width:100%;padding:30px 28px 26px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:npop .22s ease}
+.niyyah .nk{font-weight:800;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--accent)}
+.niyyah .nt{font-family:Lalezar,Inter,sans-serif;font-size:34px;line-height:1.1;margin:8px 0 14px}
+.niyyah .nar{font-family:Amiri,serif;direction:rtl;font-size:32px;line-height:1.7}
+.niyyah .nen{font-size:14px;opacity:.85;margin-top:4px}
+.niyyah .nsub{font-size:13px;opacity:.65;margin:14px 0 18px;line-height:1.5}
+.niyyah .cta{padding:12px 34px;font-size:16px}
+@keyframes nfade{from{opacity:0}to{opacity:1}}
+@keyframes npop{from{transform:translateY(8px) scale(.98);opacity:0}to{transform:none;opacity:1}}
+
 [hidden]{display:none!important}
 
 /* ===== mobile: sidebar becomes a bottom bar ===== */
@@ -692,7 +715,25 @@ nav button.child2 svg.ic{width:15px;height:15px}
     if (t) side.appendChild(el("div", "sec", byId[t.section].name));
   }
   document.getElementById("brand").onclick = function () { go("home"); };
-  function go(id){ state.tab = id; addingIn = null; save(); render(); window.scrollTo(0,0); }
+  function go(id){ var was = state.tab; state.tab = id; addingIn = null; save(); render(); window.scrollTo(0,0);
+    if (id !== was && byId[id] && byId[id].group === "islamic" && state.intentionOn !== false) intentionPopup(); }
+  function intentionPopup(){
+    var old = document.querySelector(".niyyah-ov"); if (old) old.remove();
+    var ov = el("div", "niyyah-ov"), box = el("div", "niyyah grain");
+    box.appendChild(el("div", "nk", "Before you begin"));
+    box.appendChild(el("div", "nt", "Renew your intention"));
+    box.appendChild(el("div", "nar", "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ"));
+    box.appendChild(el("div", "nen", "“Actions are only by intentions.” (al-Bukhārī & Muslim)"));
+    box.appendChild(el("p", "nsub", "Do this for the sake of Allah alone: to learn, to act upon it, and to benefit others."));
+    var go0 = el("button", "cta", "Bismillāh");
+    var close = function () { ov.classList.add("out"); setTimeout(function () { ov.remove(); }, 180); document.removeEventListener("keydown", esc); };
+    var esc = function (e) { if (e.key === "Escape" || e.key === "Enter") close(); };
+    go0.onclick = close; ov.onclick = function (e) { if (e.target === ov) close(); };
+    document.addEventListener("keydown", esc);
+    box.appendChild(go0);
+    ov.appendChild(box); document.body.appendChild(ov);
+    setTimeout(function () { go0.focus(); }, 30);
+  }
 
   // ---------- shared bits ----------
   function pageHead(p, stat){
@@ -771,7 +812,24 @@ nav button.child2 svg.ic{width:15px;height:15px}
   }
 
   // ---------- pages ----------
+  var NAJM = [
+    ["وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ", "And that there is not for man except that [good] for which he strives", 39],
+    ["وَأَنَّ سَعْيَهُ سَوْفَ يُرَىٰ", "And that his effort is going to be seen –", 40],
+    ["ثُمَّ يُجْزَاهُ الْجَزَاءَ الْأَوْفَىٰ", "Then he will be recompensed for it with the fullest recompense –", 41],
+    ["وَأَنَّ إِلَىٰ رَبِّكَ الْمُنتَهَىٰ", "And that to your Lord is the finality.", 42]
+  ];
+  function ayahCard(){
+    var c = el("div", "ayahcard grain");
+    var ar = el("div", "ayar");
+    NAJM.forEach(function (x) { ar.appendChild(document.createTextNode(x[0] + " ")); ar.appendChild(el("span", "ayn", "﴿" + String(x[2]).replace(/\d/g, function (d) { return "٠١٢٣٤٥٦٧٨٩"[d]; }) + "﴾")); ar.appendChild(document.createTextNode(" ")); });
+    c.appendChild(ar);
+    var en = el("div", "ayen"); en.textContent = NAJM.map(function (x) { return x[1]; }).join(" ");
+    c.appendChild(en);
+    c.appendChild(el("div", "ayref", "Sūrat an-Najm 53:39–42 · Saheeh International"));
+    return c;
+  }
   function renderHome(){
+    app.appendChild(ayahCard());
     var t = oneThing();
     var c = el("div", "onecard grain");
     var lbl = el("div", "lbl"); lbl.appendChild(icon("target")); lbl.appendChild(document.createTextNode("Today's one thing")); c.appendChild(lbl);
@@ -1303,14 +1361,14 @@ nav button.child2 svg.ic{width:15px;height:15px}
     [["Not started","var(--bg)"],["Learning","var(--accent-soft)"],["Memorised","var(--accent)"]].forEach(function (x) { var sp = el("span"); var i = el("i"); i.style.background = x[1]; sp.appendChild(i); sp.appendChild(document.createTextNode(x[0])); lg.appendChild(sp); });
     lg.appendChild(el("span", null, "· Tap a hadith to change it"));
     pm.appendChild(lg);
-    var grid = el("div", "hgrid" + (col.id === "nawawi" ? " titled" : ""));
+    var grid = el("div", "hgrid");
     var m = h.mem[col.id] = h.mem[col.id] || {};
     for (var n = 1; n <= col.count; n++) (function (n) {
       if (col.id === "nawawi" && n === 43) { var dv = el("div", "hdiv"); dv.appendChild(el("span", "ar", "زيادات ابن رجب")); dv.appendChild(el("span", null, "Ibn Rajab's additions")); grid.appendChild(dv); }
       var stt = m[n] || 0, t = hTitle(col, n), a = hAr(col, n);
       var b = el("button", "hch" + (stt ? " s" + stt : "")); b.title = (t ? n + ". " + t : "Hadith " + n);
       b.appendChild(el("b", null, n));
-      if (t) { var tx = el("span", "htx"); if (a) tx.appendChild(el("span", "har", a)); tx.appendChild(el("span", "hen", t)); b.appendChild(tx); }
+
       b.onclick = function () { var was = m[n] || 0, nx = (was + 1) % 3; if (nx) m[n] = nx; else delete m[n];
         var dlt = (nx === 2 ? 1 : 0) - (was === 2 ? 1 : 0);
         if (dlt) { var dk0 = dkey(new Date()); h.memLog[dk0] = (h.memLog[dk0] || 0) + dlt; if (!h.memLog[dk0]) delete h.memLog[dk0]; }
@@ -1463,6 +1521,11 @@ nav button.child2 svg.ic{width:15px;height:15px}
     var sw = el("button", "switch" + (state.showOne ? " on" : "")); sw.setAttribute("aria-label", "Toggle");
     sw.onclick = function () { state.showOne = !state.showOne; save(); render(); };
     r.appendChild(sw); p3.appendChild(r);
+    var rn = el("div", "setrow");
+    var ln = el("div", "sl"); ln.appendChild(el("b", null, "“Renew your intention” reminder")); ln.appendChild(el("span", null, "Shows a short reminder each time you open an Islamic section")); rn.appendChild(ln);
+    var swn = el("button", "switch" + (state.intentionOn !== false ? " on" : "")); swn.setAttribute("aria-label", "Toggle intention reminder");
+    swn.onclick = function () { state.intentionOn = state.intentionOn === false; save(); render(); };
+    rn.appendChild(swn); p3.appendChild(rn);
     app.appendChild(p3);
 
     // data
