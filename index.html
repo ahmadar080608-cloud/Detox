@@ -764,6 +764,11 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
 .nmeta .nfrom{font-weight:700;color:var(--ink)}
 .nmeta .iconbtn{padding:4px}
 
+
+.goals.earn{grid-template-columns:repeat(2,1fr)}
+@media (max-width:899px){.goals.earn{grid-template-columns:1fr}}
+
+.goal .bar{background:var(--card)}
 [hidden]{display:none!important}
 
 /* ===== mobile: sidebar becomes a bottom bar ===== */
@@ -2334,7 +2339,44 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
 
   // Finance: a simple money in / money out log, month by month
   var finMonth = null;
+  state.finTarget = state.finTarget || { month:0, week:0 };
+  function renderEarnTargets(){
+    var T = state.finTarget, now = new Date(), d0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    var mk = dkey(now).slice(0, 7), ws = weekStart(now), wsk = dkey(ws), we = new Date(ws); we.setDate(ws.getDate() + 6);
+    var mEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    var inM = 0, inW = 0;
+    state.money.forEach(function (x) { if (x.type !== "in") return; if ((x.date || "").slice(0, 7) === mk) inM += x.amount; if (x.date >= wsk && x.date <= dkey(we)) inW += x.amount; });
+    var gbp = function (n) { return "£" + n.toLocaleString(undefined, { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits:2 }); };
+    var p = el("div", "panel"); p.id = "earn";
+    p.appendChild(el("h2", null, "How much I need to make"));
+    var g = el("div", "goals earn");
+    [
+      { k:"month", n:"This month", sub:now.toLocaleDateString(undefined, { month:"long", year:"numeric" }), got:inM, end:mEnd },
+      { k:"week", n:"This week", sub:ws.toLocaleDateString(undefined, { day:"numeric", month:"short" }) + " – " + we.toLocaleDateString(undefined, { day:"numeric", month:"short" }), got:inW, end:we }
+    ].forEach(function (x) {
+      var t = T[x.k] || 0, card = el("div", "goal" + (t && x.got >= t ? " met" : ""));
+      var gh = el("div", "gh"); gh.appendChild(el("b", null, x.n)); gh.appendChild(el("span", "meta", x.sub)); card.appendChild(gh);
+      var big = el("div", "bignum", gbp(x.got)); big.appendChild(el("small", null, t ? "of " + gbp(t) + " earned" : "earned")); card.appendChild(big);
+      card.appendChild(barEl(t ? x.got / t : 0));
+      var daysLeft = Math.round((x.end - d0) / 864e5) + 1, left = t - x.got;
+      card.appendChild(el("p", "meta gm", !t ? "Set a target below to track it." : left <= 0 ? "Target reached, alḥamdulillāh" + (left < 0 ? " (" + gbp(-left) + " over)." : ".") :
+        gbp(Math.round(left * 100) / 100) + " still to make · about " + gbp(Math.ceil(left / daysLeft)) + " a day for " + daysLeft + (daysLeft === 1 ? " day" : " days")));
+      var r = el("div", "row"); r.appendChild(el("span", "meta", "Target £"));
+      var inp = el("input"); inp.type = "number"; inp.min = 0; inp.step = "1"; inp.value = t || ""; inp.placeholder = "0"; inp.setAttribute("aria-label", x.n + " earning target");
+      inp.onchange = function () { T[x.k] = Math.max(0, Math.round((parseFloat(inp.value) || 0) * 100) / 100); save(); render(); };
+      r.appendChild(inp); card.appendChild(r);
+      g.appendChild(card);
+    });
+    p.appendChild(g);
+    if (T.month && !T.week) {
+      var sug = el("button", "linkbtn", "Set the weekly target from the monthly one (" + gbp(Math.ceil(T.month / (mEnd.getDate() / 7))) + ")");
+      sug.onclick = function () { T.week = Math.ceil(T.month / (mEnd.getDate() / 7)); save(); render(); }; p.appendChild(sug);
+    }
+    p.appendChild(el("p", "meta", "Counts everything you log as “In” below. The week runs Monday to Sunday."));
+    app.appendChild(p); makeCollapsible("earn");
+  }
   function renderFinance(){
+    renderEarnTargets();
     var now = new Date(); finMonth = finMonth || (now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2));
     var parts = finMonth.split("-"), mDate = new Date(+parts[0], +parts[1] - 1, 1);
     var M = state.money.filter(function (x) { return (x.date || "").slice(0, 7) === finMonth; }).sort(function (a, b) { return (b.date || "").localeCompare(a.date || "") || b.added - a.added; });
