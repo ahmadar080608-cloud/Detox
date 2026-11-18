@@ -526,6 +526,11 @@ nav button.child2 svg.ic{width:15px;height:15px}
 @keyframes nfade{from{opacity:0}to{opacity:1}}
 @keyframes npop{from{transform:translateY(8px) scale(.98);opacity:0}to{transform:none;opacity:1}}
 
+
+/* watermark: fade the whole word at once so overlapping letter joins don't show as darker patches */
+.bgl{color:#000!important;opacity:.12}
+.ayahcard .bgl,.onecard .bgl{opacity:.18}
+
 [hidden]{display:none!important}
 
 /* ===== mobile: sidebar becomes a bottom bar ===== */
