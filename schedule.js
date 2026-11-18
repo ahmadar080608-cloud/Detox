@@ -521,12 +521,34 @@
     var title = el("div", "sch-title"); title.appendChild(el("b", null, d.toLocaleDateString(undefined, { month: "long" }))); title.appendChild(document.createTextNode(" " + d.getFullYear()));
     top.appendChild(title);
     var tools = el("div", "sch-tools");
-    var prev = el("button", "sch-ib"); prev.title = "Previous week"; prev.appendChild(svg("left")); prev.onclick = function () { V.day = addDays(k, -7); C.rerender(); };
+    var view = s.view || "day";
+    function shift(dir) {
+      if (view === "month") { var dd = pk(k); V.day = dkey(new Date(dd.getFullYear(), dd.getMonth() + dir, 1)); }
+      else V.day = addDays(k, dir * (view === "multi" ? 3 : 7));
+      C.rerender();
+    }
+    var unit = view === "month" ? "month" : view === "multi" ? "3 days" : "week";
+    var prev = el("button", "sch-ib"); prev.title = "Previous " + unit; prev.appendChild(svg("left")); prev.onclick = function () { shift(-1); };
     var tdy = el("button", "sch-pill", "Today"); tdy.onclick = function () { V.day = tk; C.rerender(); };
-    var next = el("button", "sch-ib"); next.title = "Next week"; next.appendChild(svg("right")); next.onclick = function () { V.day = addDays(k, 7); C.rerender(); };
+    var next = el("button", "sch-ib"); next.title = "Next " + unit; next.appendChild(svg("right")); next.onclick = function () { shift(1); };
     tools.appendChild(prev); tools.appendChild(tdy); tools.appendChild(next);
     top.appendChild(tools);
     root.appendChild(top);
+
+    var seg = el("div", "sch-views");
+    [["day","Day"],["multi","Multi-Day"],["week","Week"],["month","Month"]].forEach(function (o) {
+      var b = el("button", view === o[0] ? "on" : null, o[1]);
+      b.onclick = function () { s.view = o[0]; C.save(); C.rerender(); };
+      seg.appendChild(b);
+    });
+    root.appendChild(seg);
+
+    var now = nowMin(), isToday = k === tk;
+    if (view !== "day") {
+      if (V.toast) { var t0 = el("div", "sch-toast", V.toast); var tx0 = el("button", "sch-ib"); tx0.appendChild(svg("x")); tx0.onclick = function () { V.toast = ""; C.rerender(); }; t0.appendChild(tx0); root.appendChild(t0); }
+      if (view === "month") root.appendChild(monthView(k, tk));
+      else root.appendChild(columnsView(view === "multi" ? [k, addDays(k, 1), addDays(k, 2)] : weekDaysOf(k), tk, view));
+    } else {
 
     // week strip
     var strip = el("div", "sch-week"), mon = mondayOf(k);
@@ -590,7 +612,7 @@
     }
 
     // timeline
-    var tl = el("div", "sch-tl"), now = nowMin(), isToday = k === tk, nowPlaced = !isToday;
+    var tl = el("div", "sch-tl"), nowPlaced = !isToday;
     if (!timed.length) {
       var em = el("div", "sch-empty");
       em.appendChild(el("p", null, allDay.length ? "No timed tasks on this day." : "Nothing planned yet."));
@@ -615,6 +637,8 @@
     });
     if (!nowPlaced && timed.length) tl.appendChild(nowRow(now, "Day's plan finished. What's next?"));
     root.appendChild(tl);
+
+    }
 
     // reminders / calendar tools
     var tp = el("div", "panel sch-panel");
@@ -674,6 +698,74 @@
 
     app.appendChild(root);
     if (V.edit) app.appendChild(editor());
+  }
+
+  function weekDaysOf(k) { var m = mondayOf(k), a = []; for (var i = 0; i < 7; i++) a.push(addDays(m, i)); return a; }
+  function openDay(dk) { V.day = dk; S().view = "day"; C.save(); C.rerender(); }
+
+  // Multi-Day and Week: one column per day
+  function columnsView(days, tk, view) {
+    var wrap = el("div", "sch-cols " + view);
+    days.forEach(function (dk) {
+      var dd = pk(dk), col = el("div", "sch-col" + (dk === tk ? " today" : "") + (dk === V.day ? " sel" : ""));
+      var hd = el("div", "sch-colh");
+      var hb = el("button", "sch-colday"); hb.title = "Open this day";
+      hb.appendChild(el("span", "wd", dd.toLocaleDateString(undefined, { weekday: "short" })));
+      hb.appendChild(el("span", "dn", String(dd.getDate())));
+      hb.onclick = function () { openDay(dk); };
+      hd.appendChild(hb);
+      var ad = el("button", "sch-ib sm"); ad.title = "Add to this day"; ad.appendChild(svg("plus"));
+      ad.onclick = function () { openEditor(null, dk, dk === tk ? Math.ceil((nowMin() + 1) / 15) * 15 : 9 * 60); };
+      hd.appendChild(ad);
+      col.appendChild(hd);
+      var its = itemsOn(dk), list = el("div", "sch-clist"), placedNow = dk !== tk, nm = nowMin();
+      if (!its.length) list.appendChild(el("p", "sch-cempty", "Nothing planned"));
+      its.forEach(function (it) {
+        var st = it.start && !it.allDay ? hm(it.start) : null;
+        if (!placedNow && st != null && st > nm) { list.appendChild(el("div", "sch-cnow")); placedNow = true; }
+        var r = el("div", "sch-citem" + (isDone(it, dk) ? " done" : ""));
+        r.style.setProperty("--c", it.color);
+        var ic = el("span", "ci"); ic.style.background = it.color; ic.appendChild(svg(it.icon)); r.appendChild(ic);
+        var b = el("button", "ctx");
+        b.appendChild(el("span", "ctime", st == null ? "All day" : fmtT(st) + (it.dur ? " – " + fmtT(st + it.dur) : "")));
+        b.appendChild(el("span", "cname", it.title));
+        b.onclick = function () { openEditor(it, dk); };
+        r.appendChild(b);
+        r.appendChild(doneBtn(it, dk));
+        list.appendChild(r);
+      });
+      if (!placedNow && its.length) list.appendChild(el("div", "sch-cnow"));
+      col.appendChild(list);
+      wrap.appendChild(col);
+    });
+    return wrap;
+  }
+
+  // Month: calendar grid; tap a day to open it
+  function monthView(k, tk) {
+    var d = pk(k), first = new Date(d.getFullYear(), d.getMonth(), 1), start = mondayOf(dkey(first));
+    var grid = el("div", "sch-month");
+    ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].forEach(function (w) { grid.appendChild(el("div", "sch-mwd", w)); });
+    var weeks = Math.ceil(((first.getDay() + 6) % 7 + new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()) / 7);
+    for (var i = 0; i < weeks * 7; i++) (function (dk) {
+      var dd = pk(dk), inMonth = dd.getMonth() === d.getMonth();
+      var c = el("button", "sch-mday" + (inMonth ? "" : " out") + (dk === tk ? " today" : "") + (dk === k ? " sel" : ""));
+      c.appendChild(el("span", "mdn", String(dd.getDate())));
+      var its = itemsOn(dk), box = el("span", "mits");
+      its.slice(0, 3).forEach(function (it) {
+        var ch = el("span", "mchip" + (isDone(it, dk) ? " done" : "")); ch.style.setProperty("--c", it.color);
+        var dot = el("i"); dot.style.background = it.color; dot.appendChild(svg(it.icon)); ch.appendChild(dot);
+        ch.appendChild(el("span", null, it.title));
+        box.appendChild(ch);
+      });
+      if (its.length > 3) box.appendChild(el("span", "mmore", "+" + (its.length - 3) + " more"));
+      var dots = el("span", "mdots"); its.slice(0, 4).forEach(function (it) { var x = el("i"); x.style.background = it.color; dots.appendChild(x); });
+      c.appendChild(box); c.appendChild(dots);
+      c.title = dd.toDateString() + (its.length ? " · " + its.length + (its.length === 1 ? " item" : " items") : "");
+      c.onclick = function () { openDay(dk); };
+      grid.appendChild(c);
+    })(addDays(start, i));
+    return grid;
   }
 
   function doneBtn(it, k) {

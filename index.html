@@ -531,6 +531,73 @@ nav button.child2 svg.ic{width:15px;height:15px}
 .bgl{color:#000!important;opacity:.12}
 .ayahcard .bgl,.onecard .bgl{opacity:.18}
 
+
+/* schedule views */
+.sch-views{display:flex;background:var(--card);border-radius:999px;padding:5px;margin-bottom:16px;gap:4px;border:1px solid var(--line)}
+.sch-views button{flex:1;border:0;background:none;color:var(--muted);font-weight:600;font-size:15px;padding:10px 8px;border-radius:999px}
+.sch-views button.on{background:#6c9bd2;color:#fff}
+.sch-views button:hover:not(.on){color:var(--ink)}
+.sch-cols{display:grid;gap:10px;margin-bottom:20px}
+.sch-cols.multi{grid-template-columns:repeat(3,minmax(0,1fr))}
+.sch-cols.week{grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.sch-col{background:var(--card);border-radius:18px;padding:10px 8px 12px;min-height:260px;border:1.5px solid transparent}
+.sch-col.today{border-color:var(--accent)}
+.sch-colh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:4px}
+.sch-colday{border:0;background:none;display:flex;align-items:baseline;gap:6px;color:var(--ink);padding:4px}
+.sch-colday .wd{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.sch-colday .dn{font-size:20px;font-weight:800}
+.sch-col.today .sch-colday .dn{color:var(--accent)}
+.sch-ib.sm{width:28px;height:28px;background:var(--bg)}
+.sch-ib.sm svg.ic{width:15px;height:15px}
+.sch-clist{display:flex;flex-direction:column;gap:6px}
+.sch-cempty{color:var(--muted);font-size:13px;text-align:center;margin:20px 0}
+.sch-citem{display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:12px;padding:7px 8px;border-left:3px solid var(--c)}
+.sch-citem .ci{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;flex:none}
+.sch-citem .ci svg.ic{width:15px;height:15px}
+.sch-citem .ctx{flex:1;min-width:0;border:0;background:none;text-align:left;padding:0;display:flex;flex-direction:column;color:var(--ink)}
+.sch-citem .ctime{font-size:11px;color:var(--muted)}
+.sch-citem .cname{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sch-citem.done .cname{text-decoration:line-through;opacity:.55}
+.sch-citem .sch-done{width:22px;height:22px;margin:0;align-self:center}
+.sch-citem .sch-done svg.ic{width:12px;height:12px}
+.sch-cnow{height:2px;background:#e2574c;border-radius:2px;position:relative;margin:2px 0}
+.sch-cnow::before{content:"";position:absolute;left:-3px;top:-3px;width:8px;height:8px;border-radius:50%;background:#e2574c}
+.sch-cols.week .sch-citem{flex-direction:column;align-items:flex-start;gap:4px;padding:6px}
+.sch-cols.week .sch-citem .sch-done{display:none}
+.sch-cols.week .sch-citem .ci{width:22px;height:22px}.sch-cols.week .sch-citem .ci svg.ic{width:12px;height:12px}
+.sch-cols.week .sch-citem .cname{font-size:12px;white-space:normal;word-break:break-word}
+.sch-cols.week .sch-colday{flex-direction:column;gap:0}
+.sch-cols.week .sch-ib.sm{width:24px;height:24px}
+.sch-month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;background:var(--card);border-radius:18px;padding:10px;margin-bottom:20px}
+.sch-mwd{text-align:center;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:4px 0}
+.sch-mday{border:1.5px solid transparent;background:var(--bg);border-radius:12px;min-height:96px;padding:6px;display:flex;flex-direction:column;align-items:stretch;gap:3px;text-align:left;color:var(--ink);overflow:hidden}
+.sch-mday.out{opacity:.4}
+.sch-mday.today{border-color:var(--accent)}
+.sch-mday.sel .mdn{background:var(--accent);color:#fff}
+.sch-mday .mdn{font-weight:800;font-size:13px;width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;align-self:flex-start}
+.sch-mday.today .mdn{color:var(--accent)}
+.sch-mday.today.sel .mdn{color:#fff}
+.sch-mday .mits{display:flex;flex-direction:column;gap:2px;min-width:0}
+.sch-mday .mchip{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;min-width:0}
+.sch-mday .mchip i{width:14px;height:14px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;flex:none}
+.sch-mday .mchip i svg.ic{width:8px;height:8px;stroke-width:2.8}
+.sch-mday .mchip span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sch-mday .mchip.done span{text-decoration:line-through;opacity:.55}
+.sch-mday .mmore{font-size:10px;color:var(--muted)}
+.sch-mday .mdots{display:none}
+.sch-mday:hover{border-color:var(--line)}
+@media (max-width:899px){
+  .sch-views button{font-size:13px;padding:8px 4px}
+  .sch-cols.multi{grid-template-columns:repeat(3,minmax(150px,1fr));overflow-x:auto}
+  .sch-cols.week{display:flex;overflow-x:auto;scroll-snap-type:x mandatory}
+  .sch-cols.week .sch-col{flex:0 0 46%;scroll-snap-align:start}
+  .sch-month{gap:3px;padding:6px}
+  .sch-mday{min-height:56px;padding:4px;align-items:center}
+  .sch-mday .mits{display:none}
+  .sch-mday .mdots{display:flex;gap:2px;flex-wrap:wrap;justify-content:center}
+  .sch-mday .mdots i{width:6px;height:6px;border-radius:50%}
+}
+
 [hidden]{display:none!important}
 
 /* ===== mobile: sidebar becomes a bottom bar ===== */
@@ -558,7 +625,7 @@ nav button.child2 svg.ic{width:15px;height:15px}
 </header>
 <main id="app"></main>
 
-<script src="schedule.js?v=20261118d"></script>
+<script src="schedule.js?v=20261118e"></script>
 <script>
 (function () {
   // ---------- icons (line icons, Lucide-style) ----------
