@@ -598,6 +598,72 @@ nav button.child2 svg.ic{width:15px;height:15px}
   .sch-mday .mdots i{width:6px;height:6px;border-radius:50%}
 }
 
+
+/* Overview: stronger text */
+.tile .tt{font-size:13px;opacity:1;text-shadow:0 1px 2px rgba(0,0,0,.28)}
+.tile .tn{font-size:52px;text-shadow:0 2px 6px rgba(0,0,0,.2)}
+.tile .ti{opacity:1}
+.onecard .txt{font-size:38px;color:#fff}
+.onecard .lbl{font-size:12px}
+.ayen{opacity:1;font-size:16px;color:#f2efe9}
+.ayar{text-shadow:0 1px 0 rgba(0,0,0,.2)}
+.pagehead .ph-sub{opacity:1;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.pagehead .ph-big{text-shadow:0 2px 8px rgba(0,0,0,.18)}
+main .panel h2{font-size:14px}
+
+/* reminder of death */
+.memento{border-top:1px solid rgba(255,255,255,.08);padding:14px 4px 4px;color:#fff;text-align:left}
+.memento .mlbl{font-size:10px;font-weight:800;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:6px}
+.memento .mar{font-family:Amiri,serif;direction:rtl;text-align:right;font-size:19px;line-height:1.6}
+.memento .men{font-size:12px;color:rgba(255,255,255,.7);line-height:1.45;margin-top:2px}
+.memento .mref{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-top:5px}
+.side-one{margin-top:0;border-top:0}
+#memSide{margin-top:auto}
+.memento.mobile{display:none;background:var(--hdr);border-radius:18px;padding:16px 18px;margin-bottom:16px;border:0}
+@media (max-width:899px){#memSide{display:none}.memento.mobile{display:block}}
+
+/* lesson PDF ticks */
+.fchecks{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.fchk{border:1.5px solid var(--line);background:var(--bg);color:var(--muted);border-radius:999px;padding:4px 10px 4px 7px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:5px}
+.fchk .bx{width:14px;height:14px;border-radius:4px;border:1.5px solid currentColor;display:inline-flex;align-items:center;justify-content:center}
+.fchk.on{color:#fff;border-color:transparent}
+.fchk.on .bx{border-color:#fff}
+.fchk.on .bx::after{content:"";width:7px;height:4px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(1px,-1px)}
+.fchk.rev.on{background:#6c9bd2}.fchk.part.on{background:#d9a33a}.fchk.full.on{background:#3f9a78}
+.fstats{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:6px}
+.fstats b{color:var(--ink)}
+
+/* trackers (university & work) */
+.stack{display:flex;height:12px;border-radius:999px;overflow:hidden;background:var(--bg);margin:8px 0 10px}
+.stack i{display:block;height:100%}
+.stfilter{display:flex;gap:6px;flex-wrap:wrap}
+.stfilter button{border:1px solid var(--line);background:var(--bg);color:var(--muted);border-radius:999px;padding:5px 11px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+.stfilter button i{width:8px;height:8px;border-radius:50%}
+.stfilter button.on{background:var(--ink);color:var(--card);border-color:var(--ink)}
+select.stsel{font-weight:700;border-width:1.5px;font-size:13px;padding:7px 10px;max-width:190px}
+li.trow2{align-items:center;gap:12px;border-left:3px solid var(--sc);padding-left:12px;margin-left:-2px}
+.bulkbox{background:var(--bg);border-radius:16px;padding:12px;margin:8px 0}
+.bulkbox textarea{min-height:120px;background:var(--card);margin-bottom:8px}
+.panel .linkbtn{font-size:13px;margin:4px 0}
+/* finance */
+.moneysum{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.msum{background:var(--bg);border-radius:14px;padding:12px 14px}
+.msum span{display:block;font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.msum b{font-family:Lalezar,Inter,sans-serif;font-size:26px;font-weight:400}
+.msum.in b{color:#3f9a78}.msum.out b{color:#d93c3c}
+li.mrow2{gap:12px}
+.mdate{font-size:12px;color:var(--muted);width:52px;flex:none}
+.mamt.in{color:#3f9a78}.mamt.out{color:#d93c3c}
+@media (max-width:899px){.moneysum{grid-template-columns:1fr 1fr 1fr;gap:6px}.msum b{font-size:19px}}
+
+
+.toprow{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:16px;margin-bottom:22px;align-items:stretch}
+.toprow .ayahcard{margin-bottom:0}
+.memento.card{display:flex;flex-direction:column;justify-content:center;background:var(--hdr);border-radius:var(--r);padding:20px 20px;border:1px solid rgba(255,255,255,.06)}
+.memento.card .mar{font-size:24px}
+.memento.card .men{font-size:13px}
+@media (max-width:1100px){.toprow{grid-template-columns:1fr}}
+
 [hidden]{display:none!important}
 
 /* ===== mobile: sidebar becomes a bottom bar ===== */
@@ -621,6 +687,7 @@ nav button.child2 svg.ic{width:15px;height:15px}
 <header>
   <div class="brand" id="brand"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><defs><mask id="lgm"><rect width="64" height="64" fill="#fff"/><circle cx="38" cy="28" r="17" fill="#000"/></mask></defs><rect width="64" height="64" rx="16" fill="rgba(255,255,255,.06)"/><circle cx="31" cy="32" r="20" fill="var(--accent)" mask="url(#lgm)"/><path d="M30 32.5l6 6 12.5-14" fill="none" stroke="#f4f1ec" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg><div><div class="t1">Detox</div><div class="t2">Focus Hub</div></div></div>
   <nav id="nav"></nav>
+  <div id="memSide"></div>
   <div class="side-one" id="sideOne"></div>
 </header>
 <main id="app"></main>
@@ -654,6 +721,12 @@ nav button.child2 svg.ic{width:15px;height:15px}
     upload:'<path d="M12 15V3M7 8l5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/>',
     download:'<path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/>',
     open:'<path d="M14 3h7v7"/><path d="M10 14L21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/>',
+    lectures:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/><path d="M7 8h6M7 11h10"/>',
+    tutorials:'<circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2.5 20a5.5 5.5 0 0 1 11 0M13.5 20a4 4 0 0 1 8 0"/>',
+    seminars:'<path d="M4 5h16v10H9l-5 4z"/><path d="M8 9h8M8 12h5"/>',
+    business:'<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>',
+    tutoring:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M7 20l2-4M17 20l-2-4"/><path d="M8 10l2.5 2.5L16 7"/>',
+    finance:'<rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><circle cx="16" cy="15" r="1.5"/><path d="M6 3h12"/>',
     teacher:'<circle cx="8" cy="7" r="3"/><path d="M3 20v-2a5 5 0 0 1 10 0v2"/><path d="M13 4h8v9h-6"/><path d="M15 8h4"/>',
     calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
     trash:'<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/>',
@@ -680,7 +753,13 @@ nav button.child2 svg.ic{width:15px;height:15px}
     { id:"logic",      name:"Language & Logic", icon:"logic",      group:"islamic", parent:"studies", ar:"اللُّغَةُ وَالمَنْطِقُ", sub:"Naḥw, ṣarf, balāghah & manṭiq", bg:"منطق", color:"--c3" },
     { id:"arabic",     name:"Arabic",          icon:"arabic",     group:"islamic", parent:"islamic", ar:"اللُّغَةُ العَرَبِيَّةُ", sub:"Vocabulary & grammar", bg:"عربي", color:"--c4" },
     { id:"university", name:"University",      icon:"university", group:null,      sub:"Dental school", bg:"جامعة", color:"--c2" },
+    { id:"lectures",   name:"Lectures",        icon:"lectures",   group:"university", parent:"university", sub:"Track every lecture topic", bg:"محاضرات", color:"--c2" },
+    { id:"tutorials",  name:"Tutorials",       icon:"tutorials",  group:"university", parent:"university", sub:"Track every tutorial", bg:"دروس", color:"--c6" },
+    { id:"seminars",   name:"Seminars",        icon:"seminars",   group:"university", parent:"university", sub:"Track every seminar", bg:"ندوات", color:"--c3" },
     { id:"work",       name:"Work",            icon:"work",       group:null,      sub:"Jobs & projects", bg:"عمل", color:"--c6" },
+    { id:"business",   name:"Business ideas",  icon:"business",   group:"work", parent:"work", sub:"Ideas, research & tests", bg:"أفكار", color:"--c4" },
+    { id:"tutoring",   name:"Tutoring",        icon:"tutoring",   group:"work", parent:"work", sub:"Students & sessions", bg:"تدريس", color:"--c1" },
+    { id:"finance",    name:"Finance",         icon:"finance",    group:"work", parent:"work", sub:"Money in & out", bg:"مال", color:"--c5" },
     { id:"tools",      name:"Tools",           icon:"tools",      group:null,      sub:"Pomodoro timer", bg:"تركيز", color:"--c4" },
     { id:"settings",   name:"Settings",        icon:"settings",   group:null,      bg:"إعدادات" }
   ];
@@ -689,7 +768,9 @@ nav button.child2 svg.ic{width:15px;height:15px}
   var SCIENCES = ["aqeedah","fiqh","tazkiyah","tafsir","hadith","seerah","logic"];
   var ISLAMIC_SUBS = ["quran","studies","arabic"];
   var STUDY_SUBS = SCIENCES;
-  var TASK_SECTIONS = ["quran","studies"].concat(SCIENCES, ["arabic","university","work"]);
+  var UNI_SUBS = ["lectures","tutorials","seminars"], WORK_SUBS = ["business","tutoring","finance"];
+  var NAV_GROUPS = { university:UNI_SUBS, work:WORK_SUBS };
+  var TASK_SECTIONS = ["quran","studies"].concat(SCIENCES, ["arabic","university"], UNI_SUBS, ["work"], WORK_SUBS);
   function isUnder(id, anc){ var p = byId[id]; while (p) { if (p.id === anc) return true; p = p.parent ? byId[p.parent] : null; } return false; }
   var THEMES = [
     { id:"auto",    name:"Auto",    note:"Follows your device", sw:["#f4f1ec","#131816","#e0603f","#1f4f4a"] },
@@ -743,7 +824,8 @@ nav button.child2 svg.ic{width:15px;height:15px}
   // ---------- sidebar ----------
   function navBtn(p, child){
     var b = el("button", child ? "child" : null);
-    var active = state.tab === p.id || (p.id === "studies" && isUnder(state.tab, "studies") && (state.navSciClosed || window.innerWidth < 900)) || (!child && p.id === "islamic" && byId[state.tab].group === "islamic" && (window.innerWidth < 900 || state.navIslamicClosed));
+    var active = state.tab === p.id || (p.id === "studies" && isUnder(state.tab, "studies") && (state.navSciClosed || window.innerWidth < 900)) || (!child && p.id === "islamic" && byId[state.tab].group === "islamic" && (window.innerWidth < 900 || state.navIslamicClosed)) ||
+      (!child && NAV_GROUPS[p.id] && isUnder(state.tab, p.id) && (window.innerWidth < 900 || (state.navFold || {})[p.id]));
     if (active) b.classList.add("on");
     b.appendChild(icon(p.icon));
     b.appendChild(el("span", null, p.name === "Islamic Studies" && !child ? "Studies" : p.name));
@@ -758,6 +840,16 @@ nav button.child2 svg.ic{width:15px;height:15px}
       if (p.group) return;
       if (p.id === "settings") navEl.appendChild(el("div", "spacer"));
       navEl.appendChild(navBtn(p, false));
+      if (NAV_GROUPS[p.id]) {
+        var gb = navEl.lastChild, gid = p.id, fc = !!(state.navFold || {})[gid];
+        var gt = el("span", "navfold" + (fc ? " closed" : "")); gt.setAttribute("role", "button"); gt.setAttribute("tabindex", "0");
+        gt.setAttribute("aria-label", (fc ? "Show " : "Hide ") + p.name + " sections"); gt.setAttribute("aria-expanded", fc ? "false" : "true");
+        gt.innerHTML = '<svg viewBox="0 0 24 24" class="ic"><path d="M6 9l6 6 6-6"/></svg>';
+        var gtog = function (e) { e.stopPropagation(); e.preventDefault(); state.navFold = state.navFold || {}; state.navFold[gid] = !state.navFold[gid]; save(); renderNav(); };
+        gt.onclick = gtog; gt.onkeydown = function (e) { if (e.key === "Enter" || e.key === " ") gtog(e); };
+        gb.appendChild(gt);
+        if (!fc) NAV_GROUPS[gid].forEach(function (id) { navEl.appendChild(navBtn(byId[id], true)); });
+      }
       if (p.id === "islamic") {
         var pb = navEl.lastChild, closed = !!state.navIslamicClosed;
         var tg = el("span", "navfold" + (closed ? " closed" : "")); tg.setAttribute("role", "button"); tg.setAttribute("tabindex", "0");
@@ -780,6 +872,7 @@ nav button.child2 svg.ic{width:15px;height:15px}
         });
       }
     });
+    var ms = document.getElementById("memSide"); if (ms) { ms.innerHTML = ""; if (state.tab !== "home") ms.appendChild(mementoEl()); }
     var side = document.getElementById("sideOne"); side.innerHTML = ""; side.hidden = !state.showOne;
     var t = oneThing();
     side.appendChild(el("div", "lbl", "Today's one thing"));
@@ -788,7 +881,7 @@ nav button.child2 svg.ic{width:15px;height:15px}
   }
   document.getElementById("brand").onclick = function () { go("home"); };
   function go(id){ var was = state.tab; state.tab = id; addingIn = null; save(); render(); window.scrollTo(0,0);
-    var area = function (t) { if (!byId[t]) return null; if (t === "islamic" || byId[t].group === "islamic") return "islamic"; return (t === "university" || t === "work") ? t : null; };
+    var area = function (t) { if (!byId[t]) return null; if (t === "islamic" || byId[t].group === "islamic") return "islamic"; return isUnder(t, "university") ? "university" : isUnder(t, "work") ? "work" : null; };
     var a = area(id); if (a && a !== area(was) && state.intentionOn !== false) intentionPopup(a); }
   var NIYYAH_SUB = {
     islamic: "Seek knowledge for the sake of Allah alone: to learn, to act upon it, and to benefit others.",
@@ -817,7 +910,7 @@ nav button.child2 svg.ic{width:15px;height:15px}
   function pageHead(p, stat){
     var h = el("div", "pagehead grain"); h.style.background = bgOf(p);
     h.appendChild(el("i", "bgl" + (/[؀-ۿ]/.test(p.bg) ? " arb" : ""), p.bg));
-    var tag = el("span", "otag"); tag.appendChild(icon(p.icon)); tag.appendChild(document.createTextNode(p.parent === "studies" ? "Islamic Sciences" : p.group ? "Islamic" : p.name));
+    var tag = el("span", "otag"); tag.appendChild(icon(p.icon)); tag.appendChild(document.createTextNode(p.parent ? byId[p.parent].name : p.name));
     h.appendChild(tag);
     if (stat) h.appendChild(el("span", "stat", stat));
     h.appendChild(el("div", "ph-big", p.name));
@@ -907,7 +1000,7 @@ nav button.child2 svg.ic{width:15px;height:15px}
     return c;
   }
   function renderHome(){
-    app.appendChild(ayahCard());
+    var toprow = el("div", "toprow"); toprow.appendChild(ayahCard()); toprow.appendChild(mementoEl("card")); app.appendChild(toprow);
     var t = oneThing();
     var c = el("div", "onecard grain");
     var lbl = el("div", "lbl"); lbl.appendChild(icon("target")); lbl.appendChild(document.createTextNode("Today's one thing")); c.appendChild(lbl);
@@ -958,6 +1051,10 @@ nav button.child2 svg.ic{width:15px;height:15px}
     app.appendChild(pageHead(p0, open + " open"));
     if (p0.group === "islamic") app.appendChild(subTabs());
     if (sec === "arabic") renderArabicGoals();
+    if (NAV_GROUPS[sec]) { app.appendChild(groupTabs(sec, NAV_GROUPS[sec])); renderGroupHome(sec, NAV_GROUPS[sec]); }
+    if (NAV_GROUPS[p0.parent]) app.appendChild(groupTabs(p0.parent, NAV_GROUPS[p0.parent]));
+    if (TRK[sec]) renderTracker(sec);
+    if (sec === "finance") renderFinance();
     if (sec === "studies" || p0.parent === "studies") app.appendChild(studyTabs());
     if (sec === "studies") renderSciencesHome();
     if (sec === "quran") renderQuranTrackers();
@@ -1898,6 +1995,11 @@ nav button.child2 svg.ic{width:15px;height:15px}
     };
     var tr = el("div", "row"); tr.appendChild(ub); tr.appendChild(fi); top.appendChild(tr);
     p.appendChild(top);
+    if (L.length) {
+      var fs = el("div", "fstats"), nr = L.filter(function (x) { return x.revised; }).length, np = L.filter(function (x) { return x.acted === 1; }).length, nf = L.filter(function (x) { return x.acted === 2; }).length;
+      [[nr, "revised"], [np, "acted upon partly"], [nf, "acted upon fully"]].forEach(function (x) { var sp = el("span"); sp.appendChild(el("b", null, x[0] + "/" + L.length)); sp.appendChild(document.createTextNode(" " + x[1])); fs.appendChild(sp); });
+      p.appendChild(fs);
+    }
     if (pdfMsg[sec]) p.appendChild(el("p", "toast", pdfMsg[sec]));
     if (!L.length) {
       var em = el("button", "dropzone");
@@ -1921,6 +2023,13 @@ nav button.child2 svg.ic{width:15px;height:15px}
       var nb = el("button", "linkbtn", x.notes ? "Notes ✓" : "Add notes"); nb.onclick = function () { openPdfNote = openPdfNote === x.id ? null : x.id; render(); };
       meta.appendChild(nb);
       tb.appendChild(meta);
+      var fc0 = el("div", "fchecks");
+      var chk = function (cls, label, on, fn) { var b = el("button", "fchk " + cls + (on ? " on" : "")); b.setAttribute("aria-pressed", on ? "true" : "false");
+        b.appendChild(el("span", "bx")); b.appendChild(document.createTextNode(label)); b.onclick = function () { fn(); save(); render(); }; return b; };
+      fc0.appendChild(chk("rev", "Revised", !!x.revised, function () { x.revised = !x.revised; }));
+      fc0.appendChild(chk("part", "Acted upon partly", x.acted === 1, function () { x.acted = x.acted === 1 ? 0 : 1; }));
+      fc0.appendChild(chk("full", "Acted upon fully", x.acted === 2, function () { x.acted = x.acted === 2 ? 0 : 2; }));
+      tb.appendChild(fc0);
       li.appendChild(tb);
       var ob = el("button", "newbtn"); ob.appendChild(icon("open")); ob.appendChild(document.createTextNode("Open"));
       ob.onclick = function () { openPdf(x); };
@@ -1965,6 +2074,199 @@ nav button.child2 svg.ic{width:15px;height:15px}
     }).catch(function () { alertMsg("That file isn't on this device any more. It may have been uploaded on another device or browser."); });
   }
   function alertMsg(m){ var t = el("div", "floatmsg", m); document.body.appendChild(t); setTimeout(function () { t.remove(); }, 4500); }
+
+
+  // ---------- University & Work subsections ----------
+  state.trk = state.trk || {};
+  state.money = Array.isArray(state.money) ? state.money : [];
+  var UNI_STATUS = [["none","Not started","#9aa0a6"],["started","Started","#d9a33a"],["cards","Flashcards complete","#6c9bd2"],["teach","Can teach the topic","#3f9a78"]];
+  var TRK = {
+    lectures:  { noun:"lecture",  list:"Lectures",  statuses:UNI_STATUS, ph:"e.g. Lecture 4 · Tooth morphology: canines", bulk:true },
+    tutorials: { noun:"tutorial", list:"Tutorials", statuses:UNI_STATUS, ph:"e.g. Tutorial 2 · Waxing an incisor", bulk:true },
+    seminars:  { noun:"seminar",  list:"Seminars",  statuses:UNI_STATUS, ph:"e.g. Seminar · Infection control", bulk:true },
+    business:  { noun:"idea",     list:"Ideas",     statuses:[["idea","Idea","#9aa0a6"],["research","Researching","#d9a33a"],["test","Testing","#6c9bd2"],["live","Running","#3f9a78"],["park","Parked","#b5482f"]], ph:"e.g. Gardening service in North London" },
+    tutoring:  { noun:"session",  list:"Sessions",  statuses:[["plan","Planned","#9aa0a6"],["done","Taught","#6c9bd2"],["paid","Paid","#3f9a78"]], ph:"e.g. GCSE Biology · Cell transport", dated:true }
+  };
+  var trkFilter = {}, trkNote = null, trkBulk = {};
+  function stInfo(cfg, k){ for (var i = 0; i < cfg.statuses.length; i++) if (cfg.statuses[i][0] === k) return cfg.statuses[i]; return cfg.statuses[0]; }
+  function statusSelect(cfg, val, onch){
+    var sel = el("select", "stsel"); sel.setAttribute("aria-label", "Status");
+    cfg.statuses.forEach(function (st) { var o = el("option", null, st[1]); o.value = st[0]; o.style.color = st[2]; sel.appendChild(o); });
+    sel.value = val; var c = stInfo(cfg, val)[2];
+    sel.style.color = c; sel.style.borderColor = c; sel.style.background = "color-mix(in srgb," + c + " 14%,var(--bg))";
+    sel.onchange = function () { onch(sel.value); };
+    return sel;
+  }
+  function renderTracker(sec){
+    var cfg = TRK[sec], L = state.trk[sec] = state.trk[sec] || [], tk = dkey(new Date());
+    var p = el("div", "panel"); p.id = "t-" + sec;
+    p.appendChild(el("h2", null, cfg.list));
+    // summary: stacked bar + counts
+    var counts = {}; cfg.statuses.forEach(function (st) { counts[st[0]] = 0; }); L.forEach(function (x) { counts[x.status] = (counts[x.status] || 0) + 1; });
+    if (L.length) {
+      var top = el("div", "row"); top.style.justifyContent = "space-between";
+      var lastKey = cfg.statuses[cfg.statuses.length - 1][0];
+      var headKey = sec === "business" ? "live" : sec === "tutoring" ? "done" : lastKey;
+      var bn = el("div", "bignum", String(sec === "tutoring" ? counts.done + counts.paid : counts[headKey]));
+      bn.appendChild(el("small", null, "of " + L.length + " · " + (sec === "business" ? "running" : sec === "tutoring" ? "taught" : "can teach")));
+      top.appendChild(bn); p.appendChild(top);
+      var bar = el("div", "stack");
+      cfg.statuses.forEach(function (st) { if (!counts[st[0]]) return; var seg = el("i"); seg.style.background = st[2]; seg.style.width = (counts[st[0]] / L.length * 100) + "%"; seg.title = st[1] + ": " + counts[st[0]]; bar.appendChild(seg); });
+      p.appendChild(bar);
+      // filter pills
+      var fl = el("div", "stfilter"), cur = trkFilter[sec] || "all";
+      var all = el("button", cur === "all" ? "on" : null, "All " + L.length); all.onclick = function () { trkFilter[sec] = "all"; render(); }; fl.appendChild(all);
+      cfg.statuses.forEach(function (st) { var b = el("button", cur === st[0] ? "on" : null); var d = el("i"); d.style.background = st[2]; b.appendChild(d); b.appendChild(document.createTextNode(st[1] + " " + (counts[st[0]] || 0)));
+        b.onclick = function () { trkFilter[sec] = cur === st[0] ? "all" : st[0]; render(); }; fl.appendChild(b); });
+      p.appendChild(fl);
+    }
+    // add one
+    var r = el("div", "row"); r.style.margin = "12px 0 4px";
+    var ti = el("input"); ti.type = "text"; ti.maxLength = 160; ti.placeholder = cfg.ph; ti.setAttribute("aria-label", "New " + cfg.noun);
+    var dt = el("input"); dt.type = "date"; dt.className = "dateinp"; dt.setAttribute("aria-label", "Date"); if (cfg.dated) dt.value = tk;
+    var ss = statusSelect(cfg, cfg.statuses[0][0], function (v) { ss.value = v; var c = stInfo(cfg, v)[2]; ss.style.color = c; ss.style.borderColor = c; ss.style.background = "color-mix(in srgb," + c + " 14%,var(--bg))"; });
+    var ab = el("button", "cta"); ab.appendChild(icon("plus")); ab.appendChild(document.createTextNode("Add"));
+    var addOne = function () { var t = ti.value.trim(); if (!t) return; L.push({ id:uid(), title:t, date:dt.value || "", status:ss.value, notes:"", added:Date.now() }); save(); render();
+      var x = document.querySelector("#t-" + sec + " .row input[type=text]"); if (x) x.focus(); };
+    ab.onclick = addOne; ti.onkeydown = function (e) { if (e.key === "Enter") addOne(); };
+    r.appendChild(ti); r.appendChild(dt); r.appendChild(ss); r.appendChild(ab);
+    p.appendChild(r);
+    // paste a whole list
+    if (cfg.bulk) {
+      var bt = el("button", "linkbtn", trkBulk[sec] ? "Hide list paste" : "Paste a whole list at once"); bt.onclick = function () { trkBulk[sec] = !trkBulk[sec]; render(); };
+      p.appendChild(bt);
+      if (trkBulk[sec]) {
+        var box = el("div", "bulkbox");
+        var ta = el("textarea"); ta.placeholder = "One " + cfg.noun + " per line, e.g.\nLecture 1 · Introduction to dental anatomy\nLecture 2 · Tooth morphology: incisors\nLecture 3 · Tooth morphology: canines";
+        var br = el("div", "row"); br.appendChild(el("span", "meta", "Mark them all as"));
+        var bs = statusSelect(cfg, "none", function (v) { bs.value = v; var c = stInfo(cfg, v)[2]; bs.style.color = c; bs.style.borderColor = c; });
+        var bb = el("button", "cta", "Add all");
+        bb.onclick = function () { var lines = ta.value.split(/\r?\n/).map(function (x) { return x.replace(/^\s*[-•*]\s*/, "").trim(); }).filter(Boolean);
+          if (!lines.length) return; lines.forEach(function (t, i) { L.push({ id:uid(), title:t.slice(0, 160), date:"", status:bs.value, notes:"", added:Date.now() + i }); });
+          trkBulk[sec] = false; save(); render(); };
+        br.appendChild(bs); br.appendChild(bb);
+        box.appendChild(ta); box.appendChild(br); p.appendChild(box);
+      }
+    }
+    // list
+    var shown = L.filter(function (x) { return !trkFilter[sec] || trkFilter[sec] === "all" || x.status === trkFilter[sec]; });
+    if (cfg.dated) shown = shown.slice().sort(function (a, b) { return (b.date || "").localeCompare(a.date || "") || b.added - a.added; });
+    if (!L.length) p.appendChild(el("p", "empty", "Nothing here yet. Add your first " + cfg.noun + " above."));
+    var ul = el("ul", "trklist");
+    shown.forEach(function (x) {
+      var li = el("li", "trow2");
+      li.style.setProperty("--sc", stInfo(cfg, x.status)[2]);
+      li.appendChild(statusSelect(cfg, x.status, function (v) { x.status = v; save(); render(); }));
+      var tb = el("div", "ftx");
+      var tt = el("input"); tt.type = "text"; tt.className = "ftitle"; tt.value = x.title; tt.maxLength = 160; tt.setAttribute("aria-label", cfg.noun + " title");
+      tt.onchange = function () { x.title = tt.value.trim() || x.title; save(); };
+      tb.appendChild(tt);
+      var meta = el("div", "fmeta");
+      var d2 = el("input"); d2.type = "date"; d2.value = x.date || ""; d2.setAttribute("aria-label", "Date"); d2.onchange = function () { x.date = d2.value; save(); };
+      meta.appendChild(d2);
+      var nb = el("button", "linkbtn", x.notes ? "Notes ✓" : "Add notes"); nb.onclick = function () { trkNote = trkNote === x.id ? null : x.id; render(); };
+      meta.appendChild(nb); tb.appendChild(meta);
+      li.appendChild(tb);
+      var del = el("button", "iconbtn"), armed = false; del.title = "Delete"; del.appendChild(icon("trash"));
+      del.onclick = function () { if (!armed) { armed = true; del.classList.add("armed"); del.title = "Press again to delete"; return; }
+        state.trk[sec] = L.filter(function (y) { return y.id !== x.id; }); save(); render(); };
+      li.appendChild(del);
+      if (trkNote === x.id) { var nt = el("textarea"); nt.placeholder = "Notes"; nt.value = x.notes || ""; nt.onchange = function () { x.notes = nt.value; save(); };
+        var w = el("div"); w.style.flexBasis = "100%"; w.appendChild(nt); li.appendChild(w); }
+      ul.appendChild(li);
+    });
+    p.appendChild(ul);
+    app.appendChild(p);
+    makeCollapsible("t-" + sec);
+  }
+
+  // Finance: a simple money in / money out log, month by month
+  var finMonth = null;
+  function renderFinance(){
+    var now = new Date(); finMonth = finMonth || (now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2));
+    var parts = finMonth.split("-"), mDate = new Date(+parts[0], +parts[1] - 1, 1);
+    var M = state.money.filter(function (x) { return (x.date || "").slice(0, 7) === finMonth; }).sort(function (a, b) { return (b.date || "").localeCompare(a.date || "") || b.added - a.added; });
+    var tin = 0, tout = 0; M.forEach(function (x) { if (x.type === "in") tin += x.amount; else tout += x.amount; });
+    var gbp = function (n) { return "£" + n.toLocaleString(undefined, { minimumFractionDigits:2, maximumFractionDigits:2 }); };
+    var p = el("div", "panel"); p.id = "money";
+    p.appendChild(el("h2", null, "Money in & out"));
+    var mh = el("div", "row"); mh.style.justifyContent = "space-between";
+    var nav = el("div", "row");
+    var pv = el("button", "iconbtn"); pv.title = "Previous month"; pv.innerHTML = '<svg viewBox="0 0 24 24" class="ic"><path d="M15 6l-6 6 6 6"/></svg>';
+    var nx = el("button", "iconbtn"); nx.title = "Next month"; nx.innerHTML = '<svg viewBox="0 0 24 24" class="ic"><path d="M9 6l6 6-6 6"/></svg>';
+    var mv = function (d) { var x = new Date(mDate.getFullYear(), mDate.getMonth() + d, 1); finMonth = x.getFullYear() + "-" + ("0" + (x.getMonth() + 1)).slice(-2); render(); };
+    pv.onclick = function () { mv(-1); }; nx.onclick = function () { mv(1); };
+    nav.appendChild(pv); nav.appendChild(el("b", null, mDate.toLocaleDateString(undefined, { month:"long", year:"numeric" }))); nav.appendChild(nx);
+    mh.appendChild(nav); p.appendChild(mh);
+    var sums = el("div", "moneysum");
+    [["In", tin, "in"], ["Out", tout, "out"], ["Left over", tin - tout, tin - tout >= 0 ? "in" : "out"]].forEach(function (x) {
+      var c = el("div", "msum " + x[2]); c.appendChild(el("span", null, x[0])); c.appendChild(el("b", null, gbp(x[1]))); sums.appendChild(c); });
+    p.appendChild(sums);
+    var r = el("div", "row"); r.style.margin = "14px 0 4px";
+    var ds = el("input"); ds.type = "text"; ds.maxLength = 100; ds.placeholder = "e.g. Tutoring payment, Tesco, Oyster top-up"; ds.setAttribute("aria-label", "Description");
+    var am = el("input"); am.type = "number"; am.min = 0; am.step = "0.01"; am.placeholder = "£"; am.setAttribute("aria-label", "Amount"); am.style.width = "110px";
+    var ty = el("select"); ty.setAttribute("aria-label", "In or out"); [["out","Out"],["in","In"]].forEach(function (o) { var x = el("option", null, o[1]); x.value = o[0]; ty.appendChild(x); });
+    var dt = el("input"); dt.type = "date"; dt.className = "dateinp"; dt.value = dkey(now).slice(0, 7) === finMonth ? dkey(now) : finMonth + "-01"; dt.setAttribute("aria-label", "Date");
+    var ab = el("button", "cta"); ab.appendChild(icon("plus")); ab.appendChild(document.createTextNode("Add"));
+    var add = function () { var a = Math.round(parseFloat(am.value) * 100) / 100; if (!ds.value.trim() || !(a > 0)) return;
+      state.money.push({ id:uid(), desc:ds.value.trim(), amount:a, type:ty.value, date:dt.value || dkey(now), added:Date.now() }); save(); render(); };
+    ab.onclick = add; am.onkeydown = ds.onkeydown = function (e) { if (e.key === "Enter") add(); };
+    r.appendChild(ds); r.appendChild(am); r.appendChild(ty); r.appendChild(dt); r.appendChild(ab);
+    p.appendChild(r);
+    if (!M.length) p.appendChild(el("p", "empty", "Nothing logged for this month."));
+    var ul = el("ul");
+    M.forEach(function (x) {
+      var li = el("li", "mrow2");
+      li.appendChild(el("span", "mdate", new Date(x.date + "T12:00").toLocaleDateString(undefined, { day:"numeric", month:"short" })));
+      li.appendChild(el("span", "label", x.desc));
+      li.appendChild(el("b", "mamt " + x.type, (x.type === "in" ? "+" : "−") + gbp(x.amount)));
+      var del = el("button", "iconbtn"), armed = false; del.title = "Delete"; del.appendChild(icon("trash"));
+      del.onclick = function () { if (!armed) { armed = true; del.classList.add("armed"); return; } state.money = state.money.filter(function (y) { return y.id !== x.id; }); save(); render(); };
+      li.appendChild(del); ul.appendChild(li);
+    });
+    p.appendChild(ul);
+    app.appendChild(p);
+    makeCollapsible("money");
+  }
+
+  function groupTabs(parent, subs){
+    var bar = el("div", "subtabs");
+    [parent].concat(subs).forEach(function (id) {
+      var p = byId[id], b = el("button", state.tab === id ? "on" : null);
+      b.appendChild(icon(p.icon)); b.appendChild(document.createTextNode(id === parent ? "All" : p.name));
+      b.onclick = function () { go(id); }; bar.appendChild(b);
+    });
+    return bar;
+  }
+  function renderGroupHome(parent, subs){
+    var grid = el("div", "grid");
+    subs.forEach(function (id) {
+      var n = 0, lbl = byId[id].name;
+      if (TRK[id]) { var L = state.trk[id] || [], cfg = TRK[id], last = cfg.statuses[cfg.statuses.length - 1][0];
+        if (cfg.statuses === UNI_STATUS) { n = L.filter(function (x) { return x.status === "teach"; }).length; lbl += " · " + n + "/" + L.length + " can teach"; }
+        else if (id === "business") { n = L.length; lbl += " · " + L.filter(function (x) { return x.status === "live"; }).length + " running"; }
+        else { n = L.filter(function (x) { return x.status === "plan"; }).length; lbl += " · planned"; } }
+      else if (id === "finance") { var mk = dkey(new Date()).slice(0, 7); n = state.money.filter(function (x) { return (x.date || "").slice(0, 7) === mk; }).length; lbl += " · entries this month"; }
+      grid.appendChild(tile(byId[id], n, lbl));
+    });
+    app.appendChild(grid);
+  }
+
+  // reminder of death, in the sidebar corner (and on the Overview on phones)
+  var MEMENTO = [
+    { ar:"كُلُّ نَفْسٍ ذَائِقَةُ الْمَوْتِ", en:"“Every soul will taste death.”", ref:"Āl ʿImrān 3:185" },
+    { ar:"أَكْثِرُوا ذِكْرَ هَاذِمِ اللَّذَّاتِ", en:"“Remember often the destroyer of pleasures”: death.", ref:"at-Tirmidhī" },
+    { ar:"كُنْ فِي الدُّنْيَا كَأَنَّكَ غَرِيبٌ أَوْ عَابِرُ سَبِيلٍ", en:"“Be in this world as if you were a stranger or a traveller.”", ref:"al-Bukhārī" }
+  ];
+  function mementoEl(cls){
+    var i = Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 864e5) % MEMENTO.length, m = MEMENTO[i];
+    var d = el("div", "memento " + (cls || ""));
+    d.appendChild(el("div", "mlbl", "Remember death"));
+    d.appendChild(el("div", "mar", m.ar));
+    d.appendChild(el("div", "men", m.en));
+    d.appendChild(el("div", "mref", m.ref));
+    return d;
+  }
 
   function render(){
     app.innerHTML = "";
