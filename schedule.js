@@ -524,10 +524,10 @@
     var view = s.view || "day";
     function shift(dir) {
       if (view === "month") { var dd = pk(k); V.day = dkey(new Date(dd.getFullYear(), dd.getMonth() + dir, 1)); }
-      else V.day = addDays(k, dir * (view === "multi" ? 3 : 7));
+      else V.day = addDays(k, dir * (view === "multi" ? 3 : view === "day" ? 1 : 7));
       C.rerender();
     }
-    var unit = view === "month" ? "month" : view === "multi" ? "3 days" : "week";
+    var unit = view === "month" ? "month" : view === "multi" ? "3 days" : view === "day" ? "day" : "week";
     var prev = el("button", "sch-ib"); prev.title = "Previous " + unit; prev.appendChild(svg("left")); prev.onclick = function () { shift(-1); };
     var tdy = el("button", "sch-pill", "Today"); tdy.onclick = function () { V.day = tk; C.rerender(); };
     var next = el("button", "sch-ib"); next.title = "Next " + unit; next.appendChild(svg("right")); next.onclick = function () { shift(1); };
@@ -549,21 +549,6 @@
       if (view === "month") root.appendChild(monthView(k, tk));
       else root.appendChild(columnsView(view === "multi" ? [k, addDays(k, 1), addDays(k, 2)] : weekDaysOf(k), tk, view));
     } else {
-
-    // week strip
-    var strip = el("div", "sch-week"), mon = mondayOf(k);
-    for (var i = 0; i < 7; i++) (function (dk) {
-      var dd = pk(dk), b = el("button", "sch-day" + (dk === k ? " sel" : "") + (dk === tk ? " today" : ""));
-      b.appendChild(el("span", "wd", dd.toLocaleDateString(undefined, { weekday: "short" }).slice(0, 3)));
-      b.appendChild(el("span", "dn", String(dd.getDate())));
-      var dots = el("span", "dots"), its = itemsOn(dk);
-      its.slice(0, 3).forEach(function (it) { var c = el("i"); c.style.background = it.color; c.appendChild(svg(it.icon)); dots.appendChild(c); });
-      if (its.length > 3) dots.appendChild(el("em", null, "+" + (its.length - 3)));
-      b.appendChild(dots);
-      b.onclick = function () { V.day = dk; C.rerender(); };
-      strip.appendChild(b);
-    })(addDays(mon, i));
-    root.appendChild(strip);
 
     // day heading
     var dh = el("div", "sch-dayh");
