@@ -832,6 +832,8 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
     business:'<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>',
     tutoring:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M7 20l2-4M17 20l-2-4"/><path d="M8 10l2.5 2.5L16 7"/>',
     finance:'<rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><circle cx="16" cy="15" r="1.5"/><path d="M6 3h12"/>',
+    isoc:'<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M20 4.5A4 4 0 1 0 20 11a3.2 3.2 0 0 1 0-6.5z"/>',
+    ambitions:'<path d="M2.5 20l7-12 4 6 2.5-3.5L21.5 20z"/><path d="M9.5 8V3l4 2-4 2"/>',
     teacher:'<circle cx="8" cy="7" r="3"/><path d="M3 20v-2a5 5 0 0 1 10 0v2"/><path d="M13 4h8v9h-6"/><path d="M15 8h4"/>',
     calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
     trash:'<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/>',
@@ -857,6 +859,7 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
     { id:"seerah",     name:"Seerah",           icon:"seerah",     group:"islamic", parent:"studies", ar:"السِّيرَةُ النَّبَوِيَّةُ", sub:"Life of the Prophet ﷺ", bg:"سيرة", color:"--c4" },
     { id:"logic",      name:"Language & Logic", icon:"logic",      group:"islamic", parent:"studies", ar:"اللُّغَةُ وَالمَنْطِقُ", sub:"Naḥw, ṣarf, balāghah & manṭiq", bg:"منطق", color:"--c3" },
     { id:"arabic",     name:"Arabic",          icon:"arabic",     group:"islamic", parent:"islamic", ar:"اللُّغَةُ العَرَبِيَّةُ", sub:"Vocabulary & grammar", bg:"عربي", color:"--c4" },
+    { id:"isoc",       name:"ISOC",            icon:"isoc",       group:"islamic", parent:"islamic", ar:"الجَمْعِيَّةُ الإِسْلَامِيَّةُ", sub:"Islamic Society: events, ideas & da‘wah", bg:"جمعية", color:"--c6" },
     { id:"university", name:"University",      icon:"university", group:null,      sub:"Dental school", bg:"جامعة", color:"--c2" },
     { id:"lectures",   name:"Lectures",        icon:"lectures",   group:"university", parent:"university", sub:"Track every lecture topic", bg:"محاضرات", color:"--c2" },
     { id:"tutorials",  name:"Tutorials",       icon:"tutorials",  group:"university", parent:"university", sub:"Track every tutorial", bg:"دروس", color:"--c6" },
@@ -865,17 +868,18 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
     { id:"business",   name:"Business ideas",  icon:"business",   group:"work", parent:"work", sub:"Ideas, research & tests", bg:"أفكار", color:"--c4" },
     { id:"tutoring",   name:"Tutoring",        icon:"tutoring",   group:"work", parent:"work", sub:"Students & sessions", bg:"تدريس", color:"--c1" },
     { id:"finance",    name:"Finance",         icon:"finance",    group:"work", parent:"work", sub:"Money in & out", bg:"مال", color:"--c5" },
+    { id:"ambitions",  name:"Life ambitions",  icon:"ambitions",  group:null,      ar:"طُمُوحَاتُ الحَيَاةِ", sub:"This life and the next", bg:"طموح", color:"--c1" },
     { id:"tools",      name:"Tools",           icon:"tools",      group:null,      sub:"Focus, prayer & countdowns", bg:"تركيز", color:"--c4" },
     { id:"settings",   name:"Settings",        icon:"settings",   group:null,      bg:"إعدادات" }
   ];
 
   var byId = {}; PAGES.forEach(function (p) { byId[p.id] = p; });
   var SCIENCES = ["aqeedah","fiqh","tazkiyah","tafsir","hadith","seerah","logic"];
-  var ISLAMIC_SUBS = ["quran","studies","arabic"];
+  var ISLAMIC_SUBS = ["quran","studies","arabic","isoc"];
   var STUDY_SUBS = SCIENCES;
   var UNI_SUBS = ["lectures","tutorials","seminars"], WORK_SUBS = ["business","tutoring","finance"];
   var NAV_GROUPS = { university:UNI_SUBS, work:WORK_SUBS };
-  var TASK_SECTIONS = ["quran","studies"].concat(SCIENCES, ["arabic","university"], UNI_SUBS, ["work"], WORK_SUBS);
+  var TASK_SECTIONS = ["quran","studies"].concat(SCIENCES, ["arabic","isoc","university"], UNI_SUBS, ["work"], WORK_SUBS, ["ambitions"]);
   function isUnder(id, anc){ var p = byId[id]; while (p) { if (p.id === anc) return true; p = p.parent ? byId[p.parent] : null; } return false; }
   var THEMES = [
     { id:"auto",    name:"Auto",    note:"Follows your device", sw:["#f4f1ec","#131816","#e0603f","#1f4f4a"] },
@@ -1193,6 +1197,7 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
     if (sec === "quran") renderQuranTrackers();
     if (sec === "hadith") renderHadithTrackers();
     if (SCIENCES.indexOf(sec) >= 0) { if (sec !== "hadith") renderSciGoals(sec); renderPdfs(sec); }
+    if (sec === "isoc" || sec === "ambitions") renderSciGoals(sec);
 
     renderNotes(sec);
 
@@ -2068,6 +2073,8 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
     tafsir:{ week:"e.g. Tafsīr of Sūrat al-Mulk 1–10", month:"e.g. Complete Juz ʿAmma tafsīr", year:"e.g. Tafsīr of the last three juz" },
     hadith:{ week:"e.g. Explanation of hadith 6", month:"e.g. Read the sharḥ of 10 hadith", year:"e.g. Finish a sharḥ of the Arbaʿīn" },
     seerah:{ week:"e.g. The Makkan period, part 1", month:"e.g. Finish the Battle of Badr", year:"e.g. Complete ar-Raḥīq al-Makhtūm" },
+    isoc:{ week:"e.g. Post the event poster", month:"e.g. Run two halaqahs", year:"e.g. Organise a charity week" },
+    ambitions:{ week:"e.g. One step towards a big ambition", month:"e.g. Research Hajj packages", year:"e.g. Finish memorising Juz 29 and 30" },
     logic:{ week:"e.g. Learn the signs of the ism", month:"e.g. Finish al-Ājurrūmiyyah", year:"e.g. Start an intro to manṭiq" }
   };
   function renderSciencesHome(){
@@ -2223,9 +2230,12 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
     tutorials: { noun:"tutorial", list:"Tutorials", statuses:UNI_STATUS, ph:"e.g. Tutorial 2 · Waxing an incisor", bulk:true },
     seminars:  { noun:"seminar",  list:"Seminars",  statuses:UNI_STATUS, ph:"e.g. Seminar · Infection control", bulk:true },
     business:  { noun:"idea",     list:"Ideas",     statuses:[["idea","Idea","#9aa0a6"],["research","Researching","#d9a33a"],["test","Testing","#6c9bd2"],["live","Running","#3f9a78"],["park","Parked","#b5482f"]], ph:"e.g. Gardening service in North London" },
+    isoc:      { noun:"event or idea", list:"Events & ideas", statuses:[["idea","Idea","#9aa0a6"],["plan","Planning","#d9a33a"],["ready","Booked / ready","#6c9bd2"],["done","Done","#3f9a78"]], ph:"e.g. Weekly halaqah, Islamic trivia night, reminder video" },
+    ambitions: { noun:"ambition", list:"My ambitions", statuses:[["dream","Dream","#c58af9"],["plan","Planning","#d9a33a"],["doing","In progress","#6c9bd2"],["done","Achieved","#3f9a78"]], ph:"e.g. Memorise the whole Qur'an, perform Hajj, open my own dental practice", cats:true },
     tutoring:  { noun:"session",  list:"Sessions",  statuses:[["plan","Planned","#9aa0a6"],["done","Taught","#6c9bd2"],["paid","Paid","#3f9a78"]], ph:"e.g. GCSE Biology · Cell transport", dated:true }
   };
   var trkFilter = {}, trkNote = null, trkBulk = {};
+  var AREAS = ["Dīn & ākhirah","Qur'an & knowledge","Family","Career","Health","Wealth","Travel","Community","Personal"];
   function stInfo(cfg, k){ for (var i = 0; i < cfg.statuses.length; i++) if (cfg.statuses[i][0] === k) return cfg.statuses[i]; return cfg.statuses[0]; }
   function statusSelect(cfg, val, onch){
     var sel = el("select", "stsel"); sel.setAttribute("aria-label", "Status");
@@ -2246,7 +2256,7 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
       var lastKey = cfg.statuses[cfg.statuses.length - 1][0];
       var headKey = sec === "business" ? "live" : sec === "tutoring" ? "done" : lastKey;
       var bn = el("div", "bignum", String(sec === "tutoring" ? counts.done + counts.paid : counts[headKey]));
-      bn.appendChild(el("small", null, "of " + L.length + " · " + (sec === "business" ? "running" : sec === "tutoring" ? "taught" : "can teach")));
+      bn.appendChild(el("small", null, "of " + L.length + " · " + (sec === "business" ? "running" : sec === "tutoring" ? "taught" : sec === "isoc" ? "done" : sec === "ambitions" ? "achieved" : "can teach")));
       top.appendChild(bn); p.appendChild(top);
       var bar = el("div", "stack");
       cfg.statuses.forEach(function (st) { if (!counts[st[0]]) return; var seg = el("i"); seg.style.background = st[2]; seg.style.width = (counts[st[0]] / L.length * 100) + "%"; seg.title = st[1] + ": " + counts[st[0]]; bar.appendChild(seg); });
@@ -2264,10 +2274,12 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
     var dt = el("input"); dt.type = "date"; dt.className = "dateinp"; dt.setAttribute("aria-label", "Date"); if (cfg.dated) dt.value = tk;
     var ss = statusSelect(cfg, cfg.statuses[0][0], function (v) { ss.value = v; var c = stInfo(cfg, v)[2]; ss.style.color = c; ss.style.borderColor = c; ss.style.background = "color-mix(in srgb," + c + " 14%,var(--bg))"; });
     var ab = el("button", "cta"); ab.appendChild(icon("plus")); ab.appendChild(document.createTextNode("Add"));
-    var addOne = function () { var t = ti.value.trim(); if (!t) return; L.push({ id:uid(), title:t, date:dt.value || "", status:ss.value, notes:"", added:Date.now() }); save(); render();
+    var addOne = function () { var t = ti.value.trim(); if (!t) return; L.push({ id:uid(), title:t, date:dt.value || "", status:ss.value, notes:"", added:Date.now(), area:ar ? ar.value : undefined }); save(); render();
       var x = document.querySelector("#t-" + sec + " .row input[type=text]"); if (x) x.focus(); };
     ab.onclick = addOne; ti.onkeydown = function (e) { if (e.key === "Enter") addOne(); };
-    r.appendChild(ti); r.appendChild(dt); r.appendChild(ss); r.appendChild(ab);
+    var ar = null;
+    if (cfg.cats) { ar = el("select"); ar.setAttribute("aria-label", "Life area"); AREAS.forEach(function (a) { var o = el("option", null, a); o.value = a; ar.appendChild(o); }); dt.title = "Target date (optional)"; }
+    r.appendChild(ti); if (ar) r.appendChild(ar); r.appendChild(dt); r.appendChild(ss); r.appendChild(ab);
     p.appendChild(r);
     // paste a whole list
     if (cfg.bulk) {
@@ -2290,8 +2302,10 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
     var shown = L.filter(function (x) { return !trkFilter[sec] || trkFilter[sec] === "all" || x.status === trkFilter[sec]; });
     if (cfg.dated) shown = shown.slice().sort(function (a, b) { return (b.date || "").localeCompare(a.date || "") || b.added - a.added; });
     if (!L.length) p.appendChild(el("p", "empty", "Nothing here yet. Add your first " + cfg.noun + " above."));
-    var ul = el("ul", "trklist");
+    var ul = el("ul", "trklist"), lastArea = null;
+    if (cfg.cats) shown = shown.slice().sort(function (a, b) { return AREAS.indexOf(a.area) - AREAS.indexOf(b.area) || a.added - b.added; });
     shown.forEach(function (x) {
+      if (cfg.cats && x.area !== lastArea) { lastArea = x.area; var gh = el("li", "tgroup"); gh.appendChild(el("span", null, x.area || "Other")); ul.appendChild(gh); }
       var li = el("li", "trow2");
       li.style.setProperty("--sc", stInfo(cfg, x.status)[2]);
       li.appendChild(statusSelect(cfg, x.status, function (v) { x.status = v; save(); render(); }));
