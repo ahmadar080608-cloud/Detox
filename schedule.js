@@ -321,6 +321,195 @@
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
   }
 
+  // ---------- Google Calendar (Google sign-in in the browser; no server) ----------
+  var G = { token: null, exp: 0, busy: false };
+  var GSCOPE = "https://www.googleapis.com/auth/calendar.events";
+  try { var tk0 = JSON.parse(sessionStorage.getItem("detoxGToken") || "null"); if (tk0 && tk0.exp > Date.now()) { G.token = tk0.t; G.exp = tk0.exp; } } catch (e) {}
+  function gc() { var s = S(); s.gcal = s.gcal || {}; return s.gcal; }
+  function gOK() { return !!(G.token && Date.now() < G.exp); }
+  function gLoad(cb) {
+    if (window.google && google.accounts && google.accounts.oauth2) return cb && cb();
+    var ex = document.getElementById("gsi-js");
+    if (ex) { if (cb) ex.addEventListener("load", function () { cb(); }); return; }
+    var sc = document.createElement("script"); sc.id = "gsi-js"; sc.src = "https://accounts.google.com/gsi/client"; sc.async = true;
+    sc.onload = function () { cb && cb(); };
+    sc.onerror = function () { V.toast = "Couldn't reach Google sign-in. Check your connection."; C.rerender(); };
+    document.head.appendChild(sc);
+  }
+  var tokenClient = null, pendingFns = [];
+  function gAuth(fn) {
+    var g0 = gc(); if (!g0.clientId) { V.toast = "Add your Google Client ID first (see Google Calendar below)."; C.rerender(); return; }
+    if (fn) pendingFns.push(fn);
+    gLoad(function () {
+      if (!tokenClient || tokenClient._cid !== g0.clientId) {
+        tokenClient = google.accounts.oauth2.initTokenClient({ client_id: g0.clientId, scope: GSCOPE, callback: function (r) {
+          if (!r || r.error) { pendingFns = []; G.busy = false; V.toast = "Google sign-in didn't finish" + (r && r.error ? " (" + r.error + ")" : "") + "."; C.rerender(); return; }
+          G.token = r.access_token; G.exp = Date.now() + ((+r.expires_in || 3600) - 60) * 1000;
+          try { sessionStorage.setItem("detoxGToken", JSON.stringify({ t: G.token, exp: G.exp })); } catch (e) {}
+          var first = !gc().connected; gc().connected = true; C.save();
+          var fns = pendingFns; pendingFns = []; fns.forEach(function (f) { try { f(); } catch (e) {} });
+          if (first && !fns.length) gPull();
+          C.rerender();
+        }, error_callback: function (e) { pendingFns = []; G.busy = false; V.toast = "Google sign-in was closed or blocked" + (e && e.type ? " (" + e.type + ")" : "") + "."; C.rerender(); } });
+        tokenClient._cid = g0.clientId;
+      }
+      tokenClient.requestAccessToken({ prompt: g0.connected ? "" : "consent" });
+    });
+  }
+  function withToken(fn) { if (gOK()) fn(); else gAuth(fn); }
+  function gApi(method, path, body) {
+    return fetch("https://www.googleapis.com/calendar/v3/" + path, {
+      method: method, headers: { "Authorization": "Bearer " + G.token, "Content-Type": "application/json" },
+      body: body ? JSON.stringify(body) : undefined
+    }).then(function (r) {
+      if (r.status === 401) { G.token = null; try { sessionStorage.removeItem("detoxGToken"); } catch (e) {} throw new Error("Google sign-in expired. Press Sync now to reconnect."); }
+      if (r.status === 204 || r.status === 410) return null;
+      return r.json().then(function (j) { if (!r.ok) throw new Error((j.error && j.error.message) || ("Google said " + r.status)); return j; });
+    });
+  }
+  function gErr(e) { V.toast = "Google Calendar: " + (e && e.message ? e.message : "something went wrong"); C.rerender(); }
+  function localDT(iso) { var d = new Date(iso); return { key: dkey(d), min: d.getHours() * 60 + d.getMinutes(), d: d }; }
+
+  // bring Google events into the timeline (recurring events arrive as single days)
+  function gPull(quiet) {
+    if (G.busy) return; G.busy = true;
+    withToken(function () {
+      var from = new Date(); from.setDate(from.getDate() - 14); var to = new Date(); to.setDate(to.getDate() + 120);
+      var all = [];
+      function page(tok) {
+        return gApi("GET", "calendars/primary/events?singleEvents=true&orderBy=startTime&maxResults=2500&timeMin=" + encodeURIComponent(from.toISOString()) +
+          "&timeMax=" + encodeURIComponent(to.toISOString()) + (tok ? "&pageToken=" + encodeURIComponent(tok) : "")).then(function (j) {
+          all = all.concat((j && j.items) || []); if (j && j.nextPageToken) return page(j.nextPageToken);
+        });
+      }
+      page(null).then(function () {
+        var s = S(), localIds = {}, oldDone = {}, oldLook = {};
+        s.items.forEach(function (x) { localIds[x.id] = 1; if (x.source === "gcal") { oldDone[x.gid] = x.done || {}; oldLook[x.gid] = { icon: x.icon, color: x.color, subtasks: x.subtasks }; } });
+        var fresh = [];
+        all.forEach(function (e) {
+          if (e.status === "cancelled" || !e.start) return;
+          var dId = e.extendedProperties && e.extendedProperties["private"] && e.extendedProperties["private"].detoxId;
+          if (dId && localIds[dId]) return;   // made in Detox: the Detox copy is shown instead
+          var it = { id: "g-" + e.id, gid: e.id, source: "gcal", title: e.summary || "(No title)", notes: (e.description || "").slice(0, 2000),
+            repeat: { type: "none" }, done: oldDone[e.id] || {}, subtasks: [], color: "#6c9bd2", icon: guessIcon(e.summary) || "calendar", recurringGoogle: !!e.recurringEventId };
+          if (e.start.date) { it.allDay = true; it.date = e.start.date; it.start = null; it.dur = 0; it.remind = null; }
+          else {
+            var a = localDT(e.start.dateTime), b = localDT(e.end && e.end.dateTime ? e.end.dateTime : e.start.dateTime);
+            it.allDay = false; it.date = a.key; it.start = toHM(a.min); it.dur = Math.max(0, Math.min(1440, Math.round((b.d - a.d) / 60000)));
+            var ov = e.reminders && e.reminders.overrides && e.reminders.overrides[0]; it.remind = ov ? ov.minutes : (e.reminders && e.reminders.useDefault ? 10 : null);
+          }
+          if (oldLook[e.id]) { it.icon = oldLook[e.id].icon; it.color = oldLook[e.id].color; it.subtasks = oldLook[e.id].subtasks || []; }
+          fresh.push(it);
+        });
+        s.items = s.items.filter(function (x) { return x.source !== "gcal"; }).concat(fresh);
+        gc().lastSync = Date.now(); C.save(); G.busy = false;
+        if (!quiet) V.toast = "Synced " + fresh.length + " events from Google Calendar.";
+        C.rerender();
+      }).catch(function (e) { G.busy = false; gErr(e); });
+    });
+    if (!gOK()) setTimeout(function () { G.busy = false; }, 30000);
+  }
+  function rruleOf(it) {
+    var r = it.repeat || {}, rr = null;
+    if (r.type === "daily") rr = "FREQ=DAILY";
+    else if (r.type === "weekdays") rr = "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR";
+    else if (r.type === "weekly") rr = "FREQ=WEEKLY" + (r.days && r.days.length ? ";BYDAY=" + r.days.map(function (x) { return ["MO","TU","WE","TH","FR","SA","SU"][x]; }).join(",") : "");
+    else if (r.type === "monthly") rr = "FREQ=MONTHLY";
+    else if (r.type === "yearly") rr = "FREQ=YEARLY";
+    if (rr && (r.interval || 1) > 1) rr += ";INTERVAL=" + r.interval;
+    if (rr && it.until) rr += ";UNTIL=" + it.until.replace(/-/g, "") + (it.allDay || !it.start ? "" : "T235959Z");
+    return rr;
+  }
+  function toGEvent(it, withRepeat) {
+    var tz = "UTC"; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"; } catch (e) {}
+    var ev = { summary: it.title, description: it.notes || "", extendedProperties: { "private": { detoxId: it.id } } };
+    if (it.allDay || !it.start) { ev.start = { date: it.date }; ev.end = { date: addDays(it.date, 1) }; }
+    else {
+      var st = hm(it.start), en = st + Math.max(it.dur || 0, 0), ed = en >= 1440 ? addDays(it.date, 1) : it.date;
+      ev.start = { dateTime: it.date + "T" + toHM(st) + ":00", timeZone: tz }; ev.end = { dateTime: ed + "T" + toHM(en) + ":00", timeZone: tz };
+    }
+    ev.reminders = it.remind != null && it.remind >= 0 && !it.allDay ? { useDefault: false, overrides: [{ method: "popup", minutes: it.remind }] } : { useDefault: false, overrides: [] };
+    if (withRepeat) { var rr = rruleOf(it); ev.recurrence = rr ? ["RRULE:" + rr] : []; }
+    return ev;
+  }
+  // send one task's changes to Google
+  function gPush(it) {
+    var g0 = gc(); if (!g0.connected || !g0.clientId) return;
+    if (it.source !== "gcal" && !it.gsync) return;
+    withToken(function () {
+      var p;
+      if (it.source === "gcal") { var ev = toGEvent(it, false); delete ev.extendedProperties; p = gApi("PATCH", "calendars/primary/events/" + encodeURIComponent(it.gid), ev); }
+      else if (it.gid) p = gApi("PUT", "calendars/primary/events/" + encodeURIComponent(it.gid), toGEvent(it, true));
+      else p = gApi("POST", "calendars/primary/events", toGEvent(it, true)).then(function (j) { var x = S().items.find(function (y) { return y.id === it.id; }); if (x && j && j.id) { x.gid = j.id; C.save(); } return j; });
+      p.then(function () { V.toast = "Saved to Google Calendar."; C.rerender(); }).catch(gErr);
+    });
+  }
+  function gDelete(gid) {
+    if (!gid || !gc().connected) return;
+    withToken(function () { gApi("DELETE", "calendars/primary/events/" + encodeURIComponent(gid)).then(function () { V.toast = "Removed from Google Calendar."; C.rerender(); }).catch(gErr); });
+  }
+  function gDisconnect() {
+    var g0 = gc();
+    try { if (G.token && window.google && google.accounts) google.accounts.oauth2.revoke(G.token, function () {}); } catch (e) {}
+    G.token = null; try { sessionStorage.removeItem("detoxGToken"); } catch (e) {}
+    g0.connected = false; var s = S(); s.items = s.items.filter(function (x) { return x.source !== "gcal"; });
+    s.items.forEach(function (x) { delete x.gid; }); C.save(); V.toast = "Disconnected from Google Calendar."; C.rerender();
+  }
+
+  function googleRow(tp) {
+    var g0 = gc(), r = el("div", "setrow gcal"), l = el("div", "sl");
+    var name = el("b"); name.appendChild(svg("calendar", "gic")); name.appendChild(document.createTextNode(" Google Calendar")); l.appendChild(name);
+    var right = el("div", "row");
+    if (!g0.clientId) {
+      l.appendChild(el("span", null, "Link your Google account: your events show here, and tasks you add here go into Google Calendar with their reminders."));
+      var su = el("button", "cta", V.gSetup ? "Hide setup" : "Set up"); su.onclick = function () { V.gSetup = !V.gSetup; C.rerender(); }; right.appendChild(su);
+    } else if (!g0.connected) {
+      l.appendChild(el("span", null, "Ready to connect. You'll be asked to sign in with Google and allow access to your calendar."));
+      var cn = el("button", "cta", "Connect Google Calendar"); cn.onclick = function () { gAuth(null); }; right.appendChild(cn);
+      var ch = el("button", "ghost", "Change Client ID"); ch.onclick = function () { V.gSetup = true; g0.clientId = ""; C.save(); C.rerender(); }; right.appendChild(ch);
+    } else {
+      var ago = g0.lastSync ? Math.round((Date.now() - g0.lastSync) / 60000) : null;
+      l.appendChild(el("span", null, "Connected · " + (ago == null ? "not synced yet" : ago < 1 ? "synced just now" : "synced " + (ago < 60 ? ago + " min" : Math.round(ago / 60) + " h") + " ago") +
+        ". Google events show in blue. New tasks also go to Google unless you untick it in the task."));
+      var sy = el("button", "cta", "Sync now"); sy.onclick = function () { gPull(); }; right.appendChild(sy);
+      var dc = el("button", "ghost", "Disconnect"); dc.onclick = gDisconnect; right.appendChild(dc);
+    }
+    r.appendChild(l); r.appendChild(right); tp.appendChild(r);
+    if (!g0.clientId && V.gSetup) {
+      var box = el("div", "gsetup");
+      box.appendChild(el("p", null, "One-time setup, about 10 minutes. Google needs every website that reads a calendar to have its own Client ID:"));
+      var ol = el("ol"), origin = location.origin;
+      [
+        ["Open ", { a: "https://console.cloud.google.com/projectcreate", t: "Google Cloud Console" }, " and create a project called Detox."],
+        ["Open ", { a: "https://console.cloud.google.com/apis/library/calendar-json.googleapis.com", t: "Google Calendar API" }, " and press Enable."],
+        ["Open ", { a: "https://console.cloud.google.com/auth/overview", t: "Google Auth Platform" }, ", press Get started, name the app Detox, choose External, and add your email."],
+        ["Under Audience, press Add users and add your own Gmail address as a test user."],
+        ["Under Clients, press Create client → Web application. Under Authorised JavaScript origins add ", { code: origin }, " and press Create."],
+        ["Copy the Client ID (it ends in .apps.googleusercontent.com) and paste it below."]
+      ].forEach(function (parts) {
+        var li = el("li");
+        parts.forEach(function (x) {
+          if (typeof x === "string") li.appendChild(document.createTextNode(x));
+          else if (x.a) { var a = el("a", null, x.t); a.href = x.a; a.target = "_blank"; a.rel = "noopener"; li.appendChild(a); }
+          else if (x.code) li.appendChild(el("code", null, x.code));
+        });
+        ol.appendChild(li);
+      });
+      box.appendChild(ol);
+      box.appendChild(el("p", "meta", "When you connect, Google may say the app isn't verified. That's expected for your own private app: press Continue."));
+      var row = el("div", "row");
+      var ci = el("input"); ci.type = "text"; ci.placeholder = "xxxxxxxx.apps.googleusercontent.com"; ci.setAttribute("aria-label", "Google Client ID");
+      var ok = el("button", "cta", "Save Client ID");
+      ok.onclick = function () {
+        var v = ci.value.trim();
+        if (!/\.apps\.googleusercontent\.com$/.test(v)) { V.toast = "That doesn't look like a Client ID. It should end in .apps.googleusercontent.com"; C.rerender(); return; }
+        g0.clientId = v; V.gSetup = false; C.save(); gLoad(); C.rerender();
+      };
+      row.appendChild(ci); row.appendChild(ok); box.appendChild(row);
+      tp.appendChild(box);
+    }
+  }
+
   // ---------- rendering ----------
   function render(app) {
     var s = S(), k = V.day || (V.day = today()), tk = today();
@@ -444,8 +633,10 @@
     };
     r1.appendChild(sw); tp.appendChild(r1);
 
+    googleRow(tp);
+
     var r2 = el("div", "setrow");
-    var l2 = el("div", "sl"); l2.appendChild(el("b", null, "Import a calendar"));
+    var l2 = el("div", "sl"); l2.appendChild(el("b", null, "Import a calendar file"));
     l2.appendChild(el("span", null, "Choose an .ics file exported from Google Calendar, Apple Calendar or Outlook. Re-import any time to update."));
     r2.appendChild(l2);
     var fi = el("input"); fi.type = "file"; fi.accept = ".ics,text/calendar"; fi.style.display = "none";
@@ -461,7 +652,7 @@
     r2.appendChild(ib); r2.appendChild(fi); tp.appendChild(r2);
 
     var r3 = el("div", "setrow");
-    var l3 = el("div", "sl"); l3.appendChild(el("b", null, "Send to your phone's calendar"));
+    var l3 = el("div", "sl"); l3.appendChild(el("b", null, "Export a calendar file"));
     l3.appendChild(el("span", null, "Downloads your schedule as an .ics file with repeats and reminders. Open it on your phone or add it in Google Calendar to get alerts there."));
     r3.appendChild(l3);
     var eb = el("button", "ghost"); eb.appendChild(svg("download")); eb.appendChild(document.createTextNode("Export .ics")); eb.onclick = exportICS;
@@ -649,7 +840,7 @@
     // repeat + reminder
     var c2 = el("div", "sch-card");
     var rR = el("div", "sch-line2"); rR.appendChild(svg("repeat", "acc"));
-    var rs = el("select"); rs.setAttribute("aria-label", "Repeat");
+    var rs = el("select"); rs.setAttribute("aria-label", "Repeat"); if (dr.source === "gcal") rs.disabled = true;
     [["none","Doesn't repeat"],["daily","Every day"],["weekdays","Weekdays (Mon–Fri)"],["weekly","Weekly on…"],["monthly","Monthly"],["yearly","Yearly"]].forEach(function (o) { var x = el("option", null, o[1]); x.value = o[0]; rs.appendChild(x); });
     rs.value = (dr.repeat && dr.repeat.type) || "none";
     rs.onchange = function () { dr.repeat = { type: rs.value }; if (rs.value === "weekly") dr.repeat.days = [(pk(dr.date).getDay() + 6) % 7]; dr.title = ti.value; C.rerender(); };
@@ -699,6 +890,14 @@
     c3.appendChild(nt);
     bd.appendChild(c3);
 
+    if (gc().connected && dr.source !== "gcal" && dr.source !== "ics") {
+      if (E.isNew && dr.gsync == null) dr.gsync = gc().pushDefault !== false;
+      var gl = el("label", "sch-gsync"); var gcb = el("input"); gcb.type = "checkbox"; gcb.checked = !!dr.gsync;
+      gcb.onchange = function () { dr.gsync = gcb.checked; if (E.isNew) { gc().pushDefault = gcb.checked; C.save(); } };
+      gl.appendChild(gcb); gl.appendChild(svg("calendar", "acc")); gl.appendChild(document.createTextNode(dr.gid ? "Synced with Google Calendar" : "Also save to Google Calendar"));
+      bd.appendChild(gl);
+    }
+    if (dr.source === "gcal") bd.appendChild(el("p", "meta", "From Google Calendar. Changes to the title, time, reminder and notes are saved back to Google" + (dr.recurringGoogle ? " for this day only." : ".")));
     if (dr.repeat && dr.repeat.type !== "none" && !E.isNew) bd.appendChild(el("p", "meta", "Changes apply to every repeat of this task."));
 
     // footer
@@ -707,11 +906,14 @@
       var orig = s.items.find(function (x) { return x.id === dr.id; });
       if (orig && orig.repeat && orig.repeat.type !== "none") {
         var d1 = el("button", "ghost danger", "Delete this day only");
-        d1.onclick = function () { orig.skip = orig.skip || {}; orig.skip[E.occ] = true; C.save(); closeEditor(); };
+        d1.onclick = function () { orig.skip = orig.skip || {}; orig.skip[E.occ] = true; C.save(); closeEditor();
+          if (orig.gid) { V.toast = "Removed here only. Edit the series in Google Calendar to skip it there too."; C.rerender(); } };
         ft.appendChild(d1);
       }
       var d2 = el("button", "ghost danger"), armed = false; d2.appendChild(svg("trash")); d2.appendChild(document.createTextNode(orig && orig.repeat && orig.repeat.type !== "none" ? "Delete all" : "Delete"));
-      d2.onclick = function () { if (!armed) { armed = true; d2.lastChild.textContent = "Press again"; return; } s.items = s.items.filter(function (x) { return x.id !== dr.id; }); C.save(); closeEditor(); };
+      d2.onclick = function () { if (!armed) { armed = true; d2.lastChild.textContent = "Press again"; return; }
+        var gone = s.items.find(function (x) { return x.id === dr.id; }); s.items = s.items.filter(function (x) { return x.id !== dr.id; }); C.save(); closeEditor();
+        if (gone && gone.gid) gDelete(gone.gid); };
       ft.appendChild(d2);
     }
     var sp = el("span"); sp.style.flex = "1"; ft.appendChild(sp);
@@ -733,11 +935,15 @@
     else { var i = s.items.findIndex(function (x) { return x.id === dr.id; }); if (i >= 0) s.items[i] = dr; }
     V.day = E.isNew ? dr.date : V.day;
     C.save(); V.edit = null; C.rerender();
+    if (dr.source === "gcal" || dr.gsync) gPush(dr);
   }
 
   // ---------- public ----------
   window.DetoxSchedule = {
-    init: function (ctx) { C = ctx; S(); setInterval(checkReminders, 20000); setTimeout(checkReminders, 1500); },
+    init: function (ctx) { C = ctx; S(); setInterval(checkReminders, 20000); setTimeout(checkReminders, 1500);
+      var g0 = gc();
+      if (g0.clientId && g0.connected) { gLoad(); if (gOK() && (!g0.lastSync || Date.now() - g0.lastSync > 5 * 60000)) setTimeout(function () { gPull(true); }, 800); }
+    },
     render: function (app) { render(app); },
     today: function () { var k = today(), its = itemsOn(k), now = nowMin();
       var left = its.filter(function (it) { return !isDone(it, k); }).length;
