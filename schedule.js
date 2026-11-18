@@ -46,6 +46,37 @@
   var PICK = ["alarm","moon","sun","pray","quran","drop","tooth","grad","pen","list","work","laptop","phone","users","dumbbell","pulse","food","coffee","cart","train","plane","heart","bed","leaf","music","star","calendar"];
   var COLORS = ["#f28b82","#6c9bd2","#81c995","#f6c453","#c58af9","#5ec4d6","#fcad70","#ff8bcb","#9aa0a6","#e0603f"];
 
+  // pick an icon from the words in a task's title
+  var GUESS = [
+    [/\b(pray|prayer|salah|salat|fajr|dhuhr|zuhr|asr|maghrib|isha|jumu?'?ah|masjid|mosque|tahajjud|witr|duha|taraweeh)\b/i, "pray"],
+    [/\b(qur'?an|quran|hifz|hifdh|tilawah|surah|juz|mushaf|murajaah|tadabbur|tafsir|tafseer)\b/i, "quran"],
+    [/\b(wudu|wudhu|ghusl|shower|bath|water|drink)\b/i, "drop"],
+    [/\b(dent|dental|tooth|teeth|clinic|clinical|waxing|morphology|dentist)\w*/i, "tooth"],
+    [/\b(lecture|uni|university|seminar|lab|tutorial|exam|class|lesson|course|halaqah|dars)\b/i, "grad"],
+    [/\b(revise|revision|study|homework|essay|assignment|notes|write|journal|flashcards?|anki)\b/i, "pen"],
+    [/\b(read|reading|book)\b/i, "quran"],
+    [/\b(gym|workout|weights|lift|exercise|training)\b/i, "dumbbell"],
+    [/\b(run|running|walk|jog|cardio|football|swim|cycling|sport)\b/i, "pulse"],
+    [/\b(breakfast|lunch|dinner|eat|meal|food|cook|cooking|suhoor|iftar|snack)\b/i, "food"],
+    [/\b(coffee|tea|break|chill)\b/i, "coffee"],
+    [/\b(shop|shopping|groceries|grocery|buy|tesco|market)\b/i, "cart"],
+    [/\b(train|tube|bus|commute|travel|drive|uber)\b/i, "train"],
+    [/\b(flight|airport|holiday|trip|umrah|hajj)\b/i, "plane"],
+    [/\b(meeting|meet|family|friends|visit|group|team|tutoring|tutor)\b/i, "users"],
+    [/\b(call|phone|ring|facetime)\b/i, "phone"],
+    [/\b(email|emails|laptop|code|coding|computer|website|online)\b/i, "laptop"],
+    [/\b(work|job|shift|office|reception)\b/i, "work"],
+    [/\b(sleep|nap|bed|rest)\b/i, "bed"],
+    [/\b(wake|rise|alarm|morning)\b/i, "alarm"],
+    [/\b(wind ?down|night|evening)\b/i, "moon"],
+    [/\b(sun|outside|garden|gardening|park)\b/i, "sun"],
+    [/\b(clean|tidy|plants?|nature)\b/i, "leaf"],
+    [/\b(nasheed|music|listen|podcast)\b/i, "music"],
+    [/\b(doctor|gp|health|hospital|appointment|charity|sadaqah)\b/i, "heart"],
+    [/\b(todo|to-do|tasks?|plan|planning|admin)\b/i, "list"]
+  ];
+  function guessIcon(t) { for (var i = 0; i < GUESS.length; i++) if (GUESS[i][0].test(t || "")) return GUESS[i][1]; return null; }
+
   function svg(name, cls) {
     var s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     s.setAttribute("viewBox", "0 0 24 24"); s.setAttribute("class", "ic" + (cls ? " " + cls : ""));
@@ -428,7 +459,7 @@
       repeat: { type: "none" }, remind: 0, subtasks: [], notes: "", done: {}
     };
     if (dr.start == null && !dr.allDay) dr.start = "09:00";
-    V.edit = { draft: dr, occ: k, isNew: !it, iconsOpen: !it };
+    V.edit = { draft: dr, occ: k, isNew: !it, iconsOpen: !it, iconPicked: !!(it && it.icon && it.icon !== "list") };
     C.rerender();
   }
   function closeEditor() { V.edit = null; C.rerender(); }
@@ -446,7 +477,16 @@
     var st = hm(dr.start) || 0;
     hm0.appendChild(el("div", "sch-hmeta", dr.allDay ? "All day" : fmtT(st) + (dr.dur ? " – " + fmtT(st + dr.dur) + " (" + fmtDur(dr.dur) + ")" : "")));
     var ti = el("input", "sch-htitle"); ti.type = "text"; ti.placeholder = "Structure your day"; ti.value = dr.title; ti.maxLength = 120; ti.setAttribute("aria-label", "Title");
-    ti.oninput = function () { dr.title = ti.value; };
+    ti.oninput = function () {
+      dr.title = ti.value;
+      if (E.iconPicked) return;
+      var g = guessIcon(ti.value) || "list";
+      if (g !== dr.icon) {
+        dr.icon = g;
+        pill.innerHTML = ""; pill.appendChild(svg(g));
+        document.querySelectorAll(".sch-icb").forEach(function (b) { var on = b.dataset.icon === g; b.classList.toggle("on", on); b.style.background = on ? dr.color : ""; });
+      }
+    };
     ti.onkeydown = function (e) { if (e.key === "Enter") saveEdit(); };
     hm0.appendChild(ti);
     hd.appendChild(hm0);
@@ -464,9 +504,9 @@
         b.onclick = function () { dr.color = c; dr.title = ti.value; C.rerender(); }; cols.appendChild(b); });
       ig.appendChild(cols);
       var icons = el("div", "sch-icons");
-      PICK.forEach(function (n) { var b = el("button", "sch-icb" + (dr.icon === n ? " on" : "")); b.title = n; b.appendChild(svg(n));
+      PICK.forEach(function (n) { var b = el("button", "sch-icb" + (dr.icon === n ? " on" : "")); b.title = n; b.dataset.icon = n; b.appendChild(svg(n));
         if (dr.icon === n) b.style.background = dr.color;
-        b.onclick = function () { dr.icon = n; dr.title = ti.value; C.rerender(); }; icons.appendChild(b); });
+        b.onclick = function () { dr.icon = n; E.iconPicked = true; dr.title = ti.value; C.rerender(); }; icons.appendChild(b); });
       ig.appendChild(icons);
       bd.appendChild(ig);
     }
@@ -600,7 +640,7 @@
       var n = nowMin(), k = dateKey || today();
       V.day = k;
       openEditor(null, k, k === today() ? Math.ceil((n + 1) / 30) * 30 : 9 * 60);
-      V.edit.draft.title = title; V.edit.draft.icon = "list";
+      V.edit.draft.title = title; V.edit.draft.icon = guessIcon(title) || "list";
     },
     icon: svg
   };

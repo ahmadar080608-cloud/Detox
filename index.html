@@ -392,6 +392,16 @@ ul.wgl .iconbtn{padding:2px}
   nav button{flex:0 0 64px!important}
 }
 
+
+/* readable native controls in every theme */
+select option,select optgroup{background:var(--card);color:var(--ink)}
+:root{color-scheme:light}
+:root[data-theme=night],:root[data-theme=autumn]{color-scheme:dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){color-scheme:dark}}
+.sch-sheet input.sch-htitle{font-size:26px!important;font-weight:800!important;width:100%;background:transparent!important;border:0!important;border-bottom:1.5px solid rgba(255,255,255,.55)!important;border-radius:0!important;padding:2px 0 6px!important;min-width:0;color:#fff!important}
+.sch-sheet input.sch-htitle:focus{border-bottom-color:#fff!important}
+.sch-line2 select option{font-size:15px}
+
 [hidden]{display:none!important}
 
 /* ===== mobile: sidebar becomes a bottom bar ===== */
