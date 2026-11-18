@@ -716,15 +716,21 @@ nav button.child2 svg.ic{width:15px;height:15px}
   }
   document.getElementById("brand").onclick = function () { go("home"); };
   function go(id){ var was = state.tab; state.tab = id; addingIn = null; save(); render(); window.scrollTo(0,0);
-    if (id !== was && byId[id] && byId[id].group === "islamic" && state.intentionOn !== false) intentionPopup(); }
-  function intentionPopup(){
+    var area = function (t) { if (!byId[t]) return null; if (t === "islamic" || byId[t].group === "islamic") return "islamic"; return (t === "university" || t === "work") ? t : null; };
+    var a = area(id); if (a && a !== area(was) && state.intentionOn !== false) intentionPopup(a); }
+  var NIYYAH_SUB = {
+    islamic: "Seek knowledge for the sake of Allah alone: to learn, to act upon it, and to benefit others.",
+    university: "Study for Allah's sake, intending to serve people, benefit the Ummah and support your family.",
+    work: "Work for Allah's sake: to earn ḥalāl provision, do it with iḥsān, and help those you serve."
+  };
+  function intentionPopup(area){
     var old = document.querySelector(".niyyah-ov"); if (old) old.remove();
     var ov = el("div", "niyyah-ov"), box = el("div", "niyyah grain");
     box.appendChild(el("div", "nk", "Before you begin"));
     box.appendChild(el("div", "nt", "Renew your intention"));
     box.appendChild(el("div", "nar", "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ"));
     box.appendChild(el("div", "nen", "“Actions are only by intentions.” (al-Bukhārī & Muslim)"));
-    box.appendChild(el("p", "nsub", "Do this for the sake of Allah alone: to learn, to act upon it, and to benefit others."));
+    box.appendChild(el("p", "nsub", NIYYAH_SUB[area] || NIYYAH_SUB.islamic));
     var go0 = el("button", "cta", "Bismillāh");
     var close = function () { ov.classList.add("out"); setTimeout(function () { ov.remove(); }, 180); document.removeEventListener("keydown", esc); };
     var esc = function (e) { if (e.key === "Escape" || e.key === "Enter") close(); };
@@ -1522,7 +1528,7 @@ nav button.child2 svg.ic{width:15px;height:15px}
     sw.onclick = function () { state.showOne = !state.showOne; save(); render(); };
     r.appendChild(sw); p3.appendChild(r);
     var rn = el("div", "setrow");
-    var ln = el("div", "sl"); ln.appendChild(el("b", null, "“Renew your intention” reminder")); ln.appendChild(el("span", null, "Shows a short reminder each time you open an Islamic section")); rn.appendChild(ln);
+    var ln = el("div", "sl"); ln.appendChild(el("b", null, "“Renew your intention” reminder")); ln.appendChild(el("span", null, "Shows a short reminder when you open Islamic, University or Work")); rn.appendChild(ln);
     var swn = el("button", "switch" + (state.intentionOn !== false ? " on" : "")); swn.setAttribute("aria-label", "Toggle intention reminder");
     swn.onclick = function () { state.intentionOn = state.intentionOn === false; save(); render(); };
     rn.appendChild(swn); p3.appendChild(rn);
