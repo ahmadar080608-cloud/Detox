@@ -525,11 +525,12 @@
     function shift(dir) {
       if (view === "month") { var dd = pk(k); V.day = dkey(new Date(dd.getFullYear(), dd.getMonth() + dir, 1)); }
       else V.day = addDays(k, dir * (view === "multi" ? 3 : view === "day" ? 1 : 7));
+      V.miniMonth = null;
       C.rerender();
     }
     var unit = view === "month" ? "month" : view === "multi" ? "3 days" : view === "day" ? "day" : "week";
     var prev = el("button", "sch-ib"); prev.title = "Previous " + unit; prev.appendChild(svg("left")); prev.onclick = function () { shift(-1); };
-    var tdy = el("button", "sch-pill", "Today"); tdy.onclick = function () { V.day = tk; C.rerender(); };
+    var tdy = el("button", "sch-pill", "Today"); tdy.onclick = function () { V.day = tk; V.miniMonth = null; C.rerender(); };
     var next = el("button", "sch-ib"); next.title = "Next " + unit; next.appendChild(svg("right")); next.onclick = function () { shift(1); };
     tools.appendChild(prev); tools.appendChild(tdy); tools.appendChild(next);
     top.appendChild(tools);
@@ -622,6 +623,7 @@
     });
     if (!nowPlaced && timed.length) tl.appendChild(nowRow(now, "Day's plan finished. What's next?"));
     root.appendChild(tl);
+    root.appendChild(miniCal(k, tk));
 
     }
 
@@ -751,6 +753,35 @@
       grid.appendChild(c);
     })(addDays(start, i));
     return grid;
+  }
+
+  // small month calendar under the Day view: tap a date to open it
+  function miniCal(k, tk) {
+    var base = V.miniMonth || k.slice(0, 7), p0 = base.split("-"), m0 = new Date(+p0[0], +p0[1] - 1, 1);
+    var box = el("div", "sch-mini");
+    var hd = el("div", "mini-h");
+    var pv = el("button", "sch-ib sm"); pv.title = "Previous month"; pv.appendChild(svg("left"));
+    var nx = el("button", "sch-ib sm"); nx.title = "Next month"; nx.appendChild(svg("right"));
+    var mv = function (d) { var x = new Date(m0.getFullYear(), m0.getMonth() + d, 1); V.miniMonth = x.getFullYear() + "-" + pad(x.getMonth() + 1); C.rerender(); };
+    pv.onclick = function () { mv(-1); }; nx.onclick = function () { mv(1); };
+    hd.appendChild(pv); hd.appendChild(el("b", null, m0.toLocaleDateString(undefined, { month: "long", year: "numeric" }))); hd.appendChild(nx);
+    box.appendChild(hd);
+    var g = el("div", "mini-g");
+    ["M","T","W","T","F","S","S"].forEach(function (w) { g.appendChild(el("span", "mini-wd", w)); });
+    var start = mondayOf(dkey(m0)), days = new Date(m0.getFullYear(), m0.getMonth() + 1, 0).getDate();
+    var cells = Math.ceil(((m0.getDay() + 6) % 7 + days) / 7) * 7;
+    for (var i = 0; i < cells; i++) (function (dk) {
+      var dd = pk(dk), its = itemsOn(dk);
+      var b = el("button", "mini-d" + (dd.getMonth() !== m0.getMonth() ? " out" : "") + (dk === tk ? " today" : "") + (dk === k ? " sel" : ""));
+      b.appendChild(el("span", "n", String(dd.getDate())));
+      var dots = el("span", "dots"); its.slice(0, 3).forEach(function (it) { var x = el("i"); x.style.background = it.color; dots.appendChild(x); });
+      b.appendChild(dots);
+      b.title = dd.toDateString() + (its.length ? " · " + its.length + (its.length === 1 ? " item" : " items") : "");
+      b.onclick = function () { V.day = dk; V.miniMonth = dk.slice(0, 7); C.rerender(); window.scrollTo({ top: 0, behavior: "smooth" }); };
+      g.appendChild(b);
+    })(addDays(start, i));
+    box.appendChild(g);
+    return box;
   }
 
   function doneBtn(it, k) {

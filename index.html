@@ -677,6 +677,24 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
 .subtabs.artabs{margin-top:-8px}
 @media (max-width:899px){#arWrap{margin-left:0;padding:0 10px 100px}#arFrame{height:calc(100vh - 170px);min-height:480px;border-radius:14px}.arbar b{font-size:15px}}
 
+
+/* mini calendar under the Day view */
+.sch-mini{background:var(--card);border-radius:var(--r);padding:14px 16px 16px;margin-bottom:20px;max-width:420px}
+.mini-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.mini-h b{font-size:15px}
+.mini-g{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
+.mini-wd{font-size:11px;font-weight:800;color:var(--muted);padding:4px 0}
+.mini-d{border:0;background:none;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:2px;padding:3px 0;border-radius:10px}
+.mini-d .n{width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:600}
+.mini-d.out{opacity:.35}
+.mini-d.today .n{color:var(--accent);font-weight:800}
+.mini-d.sel .n{background:var(--accent);color:#fff}
+.mini-d:hover .n{background:var(--bg)}
+.mini-d.sel:hover .n{background:var(--accent)}
+.mini-d .dots{display:flex;gap:2px;height:5px}
+.mini-d .dots i{width:5px;height:5px;border-radius:50%}
+@media (max-width:899px){.sch-mini{max-width:none}}
+
 [hidden]{display:none!important}
 
 /* ===== mobile: sidebar becomes a bottom bar ===== */
@@ -710,7 +728,7 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
   <div id="arFrameHost"></div>
 </section>
 
-<script src="schedule.js?v=20261118f"></script>
+<script src="schedule.js?v=20261118g"></script>
 <script>
 (function () {
   // ---------- icons (line icons, Lucide-style) ----------
