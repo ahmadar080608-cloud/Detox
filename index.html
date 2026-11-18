@@ -496,6 +496,13 @@ li.frow{align-items:center;gap:12px}
 .floatmsg{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:var(--hdr);color:#fff;padding:12px 18px;border-radius:14px;z-index:70;max-width:90vw;font-weight:600}
 @media (max-width:899px){.pdfov{padding:8px}.floatmsg{bottom:90px}}
 
+
+/* third level in the sidebar */
+nav button.child2{padding:6px 0 6px 74px;font-size:13px;font-weight:500}
+nav button.child2 svg.ic{width:15px;height:15px}
+@media (max-width:899px){nav button.child2{display:none}}
+.subtabs.sub2{margin-top:-12px}
+
 [hidden]{display:none!important}
 
 /* ===== mobile: sidebar becomes a bottom bar ===== */
@@ -568,14 +575,14 @@ li.frow{align-items:center;gap:12px}
     { id:"todo",       name:"To-do",           icon:"todo",       group:null,      sub:"Everything else, by importance", bg:"مهام", color:"--c2" },
     { id:"islamic",    name:"Islamic",         icon:"islamic",    group:null,      ar:"العُلُومُ الشَّرْعِيَّةُ", sub:"Deen & study", bg:"دين", color:"--c1" },
     { id:"quran",      name:"Qur'an",          icon:"quran",      group:"islamic", parent:"islamic", ar:"القُرْآنُ الكَرِيمُ", sub:"Hifz, revision & reading", bg:"قرآن", color:"--c1" },
-    { id:"aqeedah",    name:"Aqeedah",          icon:"aqeedah",    group:"islamic", parent:"islamic", ar:"العَقِيدَةُ", sub:"Creed & belief", bg:"عقيدة", color:"--c1" },
-    { id:"fiqh",       name:"Fiqh",             icon:"fiqh",       group:"islamic", parent:"islamic", ar:"الفِقْهُ", sub:"Rulings & worship", bg:"فقه", color:"--c3" },
-    { id:"tazkiyah",   name:"Tazkiyatun Nafs",  icon:"tazkiyah",   group:"islamic", parent:"islamic", ar:"تَزْكِيَةُ النَّفْسِ", sub:"Purifying the soul", bg:"تزكية", color:"--c5" },
-    { id:"tafsir",     name:"Tafsir",           icon:"tafsir",     group:"islamic", parent:"islamic", ar:"التَّفْسِيرُ", sub:"Understanding the Qur'an", bg:"تفسير", color:"--c6" },
-    { id:"hadith",     name:"Hadith",           icon:"hadith",     group:"islamic", parent:"islamic", ar:"الحَدِيثُ", sub:"Memorise & understand", bg:"حديث", color:"--c5" },
-    { id:"seerah",     name:"Seerah",           icon:"seerah",     group:"islamic", parent:"islamic", ar:"السِّيرَةُ النَّبَوِيَّةُ", sub:"Life of the Prophet ﷺ", bg:"سيرة", color:"--c4" },
-    { id:"logic",      name:"Language & Logic", icon:"logic",      group:"islamic", parent:"islamic", ar:"اللُّغَةُ وَالمَنْطِقُ", sub:"Naḥw, ṣarf, balāghah & manṭiq", bg:"منطق", color:"--c3" },
-    { id:"studies",    name:"Islamic Studies",  icon:"studies",    group:"islamic", parent:"islamic", ar:"الدِّرَاسَاتُ الإِسْلَامِيَّةُ", sub:"Earlier general tasks", bg:"علم", color:"--c3", hidden:true },
+    { id:"studies",    name:"Islamic Sciences", icon:"studies",    group:"islamic", parent:"islamic", ar:"العُلُومُ الإِسْلَامِيَّةُ", sub:"Aqeedah, fiqh, hadith & more", bg:"علوم", color:"--c3" },
+    { id:"aqeedah",    name:"Aqeedah",          icon:"aqeedah",    group:"islamic", parent:"studies", ar:"العَقِيدَةُ", sub:"Creed & belief", bg:"عقيدة", color:"--c1" },
+    { id:"fiqh",       name:"Fiqh",             icon:"fiqh",       group:"islamic", parent:"studies", ar:"الفِقْهُ", sub:"Rulings & worship", bg:"فقه", color:"--c3" },
+    { id:"tazkiyah",   name:"Tazkiyatun Nafs",  icon:"tazkiyah",   group:"islamic", parent:"studies", ar:"تَزْكِيَةُ النَّفْسِ", sub:"Purifying the soul", bg:"تزكية", color:"--c5" },
+    { id:"tafsir",     name:"Tafsir",           icon:"tafsir",     group:"islamic", parent:"studies", ar:"التَّفْسِيرُ", sub:"Understanding the Qur'an", bg:"تفسير", color:"--c6" },
+    { id:"hadith",     name:"Hadith",           icon:"hadith",     group:"islamic", parent:"studies", ar:"الحَدِيثُ", sub:"Memorise & understand", bg:"حديث", color:"--c5" },
+    { id:"seerah",     name:"Seerah",           icon:"seerah",     group:"islamic", parent:"studies", ar:"السِّيرَةُ النَّبَوِيَّةُ", sub:"Life of the Prophet ﷺ", bg:"سيرة", color:"--c4" },
+    { id:"logic",      name:"Language & Logic", icon:"logic",      group:"islamic", parent:"studies", ar:"اللُّغَةُ وَالمَنْطِقُ", sub:"Naḥw, ṣarf, balāghah & manṭiq", bg:"منطق", color:"--c3" },
     { id:"arabic",     name:"Arabic",          icon:"arabic",     group:"islamic", parent:"islamic", ar:"اللُّغَةُ العَرَبِيَّةُ", sub:"Vocabulary & grammar", bg:"عربي", color:"--c4" },
     { id:"university", name:"University",      icon:"university", group:null,      sub:"Dental school", bg:"جامعة", color:"--c2" },
     { id:"work",       name:"Work",            icon:"work",       group:null,      sub:"Jobs & projects", bg:"عمل", color:"--c6" },
@@ -585,9 +592,9 @@ li.frow{align-items:center;gap:12px}
 
   var byId = {}; PAGES.forEach(function (p) { byId[p.id] = p; });
   var SCIENCES = ["aqeedah","fiqh","tazkiyah","tafsir","hadith","seerah","logic"];
-  var ISLAMIC_SUBS = ["quran"].concat(SCIENCES, ["arabic"]);
-  var STUDY_SUBS = [];
-  var TASK_SECTIONS = ["quran"].concat(SCIENCES, ["studies"], STUDY_SUBS, ["arabic","university","work"]);
+  var ISLAMIC_SUBS = ["quran","studies","arabic"];
+  var STUDY_SUBS = SCIENCES;
+  var TASK_SECTIONS = ["quran","studies"].concat(SCIENCES, ["arabic","university","work"]);
   function isUnder(id, anc){ var p = byId[id]; while (p) { if (p.id === anc) return true; p = p.parent ? byId[p.parent] : null; } return false; }
   var THEMES = [
     { id:"auto",    name:"Auto",    note:"Follows your device", sw:["#f4f1ec","#131816","#e0603f","#1f4f4a"] },
@@ -641,7 +648,7 @@ li.frow{align-items:center;gap:12px}
   // ---------- sidebar ----------
   function navBtn(p, child){
     var b = el("button", child ? "child" : null);
-    var active = state.tab === p.id || (child && isUnder(state.tab, p.id)) || (!child && p.id === "islamic" && byId[state.tab].group === "islamic" && (window.innerWidth < 900 || state.navIslamicClosed));
+    var active = state.tab === p.id || (p.id === "studies" && isUnder(state.tab, "studies") && (state.navSciClosed || window.innerWidth < 900)) || (!child && p.id === "islamic" && byId[state.tab].group === "islamic" && (window.innerWidth < 900 || state.navIslamicClosed));
     if (active) b.classList.add("on");
     b.appendChild(icon(p.icon));
     b.appendChild(el("span", null, p.name === "Islamic Studies" && !child ? "Studies" : p.name));
@@ -664,7 +671,18 @@ li.frow{align-items:center;gap:12px}
         var toggle = function (e) { e.stopPropagation(); e.preventDefault(); state.navIslamicClosed = !state.navIslamicClosed; save(); renderNav(); };
         tg.onclick = toggle; tg.onkeydown = function (e) { if (e.key === "Enter" || e.key === " ") toggle(e); };
         pb.appendChild(tg);
-        if (!closed) ISLAMIC_SUBS.forEach(function (id) { navEl.appendChild(navBtn(byId[id], true)); });
+        if (!closed) ISLAMIC_SUBS.forEach(function (id) {
+          var cb = navBtn(byId[id], true); navEl.appendChild(cb);
+          if (id !== "studies") return;
+          var sc = !!state.navSciClosed;
+          var t2 = el("span", "navfold" + (sc ? " closed" : "")); t2.setAttribute("role", "button"); t2.setAttribute("tabindex", "0");
+          t2.setAttribute("aria-label", sc ? "Show the Islamic sciences" : "Hide the Islamic sciences"); t2.setAttribute("aria-expanded", sc ? "false" : "true");
+          t2.innerHTML = '<svg viewBox="0 0 24 24" class="ic"><path d="M6 9l6 6 6-6"/></svg>';
+          var tog2 = function (e) { e.stopPropagation(); e.preventDefault(); state.navSciClosed = !state.navSciClosed; save(); renderNav(); };
+          t2.onclick = tog2; t2.onkeydown = function (e) { if (e.key === "Enter" || e.key === " ") tog2(e); };
+          cb.appendChild(t2);
+          if (!sc) SCIENCES.forEach(function (sid) { var b2 = navBtn(byId[sid], true); b2.classList.add("child2"); navEl.appendChild(b2); });
+        });
       }
     });
     var side = document.getElementById("sideOne"); side.innerHTML = ""; side.hidden = !state.showOne;
@@ -680,7 +698,7 @@ li.frow{align-items:center;gap:12px}
   function pageHead(p, stat){
     var h = el("div", "pagehead grain"); h.style.background = bgOf(p);
     h.appendChild(el("i", "bgl" + (/[؀-ۿ]/.test(p.bg) ? " arb" : ""), p.bg));
-    var tag = el("span", "otag"); tag.appendChild(icon(p.icon)); tag.appendChild(document.createTextNode(p.parent === "studies" ? "Islamic Studies" : p.group ? "Islamic" : p.name));
+    var tag = el("span", "otag"); tag.appendChild(icon(p.icon)); tag.appendChild(document.createTextNode(p.parent === "studies" ? "Islamic Sciences" : p.group ? "Islamic" : p.name));
     h.appendChild(tag);
     if (stat) h.appendChild(el("span", "stat", stat));
     h.appendChild(el("div", "ph-big", p.name));
@@ -702,7 +720,7 @@ li.frow{align-items:center;gap:12px}
     var bar = el("div", "subtabs sub2");
     ["studies"].concat(STUDY_SUBS).forEach(function (id) {
       var p = byId[id], b = el("button", state.tab === id ? "on" : null);
-      b.appendChild(icon(p.icon)); b.appendChild(document.createTextNode(id === "studies" ? "All studies" : p.name));
+      b.appendChild(icon(p.icon)); b.appendChild(document.createTextNode(id === "studies" ? "All sciences" : p.name));
       b.onclick = function () { go(id); };
       bar.appendChild(b);
     });
@@ -804,6 +822,8 @@ li.frow{align-items:center;gap:12px}
     app.appendChild(pageHead(p0, open + " open"));
     if (p0.group === "islamic") app.appendChild(subTabs());
     if (sec === "arabic") renderArabicGoals();
+    if (sec === "studies" || p0.parent === "studies") app.appendChild(studyTabs());
+    if (sec === "studies") renderSciencesHome();
     if (sec === "quran") renderQuranTrackers();
     if (sec === "hadith") renderHadithTrackers();
     if (SCIENCES.indexOf(sec) >= 0) { if (sec !== "hadith") renderSciGoals(sec); renderPdfs(sec); }
@@ -1674,6 +1694,14 @@ li.frow{align-items:center;gap:12px}
     seerah:{ week:"e.g. The Makkan period, part 1", month:"e.g. Finish the Battle of Badr", year:"e.g. Complete ar-Raḥīq al-Makhtūm" },
     logic:{ week:"e.g. Learn the signs of the ism", month:"e.g. Finish al-Ājurrūmiyyah", year:"e.g. Start an intro to manṭiq" }
   };
+  function renderSciencesHome(){
+    var grid = el("div", "grid");
+    SCIENCES.forEach(function (id) {
+      var n = (state.sciFiles[id] || []).length, open = openIn(id).length;
+      grid.appendChild(tile(byId[id], n, byId[id].name + " · " + (n === 1 ? "lesson" : "lessons") + (open ? " · " + open + (open === 1 ? " task" : " tasks") : "")));
+    });
+    app.appendChild(grid);
+  }
   function renderSciGoals(sec){
     var store = state.sciGoals[sec] = state.sciGoals[sec] || {};
     app.appendChild(writtenGoals("g-" + sec, "Goals", store, SCI_HINTS[sec] || { week:"Add a goal", month:"Add a goal", year:"Add a goal" }));
