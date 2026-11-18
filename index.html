@@ -438,6 +438,29 @@ select option,select optgroup{background:var(--card);color:var(--ink)}
 .sch-gsync input{width:18px;height:18px;accent-color:var(--accent)}
 .sch-gsync svg.ic{width:18px;height:18px;color:#4285f4}
 
+
+/* colour-coded importance */
+:root{--p-urgent:#d93c3c;--p-high:var(--accent);--p-med:#d9a33a;--p-low:#3f9a78}
+select.prio-sel{font-weight:700;border-width:1.5px;padding-left:30px;background-repeat:no-repeat;background-position:12px center;background-size:10px 10px}
+select.prio-sel[data-p=urgent]{color:var(--p-urgent);border-color:var(--p-urgent);background-color:color-mix(in srgb,var(--p-urgent) 14%,var(--bg))}
+select.prio-sel[data-p=high]{color:var(--p-high);border-color:var(--p-high);background-color:color-mix(in srgb,var(--p-high) 14%,var(--bg))}
+select.prio-sel[data-p=med]{color:var(--p-med);border-color:var(--p-med);background-color:color-mix(in srgb,var(--p-med) 14%,var(--bg))}
+select.prio-sel[data-p=low]{color:var(--p-low);border-color:var(--p-low);background-color:color-mix(in srgb,var(--p-low) 14%,var(--bg))}
+select.prio-sel[data-p=urgent]{background-image:radial-gradient(circle,#d93c3c 60%,transparent 62%)}
+select.prio-sel[data-p=high]{background-image:radial-gradient(circle,var(--accent) 60%,transparent 62%)}
+select.prio-sel[data-p=med]{background-image:radial-gradient(circle,#d9a33a 60%,transparent 62%)}
+select.prio-sel[data-p=low]{background-image:radial-gradient(circle,#3f9a78 60%,transparent 62%)}
+select.prio-sel option{font-weight:700}
+select.prio-sel option[value=urgent]{color:var(--p-urgent)}
+select.prio-sel option[value=high]{color:var(--p-high)}
+select.prio-sel option[value=med]{color:var(--p-med)}
+select.prio-sel option[value=low]{color:var(--p-low)}
+/* matching task labels */
+.tag.high{background:color-mix(in srgb,var(--p-high) 16%,transparent);color:var(--p-high)}
+.tag.med{background:color-mix(in srgb,var(--p-med) 16%,transparent);color:var(--p-med)}
+.tag.low{background:color-mix(in srgb,var(--p-low) 16%,transparent);color:var(--p-low)}
+.tag.prio{background:color-mix(in srgb,currentColor 14%,transparent)!important}
+
 [hidden]{display:none!important}
 
 /* ===== mobile: sidebar becomes a bottom bar ===== */
@@ -551,6 +574,8 @@ select option,select optgroup{background:var(--card);color:var(--ink)}
   var prioOrder = { high:0, med:1, low:2 };
   var prioLabel = { high:"High", med:"Medium", low:"Low" };
   var prioNext = { high:"med", med:"low", low:"high" };
+  // colour an importance dropdown by its current value
+  function tintPrio(sel){ sel.classList.add("prio-sel"); sel.dataset.p = sel.value; sel.addEventListener("change", function () { sel.dataset.p = sel.value; }); return sel; }
   function uid(){ return Math.random().toString(36).slice(2,10); }
   function el(tag, cls, text){ var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function openIn(sec){ return state.tasks.filter(function (t) { return !t.done && isUnder(t.section, sec); }); }
@@ -732,7 +757,7 @@ select option,select optgroup{background:var(--card);color:var(--ink)}
       var inp = el("input"); inp.type = "text"; inp.maxLength = 200; inp.placeholder = "Something specific you can finish";
       var pr = el("select"); pr.setAttribute("aria-label", "Priority");
       [["high","High"],["med","Medium"],["low","Low"]].forEach(function (x) { var o = el("option", null, x[1]); o.value = x[0]; pr.appendChild(o); });
-      pr.value = "med";
+      pr.value = "med"; tintPrio(pr);
       var btn = el("button", "cta", "Add");
       var add = function () { var text = inp.value.trim(); if (!text) return;
         state.tasks.push({ id:uid(), text:text, priority:pr.value, done:false, section:sec }); save(); render();
@@ -1384,7 +1409,7 @@ select option,select optgroup{background:var(--card);color:var(--ink)}
   // ---------- To-do ----------
   state.todos = Array.isArray(state.todos) ? state.todos : [];
   state.todoSort = state.todoSort || "importance";
-  var TP = { urgent:{ n:"Urgent", o:0, c:"#d93c3c" }, high:{ n:"High", o:1, c:"var(--accent)" }, med:{ n:"Medium", o:2, c:"#d9a33a" }, low:{ n:"Low", o:3, c:"var(--muted)" } };
+  var TP = { urgent:{ n:"Urgent", o:0, c:"#d93c3c" }, high:{ n:"High", o:1, c:"var(--accent)" }, med:{ n:"Medium", o:2, c:"#d9a33a" }, low:{ n:"Low", o:3, c:"#3f9a78" } };
   var TP_NEXT = { urgent:"high", high:"med", med:"low", low:"urgent" };
   function renderTodo(){
     var open = state.todos.filter(function (t) { return !t.done; }), tk = dkey(new Date());
@@ -1395,7 +1420,7 @@ select option,select optgroup{background:var(--card);color:var(--ink)}
     var r = el("div", "row");
     var inp = el("input"); inp.type = "text"; inp.maxLength = 200; inp.placeholder = "Add a to-do and press Enter"; inp.setAttribute("aria-label", "New to-do");
     var pr = el("select"); pr.setAttribute("aria-label", "Importance");
-    ["urgent","high","med","low"].forEach(function (k) { var o = el("option", null, TP[k].n); o.value = k; pr.appendChild(o); }); pr.value = state.todoLastPrio || "med";
+    ["urgent","high","med","low"].forEach(function (k) { var o = el("option", null, TP[k].n); o.value = k; pr.appendChild(o); }); pr.value = state.todoLastPrio || "med"; tintPrio(pr);
     var du = el("input"); du.type = "date"; du.className = "dateinp"; du.setAttribute("aria-label", "Due date");
     var btn = el("button", "cta"); btn.appendChild(icon("plus")); btn.appendChild(document.createTextNode("Add"));
     function addT(){ var t = inp.value.trim(); if (!t) return; state.todoLastPrio = pr.value;
