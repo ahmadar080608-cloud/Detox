@@ -1037,10 +1037,29 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
     app.appendChild(grid);
 
     var p = el("div", "panel");
-    p.appendChild(el("h2", null, "High priority"));
+    p.appendChild(el("h2", null, "Most important"));
+    var tk0 = dkey(new Date());
+    var todosTop = (state.todos || []).filter(function (x) { return !x.done && (x.prio === "urgent" || x.prio === "high"); })
+      .sort(function (a, b) { return (a.prio === "urgent" ? 0 : 1) - (b.prio === "urgent" ? 0 : 1) || (a.due || "9999").localeCompare(b.due || "9999") || a.created - b.created; });
     var high = state.tasks.filter(function (x) { return !x.done && x.priority === "high"; });
-    if (!high.length) p.appendChild(el("p", "empty", "Nothing marked high priority."));
-    var ul = el("ul"); high.forEach(function (x) { ul.appendChild(taskRow(x, true)); }); p.appendChild(ul);
+    if (!todosTop.length && !high.length) p.appendChild(el("p", "empty", "Nothing urgent or high priority right now."));
+    var ul = el("ul");
+    // to-dos first (urgent, then high), then high-priority tasks from your sections
+    todosTop.forEach(function (t) {
+      var li = el("li", "trow"); li.style.setProperty("--pc", TP[t.prio].c);
+      var cb = el("input"); cb.type = "checkbox"; cb.setAttribute("aria-label", "Mark done");
+      cb.onchange = function () { t.done = true; t.doneAt = Date.now(); save(); render(); };
+      li.appendChild(cb);
+      li.appendChild(el("span", "label", t.text));
+      if (t.due) { var od = t.due < tk0, isT = t.due === tk0;
+        li.appendChild(el("span", "tag due" + (od ? " over" : isT ? " today" : ""), od ? "Overdue" : isT ? "Today" : new Date(t.due + "T12:00").toLocaleDateString(undefined, { day:"numeric", month:"short" }))); }
+      var tg = el("button", "tag", "To-do"); tg.title = "Open To-do"; tg.onclick = function () { go("todo"); }; li.appendChild(tg);
+      var pb = el("button", "tag prio", TP[t.prio].n); pb.style.color = TP[t.prio].c; pb.title = "Change importance";
+      pb.onclick = function () { t.prio = TP_NEXT[t.prio]; save(); render(); }; li.appendChild(pb);
+      ul.appendChild(li);
+    });
+    high.forEach(function (x) { ul.appendChild(taskRow(x, true)); });
+    p.appendChild(ul);
     app.appendChild(p);
   }
 
