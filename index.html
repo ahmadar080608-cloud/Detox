@@ -461,6 +461,15 @@ select.prio-sel option[value=low]{color:var(--p-low)}
 .tag.low{background:color-mix(in srgb,var(--p-low) 16%,transparent);color:var(--p-low)}
 .tag.prio{background:color-mix(in srgb,currentColor 14%,transparent)!important}
 
+
+/* collapsible Islamic group in the sidebar */
+.navfold{margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;color:rgba(255,255,255,.5);margin-right:-4px}
+nav button small + .navfold{margin-left:8px}
+.navfold:hover{background:rgba(255,255,255,.08);color:#fff}
+.navfold svg.ic{width:16px;height:16px;transition:transform .2s}
+.navfold.closed svg.ic{transform:rotate(-90deg)}
+@media (max-width:899px){.navfold{display:none}}
+
 [hidden]{display:none!important}
 
 /* ===== mobile: sidebar becomes a bottom bar ===== */
@@ -589,7 +598,7 @@ select.prio-sel option[value=low]{color:var(--p-low)}
   // ---------- sidebar ----------
   function navBtn(p, child){
     var b = el("button", child ? "child" : null);
-    var active = state.tab === p.id || (child && isUnder(state.tab, p.id)) || (!child && p.id === "islamic" && byId[state.tab].group === "islamic" && window.innerWidth < 900);
+    var active = state.tab === p.id || (child && isUnder(state.tab, p.id)) || (!child && p.id === "islamic" && byId[state.tab].group === "islamic" && (window.innerWidth < 900 || state.navIslamicClosed));
     if (active) b.classList.add("on");
     b.appendChild(icon(p.icon));
     b.appendChild(el("span", null, p.name === "Islamic Studies" && !child ? "Studies" : p.name));
@@ -604,7 +613,16 @@ select.prio-sel option[value=low]{color:var(--p-low)}
       if (p.group) return;
       if (p.id === "settings") navEl.appendChild(el("div", "spacer"));
       navEl.appendChild(navBtn(p, false));
-      if (p.id === "islamic") ISLAMIC_SUBS.forEach(function (id) { navEl.appendChild(navBtn(byId[id], true)); });
+      if (p.id === "islamic") {
+        var pb = navEl.lastChild, closed = !!state.navIslamicClosed;
+        var tg = el("span", "navfold" + (closed ? " closed" : "")); tg.setAttribute("role", "button"); tg.setAttribute("tabindex", "0");
+        tg.setAttribute("aria-label", closed ? "Show Islamic sections" : "Hide Islamic sections"); tg.setAttribute("aria-expanded", closed ? "false" : "true");
+        tg.innerHTML = '<svg viewBox="0 0 24 24" class="ic"><path d="M6 9l6 6 6-6"/></svg>';
+        var toggle = function (e) { e.stopPropagation(); e.preventDefault(); state.navIslamicClosed = !state.navIslamicClosed; save(); renderNav(); };
+        tg.onclick = toggle; tg.onkeydown = function (e) { if (e.key === "Enter" || e.key === " ") toggle(e); };
+        pb.appendChild(tg);
+        if (!closed) ISLAMIC_SUBS.forEach(function (id) { navEl.appendChild(navBtn(byId[id], true)); });
+      }
     });
     var side = document.getElementById("sideOne"); side.innerHTML = ""; side.hidden = !state.showOne;
     var t = oneThing();
