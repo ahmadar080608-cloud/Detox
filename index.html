@@ -807,7 +807,7 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
   <div id="arFrameHost"></div>
 </section>
 
-<script src="schedule.js?v=20261118g"></script>
+<script src="schedule.js?v=20261118h"></script>
 <script>
 (function () {
   // ---------- icons (line icons, Lucide-style) ----------
@@ -857,6 +857,7 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
   var PAGES = [
     { id:"home",       name:"Overview",        icon:"home",       group:null,      bg:"نظرة" },
     { id:"schedule",   name:"Schedule",        icon:"schedule",   group:null,      sub:"Your day, hour by hour", bg:"جدول", color:"--c6" },
+    { id:"calendar",   name:"Calendar",        icon:"calendar",   group:null,      sub:"Week & month at a glance", bg:"تقويم", color:"--c6" },
     { id:"todo",       name:"To-do",           icon:"todo",       group:null,      sub:"Everything else, by importance", bg:"مهام", color:"--c2" },
     { id:"islamic",    name:"Islamic",         icon:"islamic",    group:null,      ar:"العُلُومُ الشَّرْعِيَّةُ", sub:"Deen & study", bg:"دين", color:"--c1" },
     { id:"quran",      name:"Qur'an",          icon:"quran",      group:"islamic", parent:"islamic", ar:"القُرْآنُ الكَرِيمُ", sub:"Hifz, revision & reading", bg:"قرآن", color:"--c1" },
@@ -1876,7 +1877,7 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
   if (window.DetoxSchedule) DetoxSchedule.init({ state:state, save:save, rerender:function () { render(); }, go:go });
   function renderSchedule(){
     if (!window.DetoxSchedule) { app.appendChild(el("p", "empty", "The schedule didn't load. Refresh the page.")); return; }
-    DetoxSchedule.render(app);
+    DetoxSchedule.render(app, "schedule");
   }
 
   // ---------- To-do ----------
@@ -2754,6 +2755,7 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
     var t = state.tab;
     if (t === "home") renderHome();
     else if (t === "schedule") renderSchedule();
+    else if (t === "calendar") { if (window.DetoxSchedule) DetoxSchedule.render(app, "calendar"); }
     else if (t === "todo") renderTodo();
     else if (t === "islamic") renderIslamic();
     else if (t === "tools") renderTools();

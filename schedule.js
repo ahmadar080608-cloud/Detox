@@ -511,7 +511,9 @@
   }
 
   // ---------- rendering ----------
-  function render(app) {
+  var PAGE = "schedule";
+  function render(app, page) {
+    PAGE = page === "calendar" ? "calendar" : "schedule";
     var s = S(), k = V.day || (V.day = today()), tk = today();
     var root = el("div", "sch");
 
@@ -521,7 +523,9 @@
     var title = el("div", "sch-title"); title.appendChild(el("b", null, d.toLocaleDateString(undefined, { month: "long" }))); title.appendChild(document.createTextNode(" " + d.getFullYear()));
     top.appendChild(title);
     var tools = el("div", "sch-tools");
-    var view = s.view || "day";
+    if (PAGE === "calendar") { if (s.calView !== "week" && s.calView !== "month") s.calView = (s.view === "week" || s.view === "month") ? s.view : "month"; }
+    else if (s.view !== "day" && s.view !== "multi") s.view = "day";
+    var view = PAGE === "calendar" ? s.calView : s.view;
     function shift(dir) {
       if (view === "month") { var dd = pk(k); V.day = dkey(new Date(dd.getFullYear(), dd.getMonth() + dir, 1)); }
       else V.day = addDays(k, dir * (view === "multi" ? 3 : view === "day" ? 1 : 7));
@@ -537,9 +541,9 @@
     root.appendChild(top);
 
     var seg = el("div", "sch-views");
-    [["day","Day"],["multi","Multi-Day"],["week","Week"],["month","Month"]].forEach(function (o) {
+    (PAGE === "calendar" ? [["week","Week"],["month","Month"]] : [["day","Day"],["multi","Multi-Day"]]).forEach(function (o) {
       var b = el("button", view === o[0] ? "on" : null, o[1]);
-      b.onclick = function () { s.view = o[0]; C.save(); C.rerender(); };
+      b.onclick = function () { if (PAGE === "calendar") s.calView = o[0]; else s.view = o[0]; C.save(); C.rerender(); };
       seg.appendChild(b);
     });
     root.appendChild(seg);
@@ -629,7 +633,7 @@
 
     // reminders / calendar tools
     var tp = el("div", "panel sch-panel");
-    tp.appendChild(el("h2", null, "Calendar & reminders"));
+    tp.appendChild(el("h2", null, PAGE === "calendar" ? "Connect your calendars" : "Reminders"));
     var r1 = el("div", "setrow");
     var l1 = el("div", "sl"); l1.appendChild(el("b", null, "Reminders"));
     l1.appendChild(el("span", null, typeof Notification === "undefined" ? "This browser can't show notifications, so reminders appear at the top of this page." :
@@ -642,9 +646,9 @@
       if (s.remindersOn && typeof Notification !== "undefined" && Notification.permission === "default") { try { Notification.requestPermission().then(function () { C.rerender(); }); } catch (e) {} }
       C.rerender();
     };
-    r1.appendChild(sw); tp.appendChild(r1);
-
-    googleRow(tp);
+    r1.appendChild(sw);
+    if (PAGE === "schedule") tp.appendChild(r1);
+    else googleRow(tp);
 
     var r2 = el("div", "setrow");
     var l2 = el("div", "sl"); l2.appendChild(el("b", null, "Import a calendar file"));
@@ -659,6 +663,7 @@
         C.rerender();
       }; rd.readAsText(f);
     };
+    if (PAGE === "calendar") {
     var ib = el("button", "ghost"); ib.appendChild(svg("upload")); ib.appendChild(document.createTextNode("Import .ics")); ib.onclick = function () { fi.click(); };
     r2.appendChild(ib); r2.appendChild(fi); tp.appendChild(r2);
 
@@ -676,6 +681,7 @@
       rb.onclick = function () { if (!armed) { armed = true; rb.textContent = "Press again to remove"; return; } s.items = s.items.filter(function (x) { return x.source !== "ics"; }); C.save(); C.rerender(); };
       r4.appendChild(rb); tp.appendChild(r4);
     }
+    }
     root.appendChild(tp);
 
     // add button
@@ -688,7 +694,7 @@
   }
 
   function weekDaysOf(k) { var m = mondayOf(k), a = []; for (var i = 0; i < 7; i++) a.push(addDays(m, i)); return a; }
-  function openDay(dk) { V.day = dk; S().view = "day"; C.save(); C.rerender(); }
+  function openDay(dk) { V.day = dk; V.miniMonth = null; S().view = "day"; C.save(); if (PAGE === "calendar" && C.go) C.go("schedule"); else C.rerender(); }
 
   // Multi-Day and Week: one column per day
   function columnsView(days, tk, view) {
@@ -1052,7 +1058,7 @@
       var g0 = gc();
       if (g0.clientId && g0.connected) { gLoad(); if (gOK() && (!g0.lastSync || Date.now() - g0.lastSync > 5 * 60000)) setTimeout(function () { gPull(true); }, 800); }
     },
-    render: function (app) { render(app); },
+    render: function (app, page) { render(app, page); },
     today: function () { var k = today(), its = itemsOn(k), now = nowMin();
       var left = its.filter(function (it) { return !isDone(it, k); }).length;
       var nxt = its.filter(function (it) { return !it.allDay && it.start && hm(it.start) >= now && !isDone(it, k); })[0];
