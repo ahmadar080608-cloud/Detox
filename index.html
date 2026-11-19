@@ -862,6 +862,31 @@ li.mrow2 .label{display:flex;flex-direction:column}
 
 
 /* adhkar */
+.adtabs{margin:6px 0 12px;flex-wrap:wrap}
+.adhead{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.adtitle{font-family:Amiri,serif;font-size:26px;direction:rtl;line-height:1.3}
+.adprog{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted);margin-bottom:10px}
+.adlist{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+.aditem{background:var(--bg);border-radius:16px;padding:14px 16px;border:1.5px solid transparent}
+.aditem.done{background:color-mix(in srgb,#3f9a78 12%,var(--bg));border-color:color-mix(in srgb,#3f9a78 40%,transparent)}
+.adtop{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.adno{width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:none}
+.adx{margin-left:auto;background:var(--ink,#1c2b3a);color:var(--bg);border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700}
+.adtext{font-family:Amiri,"Scheherazade New",serif;font-size:24px;line-height:2;direction:rtl;text-align:right}
+.adlist.big .adtext{font-size:31px}
+.adbas{font-size:20px;text-align:center;opacity:.8}
+.adlist.big .adbas{font-size:25px}
+.adq+.adq{margin-top:8px;padding-top:8px;border-top:1px dashed color-mix(in srgb,var(--muted) 40%,transparent)}
+.adqref{font-size:12px;color:var(--muted);font-weight:600}
+.aden{margin:6px 0 0;font-size:14px;color:var(--muted);line-height:1.5}
+.adlist.noen .aden{display:none}
+.adfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+.adsrc{font-size:12px;font-style:italic;color:var(--muted)}
+.adcount{border:1.5px solid var(--accent);background:transparent;color:var(--accent);border-radius:999px;padding:8px 16px;font-weight:700;font-size:14px;min-width:120px;cursor:pointer}
+.adcount.done{background:#3f9a78;border-color:#3f9a78;color:#fff}
+.adsub{display:flex;justify-content:space-between;align-items:center;background:color-mix(in srgb,var(--accent) 16%,var(--bg));border-radius:999px;padding:8px 16px;font-weight:700;margin-top:6px}
+.adsubar{font-family:Amiri,serif;font-size:19px;direction:rtl}
+.adend{margin-top:14px}
 .adgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
 .adcard{background:var(--bg);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:4px;border:1.5px solid transparent}
 .adcard.now{border-color:var(--accent)}
@@ -922,6 +947,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
 </section>
 
 <script src="schedule.js?v=20261119e"></script>
+<script src="adhkar.js?v=20261119a"></script>
 <script>
 (function () {
   // ---------- icons (line icons, Lucide-style) ----------
@@ -956,6 +982,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     business:'<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>',
     tutoring:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M7 20l2-4M17 20l-2-4"/><path d="M8 10l2.5 2.5L16 7"/>',
     finance:'<rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><circle cx="16" cy="15" r="1.5"/><path d="M6 3h12"/>',
+    dawah:'<path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15 9a4 4 0 0 1 0 6"/><path d="M18 6a8 8 0 0 1 0 12"/>',
     isoc:'<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M20 4.5A4 4 0 1 0 20 11a3.2 3.2 0 0 1 0-6.5z"/>',
     ambitions:'<path d="M2.5 20l7-12 4 6 2.5-3.5L21.5 20z"/><path d="M9.5 8V3l4 2-4 2"/>',
     adhkar:'<circle cx="12" cy="5" r="2"/><circle cx="17.5" cy="8.5" r="1.6"/><circle cx="19" cy="14.5" r="1.6"/><circle cx="15.5" cy="19.5" r="1.6"/><circle cx="8.5" cy="19.5" r="1.6"/><circle cx="5" cy="14.5" r="1.6"/><circle cx="6.5" cy="8.5" r="1.6"/>',
@@ -986,7 +1013,8 @@ li.mrow2 .label{display:flex;flex-direction:column}
     { id:"logic",      name:"Language & Logic", icon:"logic",      group:"islamic", parent:"studies", ar:"اللُّغَةُ وَالمَنْطِقُ", sub:"Naḥw, ṣarf, balāghah & manṭiq", bg:"منطق", color:"--c3" },
     { id:"arabic",     name:"Arabic",          icon:"arabic",     group:"islamic", parent:"islamic", ar:"اللُّغَةُ العَرَبِيَّةُ", sub:"Vocabulary & grammar", bg:"عربي", color:"--c4" },
     { id:"adhkar",     name:"Adhkar",          icon:"adhkar",     group:"islamic", parent:"islamic", ar:"الأَذْكَارُ", sub:"Morning, evening, after ṣalāh & before sleep", bg:"ذكر", color:"--c4" },
-    { id:"isoc",       name:"ISOC",            icon:"isoc",       group:"islamic", parent:"islamic", ar:"الجَمْعِيَّةُ الإِسْلَامِيَّةُ", sub:"Islamic Society: events, ideas & da‘wah", bg:"جمعية", color:"--c6" },
+    { id:"isoc",       name:"ISOC",            icon:"isoc",       group:"islamic", parent:"islamic", ar:"الجَمْعِيَّةُ الإِسْلَامِيَّةُ", sub:"Islamic Society: events & ideas", bg:"جمعية", color:"--c6" },
+    { id:"dawah",      name:"Da‘wah",          icon:"dawah",      group:"islamic", parent:"isoc", ar:"الدَّعْوَةُ", sub:"Talks, leaflets & resources", bg:"دعوة", color:"--c3" },
     { id:"university", name:"University",      icon:"university", group:null,      sub:"Dental school", bg:"جامعة", color:"--c2" },
     { id:"lectures",   name:"Lectures",        icon:"lectures",   group:"university", parent:"university", sub:"Track every lecture topic", bg:"محاضرات", color:"--c2" },
     { id:"tutorials",  name:"Tutorials",       icon:"tutorials",  group:"university", parent:"university", sub:"Track every tutorial", bg:"دروس", color:"--c6" },
@@ -1006,7 +1034,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
   var STUDY_SUBS = SCIENCES;
   var UNI_SUBS = ["lectures","tutorials","seminars"], WORK_SUBS = ["business","tutoring","finance"];
   var NAV_GROUPS = { university:UNI_SUBS, work:WORK_SUBS };
-  var TASK_SECTIONS = ["quran","studies"].concat(SCIENCES, ["adhkar","arabic","isoc","university"], UNI_SUBS, ["work"], WORK_SUBS, ["ambitions"]);
+  var TASK_SECTIONS = ["quran","studies"].concat(SCIENCES, ["adhkar","arabic","isoc","dawah","university"], UNI_SUBS, ["work"], WORK_SUBS, ["ambitions"]);
   function isUnder(id, anc){ var p = byId[id]; while (p) { if (p.id === anc) return true; p = p.parent ? byId[p.parent] : null; } return false; }
   var THEMES = [
     { id:"auto",    name:"Auto",    note:"Follows your device", sw:["#f4f1ec","#131816","#e0603f","#1f4f4a"] },
@@ -1096,6 +1124,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
         pb.appendChild(tg);
         if (!closed) ISLAMIC_SUBS.forEach(function (id) {
           var cb = navBtn(byId[id], true); navEl.appendChild(cb);
+          if (id === "isoc") { var bd = navBtn(byId.dawah, true); bd.classList.add("child2"); navEl.appendChild(bd); return; }
           if (id !== "studies") return;
           var sc = !!state.navSciClosed;
           var t2 = el("span", "navfold" + (sc ? " closed" : "")); t2.setAttribute("role", "button"); t2.setAttribute("tabindex", "0");
@@ -1159,6 +1188,16 @@ li.mrow2 .label{display:flex;flex-direction:column}
     ["islamic"].concat(ISLAMIC_SUBS).forEach(function (id) {
       var p = byId[id], b = el("button", state.tab === id || (id !== "islamic" && isUnder(state.tab, id)) ? "on" : null);
       b.appendChild(icon(p.icon)); b.appendChild(document.createTextNode(id === "islamic" ? "All" : p.name));
+      b.onclick = function () { go(id); };
+      bar.appendChild(b);
+    });
+    return bar;
+  }
+  function isocTabs(){
+    var bar = el("div", "subtabs sub2");
+    ["isoc","dawah"].forEach(function (id) {
+      var p = byId[id], b = el("button", state.tab === id ? "on" : null);
+      b.appendChild(icon(p.icon)); b.appendChild(document.createTextNode(id === "isoc" ? "Events & ideas" : p.name));
       b.onclick = function () { go(id); };
       bar.appendChild(b);
     });
@@ -1290,7 +1329,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     app.appendChild(grid);
     var p = el("div", "panel");
     p.appendChild(el("h2", null, "All Islamic tasks"));
-    var items = state.tasks.filter(function (t) { return ISLAMIC_SUBS.indexOf(t.section) >= 0 && !t.done; })
+    var items = state.tasks.filter(function (t) { return byId[t.section] && byId[t.section].group === "islamic" && !t.done; })
       .sort(function (a,b) { return prioOrder[a.priority] - prioOrder[b.priority]; });
     if (!items.length) p.appendChild(el("p", "empty", "No open tasks. Open a subsection above to add one."));
     var ul = el("ul"); items.forEach(function (t) { ul.appendChild(taskRow(t, true)); }); p.appendChild(ul);
@@ -1326,8 +1365,9 @@ li.mrow2 .label{display:flex;flex-direction:column}
     if (sec === "hadith") renderHadithTrackers();
     if (SCIENCES.indexOf(sec) >= 0) { if (sec !== "hadith") renderSciGoals(sec); renderMutoon(sec); renderPdfs(sec);
       if (sec === "hadith") { var hr = document.getElementById("h-rev"), mt = document.getElementById("mt-hadith"); if (hr && mt) hr.parentNode.insertBefore(mt, hr); } }
-    if (sec === "isoc" || sec === "ambitions") renderSciGoals(sec);
-    if (sec === "isoc") renderPdfs("dawah", { title:"Da‘wah", empty:"Upload your da‘wah PDFs: talks, leaflets, reminders and resources", unit:["file","files"], noTicks:true });
+    if (sec === "isoc" || sec === "dawah") app.appendChild(isocTabs());
+    if (sec === "isoc" || sec === "dawah" || sec === "ambitions") renderSciGoals(sec);
+    if (sec === "dawah") renderPdfs("dawah", { title:"Da‘wah files", empty:"Upload your da‘wah PDFs: talks, leaflets, reminders and resources", unit:["file","files"], noTicks:true });
     if (sec === "adhkar") renderAdhkar();
 
     renderNotes(sec);
@@ -2204,6 +2244,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     tafsir:{ week:"e.g. Tafsīr of Sūrat al-Mulk 1–10", month:"e.g. Complete Juz ʿAmma tafsīr", year:"e.g. Tafsīr of the last three juz" },
     hadith:{ week:"e.g. Explanation of hadith 6", month:"e.g. Read the sharḥ of 10 hadith", year:"e.g. Finish a sharḥ of the Arbaʿīn" },
     seerah:{ week:"e.g. The Makkan period, part 1", month:"e.g. Finish the Battle of Badr", year:"e.g. Complete ar-Raḥīq al-Makhtūm" },
+    dawah:{ week:"e.g. Hand out 20 leaflets", month:"e.g. Run a da‘wah stall", year:"e.g. Give a talk on campus" },
     isoc:{ week:"e.g. Post the event poster", month:"e.g. Run two halaqahs", year:"e.g. Organise a charity week" },
     ambitions:{ week:"e.g. One step towards a big ambition", month:"e.g. Research Hajj packages", year:"e.g. Finish memorising Juz 29 and 30" },
     logic:{ week:"e.g. Learn the signs of the ism", month:"e.g. Finish al-Ājurrūmiyyah", year:"e.g. Start an intro to manṭiq" }
@@ -3167,6 +3208,8 @@ li.mrow2 .label{display:flex;flex-direction:column}
   // Your adhkar booklets are kept privately in this browser (like lesson PDFs) and opened at the right page.
   state.adhkarBooks = state.adhkarBooks || {};
   state.adhkarLog = state.adhkarLog || {};
+  state.adhkarCount = state.adhkarCount || {};
+  (function () { var keep = dkey(new Date()); Object.keys(state.adhkarCount).forEach(function (k) { if (k !== keep) delete state.adhkarCount[k]; }); })();
   var BOOKS = [
     { key:"daily", name:"Daily Adhkār", sub:"Morning & evening, before sleep, after ṣalāh, other actions",
       parts:[["Morning & evening",2],["Only in the morning",3],["Only in the evening",4],["Morning & evening (cont.)",5],["Before sleeping",6],["After ṣalāh",8],["Other actions",9],["General adhkār",12]] },
@@ -3213,6 +3256,92 @@ li.mrow2 .label{display:flex;flex-direction:column}
       d.setDate(d.getDate() - 1); }
     return n;
   }
+  var AR_NUM = "٠١٢٣٤٥٦٧٨٩";
+  function arNum(n){ return String(n).replace(/[0-9]/g, function (d) { return AR_NUM[d]; }); }
+  function openReader(id){
+    if (id === "fajr" || id === "dhuhr" || id === "asr" || id === "maghrib" || id === "isha") id = "salah";
+    state.adTab = id; delete q.collapsed["ad-read"]; save(); render();
+    var r = document.getElementById("ad-read"); if (r) r.scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+  function renderAdhkarReader(log){
+    var D = window.ADHKAR_DATA;
+    var p = el("div", "panel"); p.id = "ad-read";
+    p.appendChild(el("h2", null, "Read the adhkār"));
+    if (!D) { p.appendChild(el("p", "empty", "The adhkār text didn't load. Refresh the page.")); app.appendChild(p); makeCollapsible("ad-read"); return; }
+    var cur = D.tabs.filter(function (t) { return t.id === state.adTab; })[0] || D.tabs[0];
+    var tabs = el("div", "subtabs adtabs");
+    D.tabs.forEach(function (t) { var b = el("button", t.id === cur.id ? "on" : null, t.name);
+      b.onclick = function () { state.adTab = t.id; save(); render(); var r = document.getElementById("ad-read"); if (r) r.scrollIntoView({ block:"start" }); }; tabs.appendChild(b); });
+    p.appendChild(tabs);
+    var hd = el("div", "adhead");
+    var tl = el("div"); tl.appendChild(el("div", "adtitle", cur.ar)); tl.appendChild(el("span", "meta", cur.when)); hd.appendChild(tl);
+    var opts = el("div", "row");
+    var enb = el("button", "ghost", state.adNoEn ? "Show meanings" : "Hide meanings");
+    enb.onclick = function () { state.adNoEn = !state.adNoEn; save(); render(); document.getElementById("ad-read").scrollIntoView({ block:"start" }); };
+    var szb = el("button", "ghost", "A" + (state.adBig ? "−" : "+")); szb.title = "Arabic text size";
+    szb.onclick = function () { state.adBig = !state.adBig; save(); render(); document.getElementById("ad-read").scrollIntoView({ block:"start" }); };
+    opts.appendChild(enb); opts.appendChild(szb); hd.appendChild(opts);
+    p.appendChild(hd);
+    var tk = dkey(new Date()), cnt = state.adhkarCount[tk] = state.adhkarCount[tk] || {};
+    var list = el("ol", "adlist" + (state.adBig ? " big" : "") + (state.adNoEn ? " noen" : "")), num = 0, total = 0, full = 0;
+    cur.items.forEach(function (it, i) {
+      if (it.h) { var hh = el("li", "adsub"); hh.appendChild(el("span", null, it.h)); if (it.hAr) hh.appendChild(el("span", "adsubar", it.hAr)); list.appendChild(hh); return; }
+      num++;
+      var key = cur.id + ":" + i, n = it.n || 1, c = cnt[key] || 0, done = c >= n;
+      total++; if (done) full++;
+      var li = el("li", "aditem" + (done ? " done" : ""));
+      var top = el("div", "adtop"); top.appendChild(el("span", "adno", num));
+      if (it.t) top.appendChild(el("b", null, it.t));
+      if (it.n > 1) top.appendChild(el("span", "adx", it.n + "×"));
+      li.appendChild(top);
+      if (it.q) it.q.forEach(function (s) {
+        var box = el("div", "adq");
+        if (it.q.length > 1 || s.basmalah) box.appendChild(el("div", "adqref", s.ref));
+        if (s.basmalah) box.appendChild(el("div", "adtext adbas", "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ"));
+        box.appendChild(el("div", "adtext", s.ayat.map(function (a, j) { return a + " ﴿" + arNum(j + 1 + (s.ref === "2:285–286" ? 284 : s.ref === "2:255" ? 254 : 0)) + "﴾"; }).join(" ")));
+        li.appendChild(box);
+      });
+      if (it.ar) li.appendChild(el("div", "adtext", it.ar));
+      if (it.en) li.appendChild(el("p", "aden", it.en));
+      if (it.links) { var lr = el("div", "row"); it.links.forEach(function (L) { var a = el("a", "ghost", L[0]); a.href = L[1]; a.target = "_blank"; a.rel = "noopener"; lr.appendChild(a); }); li.appendChild(lr); }
+      var foot = el("div", "adfoot");
+      foot.appendChild(el("span", "adsrc", it.src ? "(" + it.src + ")" : ""));
+      var bt = el("button", "adcount" + (done ? " done" : ""));
+      var label = function (v) {
+        if (v >= n) return "✓ Done";
+        if (n === 1) return "Tap when read";
+        if (it.split) { var acc = 0, part = 0; for (var k = 0; k < it.split.length; k++) { if (v < acc + it.split[k]) { part = k; break; } acc += it.split[k]; } return (v - acc) + " / " + it.split[part] + " · part " + (part + 1) + " of " + it.split.length; }
+        return v + " / " + n;
+      };
+      bt.textContent = label(c);
+      bt.onclick = function () {
+        var v = (cnt[key] || 0); v = v >= n ? 0 : v + 1; cnt[key] = v; save();
+        bt.textContent = label(v); var d = v >= n; bt.classList.toggle("done", d); li.classList.toggle("done", d);
+        if (navigator.vibrate && it.split && it.split.indexOf(v) < 0) { var acc = 0; it.split.forEach(function (x) { acc += x; if (acc === v) navigator.vibrate(60); }); }
+        if (d && navigator.vibrate) navigator.vibrate(30);
+        if (d && cur.log && !log[cur.log] && cur.items.every(function (x, j) { return x.h || (cnt[cur.id + ":" + j] || 0) >= (x.n || 1); })) { log[cur.log] = Date.now(); save(); }
+        if (v === 0 || v === n) render();
+      };
+      foot.appendChild(bt);
+      li.appendChild(foot);
+      list.appendChild(li);
+    });
+    var prog = el("div", "adprog"); prog.appendChild(el("span", null, full + " of " + total + " read")); prog.appendChild(barEl(total ? full / total : 0));
+    p.appendChild(prog);
+    p.appendChild(list);
+    var end = el("div", "row adend");
+    if (cur.log) {
+      var on = !!log[cur.log], mb = el("button", on ? "ghost" : "cta", on ? cur.name + " adhkār done ✓" : "Mark " + cur.name.toLowerCase() + " adhkār done");
+      mb.onclick = function () { if (log[cur.log]) delete log[cur.log]; else log[cur.log] = Date.now(); save(); render(); };
+      end.appendChild(mb);
+    }
+    var rb = el("button", "ghost", "Reset counters");
+    rb.onclick = function () { Object.keys(cnt).forEach(function (k) { if (k.indexOf(cur.id + ":") === 0) delete cnt[k]; }); save(); render(); };
+    end.appendChild(rb);
+    p.appendChild(end);
+    p.appendChild(el("p", "meta", "Arabic and sources follow your Daily Adhkār booklet; Qur’ān text is the Uthmani muṣḥaf. English lines are short meanings, not a full translation. Counters reset each day."));
+    app.appendChild(p); makeCollapsible("ad-read");
+  }
   function renderAdhkar(){
     var tk = dkey(new Date()), log = state.adhkarLog[tk] = state.adhkarLog[tk] || {}, h = new Date().getHours();
     var now = h < 12 ? "morning" : h >= 15 && h < 20 ? "evening" : h >= 20 || h < 3 ? "sleep" : null;
@@ -3231,7 +3360,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
       var tb = el("button", log[a.k] ? "ghost" : "cta", log[a.k] ? "Done ✓" : "Mark done");
       tb.onclick = function () { if (log[a.k]) delete log[a.k]; else log[a.k] = Date.now(); save(); render(); };
       var ob = el("button", "ghost"); ob.appendChild(icon("open")); ob.appendChild(document.createTextNode("Read"));
-      ob.onclick = function () { var o = state.adhkarBooks[a.open[0]] ? a.open : (a.alt || a.open); openBook(o[0], o[1], a.n); };
+      ob.onclick = function () { openReader(a.k); };
       r.appendChild(tb); r.appendChild(ob); c.appendChild(r);
       g.appendChild(c);
     });
@@ -3244,7 +3373,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
       b.onclick = function () { if (log[a.k]) delete log[a.k]; else log[a.k] = Date.now(); save(); render(); };
       sr.appendChild(b);
     });
-    var rs = el("button", "ghost"); rs.appendChild(icon("open")); rs.appendChild(document.createTextNode("Read adhkār after ṣalāh")); rs.onclick = function () { openBook("daily", 8, "Adhkār after ṣalāh"); };
+    var rs = el("button", "ghost"); rs.appendChild(icon("open")); rs.appendChild(document.createTextNode("Read adhkār after ṣalāh")); rs.onclick = function () { openReader("salah"); };
     sr.appendChild(rs);
     p.appendChild(sr);
     // last 7 days
@@ -3258,11 +3387,12 @@ li.mrow2 .label{display:flex;flex-direction:column}
     p.appendChild(wk);
     p.appendChild(el("p", "meta", "Dots: morning · evening · before sleep. The number is how many after-ṣalāh adhkār you did."));
     app.appendChild(p); makeCollapsible("ad-today");
+    renderAdhkarReader(log);
 
     // my booklets
     var q = el("div", "panel"); q.id = "ad-books";
-    q.appendChild(el("h2", null, "My adhkar books"));
-    q.appendChild(el("p", "meta", "Upload your adhkar PDFs once. They're stored privately in this browser on this device, and the buttons above open them at the right page."));
+    q.appendChild(el("h2", null, "My adhkar PDFs (optional)"));
+    q.appendChild(el("p", "meta", "All the adhkār are written out above. If you also want the original booklets, upload them here; they're stored privately in this browser on this device."));
     BOOKS.forEach(function (bk) {
       var have = state.adhkarBooks[bk.key], c = el("div", "adbook" + (have ? " have" : ""));
       var hd = el("div", "row"); hd.style.justifyContent = "space-between";
