@@ -730,6 +730,7 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
 .prset .row{margin-top:10px}
 .prset input[type=text]{min-width:120px}
 /* tools: countdowns */
+.cdnote{font-size:11.5px;color:var(--muted);line-height:1.35;margin-top:2px}
 .cdgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-top:8px}
 .cd{position:relative;background:var(--bg);border-radius:16px;padding:14px;border-top:4px solid var(--k);display:flex;flex-direction:column;gap:2px}
 .cd .cdk{font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--k)}
@@ -3004,6 +3005,24 @@ li.mrow2 .label{display:flex;flex-direction:column}
   function cdLabel(d){ return d === 0 ? "Today" : d === 1 ? "Tomorrow" : d < 0 ? (-d) + (d === -1 ? " day ago" : " days ago") : d + " days"; }
   function upcomingCountdowns(){ return state.countdowns.filter(function (c) { return daysUntil(c.date) >= 0; }).sort(function (a, b) { return a.date.localeCompare(b.date); }); }
   state.countdowns.forEach(function (c) { if (!c.scope) c.scope = "uni@y" + (state.uniYear || 1); });
+  // BDS1 Assessment & Feedback calendar 2026/27 (added once into Year 1)
+  if (!state.seedBDS1) {
+    [["Clinical Exams (OSCE) · Summative","2026-11-24","exam","4NNYB01B · on campus · results 01/12/2026"],
+     ["Kickstarter certificate submission · Formative","2026-12-02","deadline","4NNYB01D · remote"],
+     ["Body Systems MCQ · Formative","2027-01-25","exam","4NNYB01F · on campus · results immediately"],
+     ["Tooth ID Test · Formative","2027-02-05","exam","4NNYB01B · remote MCQ · results immediately"],
+     ["EBD & Research presentation · Formative","2027-02-08","deadline","4NNYB01A · remote · results 08/03/2027"],
+     ["Anatomy Spotter · Summative","2027-03-15","exam","4NNYB01C · practical, on campus · results 12/04/2027"],
+     ["Oral Biology & Craniofacial Anatomy MCQ · Formative","2027-04-19","exam","4NNYB01C · remote · results immediately"],
+     ["Reflective Portfolio submission · Summative","2027-04-22","deadline","4NNYB01B · remote · results 07/06/2027"],
+     ["EBD & Research submission · Summative","2027-04-26","deadline","4NNYB01A · written or poster, remote · results 07/06/2027"],
+     ["Group Prevention Project · Summative","2027-05-05","exam","4NNYB01E · presentation, on campus · results 07/06/2027"],
+     ["PBL Task submission · Summative","2027-05-06","deadline","4NNYB01E · remote · results 07/06/2027"],
+     ["Oral Biology & Craniofacial Anatomy MCQ · Summative","2027-05-12","exam","4NNYB01C · on campus · results 07/06/2027"],
+     ["Body Systems MCQ · Summative","2027-05-13","exam","4NNYB01F · on campus · results 07/06/2027"]
+    ].forEach(function (r, i) { state.countdowns.push({ id:"bds1-" + i, title:r[0], date:r[1], kind:r[2], note:r[3], scope:"uni@y1" }); });
+    state.seedBDS1 = 1; save();
+  }
   function cdScopeName(sc){ return sc === "studies" ? "Islamic Sciences" : "Year " + sc.split("@y")[1]; }
   function renderCountdowns(scope){
     var p = el("div", "panel"); p.id = "cd-" + scope.replace("@", "-");
@@ -3027,6 +3046,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
       if (d > 1) card.appendChild(el("span", "cdu", "days to go"));
       card.appendChild(el("b", null, c.title));
       card.appendChild(el("span", "cdd", new Date(c.date + "T12:00").toLocaleDateString(undefined, { weekday:"short", day:"numeric", month:"short", year:"numeric" })));
+      if (c.note) card.appendChild(el("span", "cdnote", c.note));
       var del = el("button", "iconbtn"), armed = false; del.title = "Remove"; del.appendChild(icon("trash"));
       del.onclick = function () { if (!armed) { armed = true; del.classList.add("armed"); return; } state.countdowns = state.countdowns.filter(function (x) { return x.id !== c.id; }); save(); render(); };
       card.appendChild(del);
