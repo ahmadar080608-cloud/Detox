@@ -156,10 +156,13 @@
   var WD = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
   function norm(t) { return String(t || "").trim().toLowerCase(); }
   // one-off tasks from the last 4 weeks, grouped by title + start time
+  // university timetable items change every week, so they're never suggested
+  var UNI_RX = /\b(lecture|seminar|tutorial|practical|lab|workshop|osce|pbl|histology|anatomy|clinic|clinical|module|assessment|exam|quiz|spotter|dissection)s?\b|\b\d[a-z]{4}\d{2}[a-z]\b|\(4nn/i;
+  function noSuggest(it) { return it.source === "ics" || it.source === "gcal" || UNI_RX.test(it.title || ""); }
   function history(beforeKey) {
     var from = addDays(beforeKey, -28), groups = {};
     S().items.forEach(function (it) {
-      if (it.source === "ics" || it.allDay || !it.start) return;
+      if (noSuggest(it) || it.allDay || !it.start) return;
       if (it.repeat && it.repeat.type && it.repeat.type !== "none") return;
       if (it.date >= beforeKey || it.date < from) return;
       var key = norm(it.title) + "@" + it.start;
@@ -205,7 +208,7 @@
   function recents(startMin, excludeId) {
     var seen = {}, out = [];
     S().items.slice().sort(function (a, b) { return (b.date || "").localeCompare(a.date || ""); }).forEach(function (it) {
-      if (it.id === excludeId || it.source === "ics" || !it.title) return;
+      if (it.id === excludeId || noSuggest(it) || !it.title) return;
       var n = norm(it.title); if (seen[n]) return; seen[n] = 1; out.push(it);
     });
     if (startMin != null) out.sort(function (a, b) { var da = a.start ? Math.abs(hm(a.start) - startMin) : 999, db = b.start ? Math.abs(hm(b.start) - startMin) : 999; return da - db; });
