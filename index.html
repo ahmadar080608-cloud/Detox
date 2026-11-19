@@ -830,6 +830,36 @@ select.topsel.row{font-size:12px;padding:3px 8px;border-radius:8px;background:tr
 .mtgrid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))!important}
 .mtgrid .hch{justify-content:flex-start;align-items:flex-start}
 .mtgrid .hch span{font-size:13px;line-height:1.35}
+
+/* finance pots */
+.potsum{display:grid;grid-template-columns:1.4fr 1fr;gap:10px;margin-bottom:14px}
+.psum{background:var(--bg);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.psum span{font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.psum b{font-family:Lalezar,Inter,sans-serif;font-weight:400;font-size:34px;line-height:1.1}
+.psum.need b{color:var(--accent)}
+.psum small{font-size:12px;color:var(--muted)}
+.potgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.pot{background:var(--bg);border-radius:16px;padding:14px;border-top:4px solid var(--pc);display:flex;flex-direction:column;gap:2px}
+.poth{display:flex;justify-content:space-between;align-items:center}
+.poth b{font-size:15px}
+.potbal{font-family:Lalezar,Inter,sans-serif;font-size:32px;line-height:1.1;color:var(--pc)}
+.potbal.neg{color:#d93c3c}
+.potsub{font-size:11px;color:var(--muted);margin-bottom:6px}
+.pot .meta{margin:4px 0 0;font-size:12px}
+.pot .bar i{background:var(--pc)}
+.goal .bar{background:var(--card)}
+.pot .bar{background:var(--card)}
+.potedit{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.potedit input,.potedit select{background:var(--card);min-width:0;width:100%}
+.addpot{border:2px dashed var(--line);border-top:2px dashed var(--line);align-items:center;justify-content:center;flex-direction:row;gap:8px;color:var(--muted);font-weight:700;min-height:120px}
+.addpot:hover{border-color:var(--accent);color:var(--accent)}
+select.potsel{font-size:13px;padding:7px 10px;max-width:200px}
+li.mrow2 select.potsel{font-size:12px;padding:3px 8px;border-radius:8px;background:transparent}
+.potsplit{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.pottag{font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;background:color-mix(in srgb,var(--pc) 16%,transparent);color:var(--pc)}
+li.mrow2 .label{display:flex;flex-direction:column}
+@media (max-width:899px){.potsum{grid-template-columns:1fr}}
+
 [hidden]{display:none!important}
 
 /* ===== mobile: sidebar becomes a bottom bar ===== */
@@ -2509,51 +2539,117 @@ select.topsel.row{font-size:12px;padding:3px 8px;border-radius:8px;background:tr
     makeCollapsible("t-" + sec);
   }
 
-  // Finance: a simple money in / money out log, month by month
-  var finMonth = null;
-  state.finTarget = state.finTarget || { month:0, week:0 };
-  function renderEarnTargets(){
-    var T = state.finTarget, now = new Date(), d0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    var mk = dkey(now).slice(0, 7), ws = weekStart(now), wsk = dkey(ws), we = new Date(ws); we.setDate(ws.getDate() + 6);
-    var mEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    var inM = 0, inW = 0;
-    state.money.forEach(function (x) { if (x.type !== "in") return; if ((x.date || "").slice(0, 7) === mk) inM += x.amount; if (x.date >= wsk && x.date <= dkey(we)) inW += x.amount; });
-    var gbp = function (n) { return "£" + n.toLocaleString(undefined, { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits:2 }); };
-    var p = el("div", "panel"); p.id = "earn";
-    p.appendChild(el("h2", null, "How much I need to make"));
-    var g = el("div", "goals earn");
-    [
-      { k:"month", n:"This month", sub:now.toLocaleDateString(undefined, { month:"long", year:"numeric" }), got:inM, end:mEnd },
-      { k:"week", n:"This week", sub:ws.toLocaleDateString(undefined, { day:"numeric", month:"short" }) + " – " + we.toLocaleDateString(undefined, { day:"numeric", month:"short" }), got:inW, end:we }
-    ].forEach(function (x) {
-      var t = T[x.k] || 0, card = el("div", "goal" + (t && x.got >= t ? " met" : ""));
-      var gh = el("div", "gh"); gh.appendChild(el("b", null, x.n)); gh.appendChild(el("span", "meta", x.sub)); card.appendChild(gh);
-      var big = el("div", "bignum", gbp(x.got)); big.appendChild(el("small", null, t ? "of " + gbp(t) + " earned" : "earned")); card.appendChild(big);
-      card.appendChild(barEl(t ? x.got / t : 0));
-      var daysLeft = Math.round((x.end - d0) / 864e5) + 1, left = t - x.got;
-      card.appendChild(el("p", "meta gm", !t ? "Set a target below to track it." : left <= 0 ? "Target reached, alḥamdulillāh" + (left < 0 ? " (" + gbp(-left) + " over)." : ".") :
-        gbp(Math.round(left * 100) / 100) + " still to make · about " + gbp(Math.ceil(left / daysLeft)) + " a day for " + daysLeft + (daysLeft === 1 ? " day" : " days")));
-      var r = el("div", "row"); r.appendChild(el("span", "meta", "Target £"));
-      var inp = el("input"); inp.type = "number"; inp.min = 0; inp.step = "1"; inp.value = t || ""; inp.placeholder = "0"; inp.setAttribute("aria-label", x.n + " earning target");
-      inp.onchange = function () { T[x.k] = Math.max(0, Math.round((parseFloat(inp.value) || 0) * 100) / 100); save(); render(); };
-      r.appendChild(inp); card.appendChild(r);
+  // ---------- Finance: pots (envelopes) ----------
+  // Every pound goes into a pot. Money in is added to a pot (or split across the pots that still need it);
+  // money out comes out of a pot, so spending on travel never eats into uni fees.
+  state.pots = Array.isArray(state.pots) && state.pots.length ? state.pots : [
+    { id:"travel", name:"Travel", kind:"monthly", target:0, color:"#6c9bd2" },
+    { id:"fees", name:"Uni fees", kind:"goal", target:0, due:"", color:"#e0603f" },
+    { id:"misc", name:"Miscellaneous", kind:"monthly", target:0, color:"#3f9a78" }
+  ];
+  var POT_COLORS = ["#6c9bd2","#e0603f","#3f9a78","#c58af9","#d9a33a","#5ec4d6","#f28b82"];
+  var finMonth = null, potEdit = null, addingPot = false;
+  function gbp(n){ var neg = n < 0; n = Math.abs(n); return (neg ? "−" : "") + "£" + n.toLocaleString(undefined, { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits:2 }); }
+  function amtFor(x, potId){ if (x.split) return x.split[potId] || 0; return x.pot === potId ? x.amount : 0; }
+  function monthsLeft(due){ if (!due) return 1; var n = new Date(), d = new Date(due + "T12:00"); return Math.max(1, (d.getFullYear() - n.getFullYear()) * 12 + d.getMonth() - n.getMonth() + 1); }
+  // what each pot still needs this month
+  function potStatus(pt){
+    var now = new Date(), mk = dkey(now).slice(0, 7), inAll = 0, outAll = 0, inM = 0, outM = 0;
+    state.money.forEach(function (x) { var a = amtFor(x, pt.id); if (!a) return; var thisM = (x.date || "").slice(0, 7) === mk;
+      if (x.type === "in") { inAll += a; if (thisM) inM += a; } else { outAll += a; if (thisM) outM += a; } });
+    var bal = inAll - outAll, need = 0;
+    if (pt.kind === "monthly") need = Math.max(0, (pt.target || 0) - inM);
+    else { var left = Math.max(0, (pt.target || 0) - bal); need = left / monthsLeft(pt.due); }
+    return { bal:bal, inAll:inAll, outAll:outAll, inM:inM, outM:outM, needMonth:Math.round(need * 100) / 100 };
+  }
+  function splitByNeed(amount){
+    var needs = state.pots.map(function (p) { return { id:p.id, n:potStatus(p).needMonth }; }).filter(function (x) { return x.n > 0; });
+    var total = needs.reduce(function (a, x) { return a + x.n; }, 0), out = {};
+    if (!total) { var misc = state.pots.find(function (p) { return p.id === "misc"; }) || state.pots[state.pots.length - 1]; out[misc.id] = amount; return out; }
+    var give = Math.min(amount, total), used = 0;
+    needs.forEach(function (x, i) { var v = i === needs.length - 1 ? Math.round((give - used) * 100) / 100 : Math.round(give * x.n / total * 100) / 100; if (v > 0) { out[x.id] = (out[x.id] || 0) + v; used += v; } });
+    if (amount > give) { var extra = Math.round((amount - give) * 100) / 100, m2 = state.pots.find(function (p) { return p.id === "misc"; }) || state.pots[0]; out[m2.id] = Math.round(((out[m2.id] || 0) + extra) * 100) / 100; }
+    return out;
+  }
+
+  function renderPots(){
+    var now = new Date(), mEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0), d0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    var daysLeft = Math.round((mEnd - d0) / 864e5) + 1, weeksLeft = Math.max(1, daysLeft / 7);
+    var stats = state.pots.map(function (pt) { return { p:pt, s:potStatus(pt) }; });
+    var needM = stats.reduce(function (a, x) { return a + x.s.needMonth; }, 0), avail = stats.reduce(function (a, x) { return a + x.s.bal; }, 0);
+    var unassigned = state.money.filter(function (x) { return !x.split && !x.pot; });
+    var p = el("div", "panel"); p.id = "pots";
+    p.appendChild(el("h2", null, "My pots"));
+    // what I still need to make
+    var top = el("div", "potsum");
+    var c1 = el("div", "psum need"); c1.appendChild(el("span", null, "Still to make this month")); c1.appendChild(el("b", null, gbp(needM)));
+    c1.appendChild(el("small", null, needM ? "about " + gbp(Math.ceil(needM / weeksLeft)) + " a week, " + gbp(Math.ceil(needM / daysLeft)) + " a day for " + daysLeft + " days" : "Every pot is covered this month, alḥamdulillāh."));
+    var c2 = el("div", "psum"); c2.appendChild(el("span", null, "In your pots now")); c2.appendChild(el("b", null, gbp(avail))); c2.appendChild(el("small", null, "money put in, minus money spent"));
+    top.appendChild(c1); top.appendChild(c2); p.appendChild(top);
+    // one card per pot
+    var g = el("div", "potgrid");
+    stats.forEach(function (x) {
+      var pt = x.p, s = x.s, card = el("div", "pot"); card.style.setProperty("--pc", pt.color);
+      var h = el("div", "poth"); h.appendChild(el("b", null, pt.name));
+      var eb = el("button", "iconbtn"); eb.title = "Edit pot"; eb.appendChild(icon("settings")); eb.onclick = function () { potEdit = potEdit === pt.id ? null : pt.id; render(); }; h.appendChild(eb);
+      card.appendChild(h);
+      card.appendChild(el("div", "potbal" + (s.bal < 0 ? " neg" : ""), gbp(s.bal)));
+      card.appendChild(el("span", "potsub", "available to spend"));
+      if (pt.kind === "monthly") {
+        card.appendChild(barEl(pt.target ? s.inM / pt.target : 0));
+        card.appendChild(el("p", "meta", pt.target ? gbp(s.inM) + " of " + gbp(pt.target) + " put in this month" + (s.needMonth ? " · " + gbp(s.needMonth) + " to go" : " ✓") : "Set a monthly target ⚙"));
+      } else {
+        card.appendChild(barEl(pt.target ? Math.max(0, s.bal) / pt.target : 0));
+        var left = Math.max(0, (pt.target || 0) - s.bal);
+        card.appendChild(el("p", "meta", pt.target ? gbp(Math.max(0, s.bal)) + " of " + gbp(pt.target) + " saved" + (left ? " · " + gbp(left) + " to go" + (pt.due ? " by " + new Date(pt.due + "T12:00").toLocaleDateString(undefined, { day:"numeric", month:"short", year:"numeric" }) + " (about " + gbp(Math.ceil(s.needMonth)) + "/month)" : "") : " ✓") : "Set a target ⚙"));
+      }
+      if (s.outM) card.appendChild(el("p", "meta", "Spent this month: " + gbp(s.outM)));
+      if (potEdit === pt.id) {
+        var f = el("div", "potedit");
+        var nm = el("input"); nm.type = "text"; nm.value = pt.name; nm.setAttribute("aria-label", "Pot name");
+        var kd = el("select"); kd.setAttribute("aria-label", "Target type"); [["monthly","Monthly amount"],["goal","Total by a date"]].forEach(function (o) { var q = el("option", null, o[1]); q.value = o[0]; kd.appendChild(q); }); kd.value = pt.kind;
+        var tg = el("input"); tg.type = "number"; tg.min = 0; tg.step = "1"; tg.value = pt.target || ""; tg.placeholder = "Target £"; tg.setAttribute("aria-label", "Target");
+        var du = el("input"); du.type = "date"; du.value = pt.due || ""; du.className = "dateinp"; du.setAttribute("aria-label", "Needed by"); du.hidden = pt.kind !== "goal";
+        kd.onchange = function () { du.hidden = kd.value !== "goal"; };
+        var sv = el("button", "cta", "Save");
+        sv.onclick = function () { pt.name = nm.value.trim() || pt.name; pt.kind = kd.value; pt.target = Math.max(0, parseFloat(tg.value) || 0); pt.due = du.value || ""; potEdit = null; save(); render(); };
+        var dl = el("button", "ghost danger", "Delete pot"), armed = false;
+        dl.onclick = function () { if (!armed) { armed = true; dl.textContent = "Press again: its history moves to Not in a pot"; return; }
+          state.money.forEach(function (m) { if (m.pot === pt.id) delete m.pot; if (m.split && m.split[pt.id]) { delete m.split[pt.id]; if (!Object.keys(m.split).length) delete m.split; } });
+          state.pots = state.pots.filter(function (q) { return q.id !== pt.id; }); potEdit = null; save(); render(); };
+        f.appendChild(nm); f.appendChild(kd); f.appendChild(tg); f.appendChild(du);
+        var fr = el("div", "row"); fr.appendChild(sv); if (state.pots.length > 1) fr.appendChild(dl); f.appendChild(fr);
+        card.appendChild(f);
+      }
       g.appendChild(card);
     });
+    var addc = el("button", "pot addpot"); addc.appendChild(icon("plus")); addc.appendChild(document.createTextNode("Add a pot"));
+    addc.onclick = function () { var id = "p" + uid(); state.pots.push({ id:id, name:"New pot", kind:"monthly", target:0, color:POT_COLORS[state.pots.length % POT_COLORS.length] }); potEdit = id; save(); render(); };
+    g.appendChild(addc);
     p.appendChild(g);
-    if (T.month && !T.week) {
-      var sug = el("button", "linkbtn", "Set the weekly target from the monthly one (" + gbp(Math.ceil(T.month / (mEnd.getDate() / 7))) + ")");
-      sug.onclick = function () { T.week = Math.ceil(T.month / (mEnd.getDate() / 7)); save(); render(); }; p.appendChild(sug);
+    if (unassigned.length) {
+      var ua = unassigned.reduce(function (a, x) { return a + (x.type === "in" ? x.amount : -x.amount); }, 0);
+      p.appendChild(el("p", "meta", unassigned.length + " older " + (unassigned.length === 1 ? "entry isn't" : "entries aren't") + " in a pot (" + gbp(ua) + "). Choose a pot for " + (unassigned.length === 1 ? "it" : "them") + " in the list below."));
     }
-    p.appendChild(el("p", "meta", "Counts everything you log as “In” below. The week runs Monday to Sunday."));
-    app.appendChild(p); makeCollapsible("earn");
+    p.appendChild(el("p", "meta", "Monthly pots need their target put in each month. A total-by-date pot spreads what's left over the months until it's due."));
+    app.appendChild(p); makeCollapsible("pots");
   }
+
+  function potPicker(val, type, onch){
+    var sel = el("select", "potsel"); sel.setAttribute("aria-label", "Pot");
+    if (type === "in") { var o0 = el("option", null, "Split by what's needed"); o0.value = "__split"; sel.appendChild(o0); }
+    state.pots.forEach(function (pt) { var o = el("option", null, (type === "in" ? "Into " : "From ") + pt.name); o.value = pt.id; sel.appendChild(o); });
+    if (val === "") { var on = el("option", null, "Not in a pot"); on.value = ""; sel.appendChild(on); }
+    sel.value = val; sel.onchange = function () { onch(sel.value); };
+    return sel;
+  }
+
   function renderFinance(){
-    renderEarnTargets();
+    renderPots();
     var now = new Date(); finMonth = finMonth || (now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2));
     var parts = finMonth.split("-"), mDate = new Date(+parts[0], +parts[1] - 1, 1);
     var M = state.money.filter(function (x) { return (x.date || "").slice(0, 7) === finMonth; }).sort(function (a, b) { return (b.date || "").localeCompare(a.date || "") || b.added - a.added; });
     var tin = 0, tout = 0; M.forEach(function (x) { if (x.type === "in") tin += x.amount; else tout += x.amount; });
-    var gbp = function (n) { return "£" + n.toLocaleString(undefined, { minimumFractionDigits:2, maximumFractionDigits:2 }); };
     var p = el("div", "panel"); p.id = "money";
     p.appendChild(el("h2", null, "Money in & out"));
     var mh = el("div", "row"); mh.style.justifyContent = "space-between";
@@ -2568,23 +2664,40 @@ select.topsel.row{font-size:12px;padding:3px 8px;border-radius:8px;background:tr
     [["In", tin, "in"], ["Out", tout, "out"], ["Left over", tin - tout, tin - tout >= 0 ? "in" : "out"]].forEach(function (x) {
       var c = el("div", "msum " + x[2]); c.appendChild(el("span", null, x[0])); c.appendChild(el("b", null, gbp(x[1]))); sums.appendChild(c); });
     p.appendChild(sums);
+    // add an entry
     var r = el("div", "row"); r.style.margin = "14px 0 4px";
-    var ds = el("input"); ds.type = "text"; ds.maxLength = 100; ds.placeholder = "e.g. Tutoring payment, Tesco, Oyster top-up"; ds.setAttribute("aria-label", "Description");
+    var ty = el("select"); ty.setAttribute("aria-label", "In or out"); [["in","Money in"],["out","Money out"]].forEach(function (o) { var x = el("option", null, o[1]); x.value = o[0]; ty.appendChild(x); });
+    ty.value = state.finLastType || "in";
+    var ds = el("input"); ds.type = "text"; ds.maxLength = 100; ds.setAttribute("aria-label", "Description");
     var am = el("input"); am.type = "number"; am.min = 0; am.step = "0.01"; am.placeholder = "£"; am.setAttribute("aria-label", "Amount"); am.style.width = "110px";
-    var ty = el("select"); ty.setAttribute("aria-label", "In or out"); [["out","Out"],["in","In"]].forEach(function (o) { var x = el("option", null, o[1]); x.value = o[0]; ty.appendChild(x); });
+    var potHost = el("span"), potSel = null;
+    var drawPot = function () { potHost.innerHTML = ""; var v = ty.value === "in" ? (state.finLastInPot || "__split") : (state.finLastOutPot || (state.pots[0] && state.pots[0].id));
+      if (!state.pots.some(function (q) { return q.id === v; }) && v !== "__split") v = ty.value === "in" ? "__split" : state.pots[0].id;
+      potSel = potPicker(v, ty.value, function () {}); potHost.appendChild(potSel);
+      ds.placeholder = ty.value === "in" ? "e.g. Tutoring payment, Student loan" : "e.g. Oyster top-up, Textbook"; };
+    ty.onchange = function () { state.finLastType = ty.value; drawPot(); };
+    drawPot();
     var dt = el("input"); dt.type = "date"; dt.className = "dateinp"; dt.value = dkey(now).slice(0, 7) === finMonth ? dkey(now) : finMonth + "-01"; dt.setAttribute("aria-label", "Date");
     var ab = el("button", "cta"); ab.appendChild(icon("plus")); ab.appendChild(document.createTextNode("Add"));
-    var add = function () { var a = Math.round(parseFloat(am.value) * 100) / 100; if (!ds.value.trim() || !(a > 0)) return;
-      state.money.push({ id:uid(), desc:ds.value.trim(), amount:a, type:ty.value, date:dt.value || dkey(now), added:Date.now() }); save(); render(); };
+    var add = function () {
+      var a = Math.round(parseFloat(am.value) * 100) / 100; if (!ds.value.trim() || !(a > 0)) return;
+      var e = { id:uid(), desc:ds.value.trim(), amount:a, type:ty.value, date:dt.value || dkey(now), added:Date.now() };
+      if (ty.value === "in") { state.finLastInPot = potSel.value; if (potSel.value === "__split") e.split = splitByNeed(a); else e.pot = potSel.value; }
+      else { state.finLastOutPot = potSel.value; e.pot = potSel.value; }
+      state.money.push(e); save(); render(); };
     ab.onclick = add; am.onkeydown = ds.onkeydown = function (e) { if (e.key === "Enter") add(); };
-    r.appendChild(ds); r.appendChild(am); r.appendChild(ty); r.appendChild(dt); r.appendChild(ab);
+    r.appendChild(ty); r.appendChild(ds); r.appendChild(am); r.appendChild(potHost); r.appendChild(dt); r.appendChild(ab);
     p.appendChild(r);
     if (!M.length) p.appendChild(el("p", "empty", "Nothing logged for this month."));
-    var ul = el("ul");
+    var ul = el("ul"), potById = {}; state.pots.forEach(function (q) { potById[q.id] = q; });
     M.forEach(function (x) {
       var li = el("li", "mrow2");
       li.appendChild(el("span", "mdate", new Date(x.date + "T12:00").toLocaleDateString(undefined, { day:"numeric", month:"short" })));
-      li.appendChild(el("span", "label", x.desc));
+      var lab = el("span", "label"); lab.appendChild(document.createTextNode(x.desc));
+      if (x.split) { var sp = el("span", "potsplit"); Object.keys(x.split).forEach(function (k) { if (!potById[k]) return; var t = el("span", "pottag", potById[k].name + " " + gbp(x.split[k])); t.style.setProperty("--pc", potById[k].color); sp.appendChild(t); }); lab.appendChild(sp); }
+      li.appendChild(lab);
+      if (!x.split) li.appendChild(potPicker(x.pot && potById[x.pot] ? x.pot : "", x.type, function (v) { if (v === "__split") { x.split = splitByNeed(x.amount); delete x.pot; } else if (v) x.pot = v; else delete x.pot; save(); render(); }));
+      else { var rs = el("button", "linkbtn", "Change pot"); rs.onclick = function () { delete x.split; x.pot = (state.pots[0] || {}).id; save(); render(); }; li.appendChild(rs); }
       li.appendChild(el("b", "mamt " + x.type, (x.type === "in" ? "+" : "−") + gbp(x.amount)));
       var del = el("button", "iconbtn"), armed = false; del.title = "Delete"; del.appendChild(icon("trash"));
       del.onclick = function () { if (!armed) { armed = true; del.classList.add("armed"); return; } state.money = state.money.filter(function (y) { return y.id !== x.id; }); save(); render(); };
