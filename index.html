@@ -1492,6 +1492,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     if (NAV_GROUPS[sec]) { app.appendChild(groupTabs(sec, NAV_GROUPS[sec])); renderGroupHome(sec, NAV_GROUPS[sec]); }
     if (sec === "university") renderCountdowns("uni@y" + state.uniYear);
     if (NAV_GROUPS[p0.parent]) app.appendChild(groupTabs(p0.parent, NAV_GROUPS[p0.parent]));
+    if (sec === "isoc" || sec === "dawah") app.appendChild(isocTabs());
     if (TRK[sec]) renderTracker(sec);
     if (sec === "finance") renderFinance();
     if (sec === "studies" || p0.parent === "studies") app.appendChild(studyTabs());
@@ -1500,7 +1501,6 @@ li.mrow2 .label{display:flex;flex-direction:column}
     if (sec === "hadith") renderHadithTrackers();
     if (SCIENCES.indexOf(sec) >= 0) { if (sec !== "hadith") renderSciGoals(sec); renderMutoon(sec); renderPdfs(sec);
       if (sec === "hadith") { var hr = document.getElementById("h-rev"), mt = document.getElementById("mt-hadith"); if (hr && mt) hr.parentNode.insertBefore(mt, hr); } }
-    if (sec === "isoc" || sec === "dawah") app.appendChild(isocTabs());
     if (sec === "fitness") renderFitness();
     if (sec === "isoc" || sec === "dawah" || sec === "ambitions" || sec === "fitness") renderSciGoals(sec);
     if (sec === "dawah") renderPdfs("dawah", { title:"Da‘wah files", empty:"Upload your da‘wah PDFs: talks, leaflets, reminders and resources", unit:["file","files"], noTicks:true });
