@@ -1032,7 +1032,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     { id:"tutoring",   name:"Tutoring",        icon:"tutoring",   group:"work", parent:"work", sub:"Students & sessions", bg:"تدريس", color:"--c1" },
     { id:"finance",    name:"Finance",         icon:"finance",    group:"work", parent:"work", sub:"Money in & out", bg:"مال", color:"--c5" },
     { id:"ambitions",  name:"Life ambitions",  icon:"ambitions",  group:null,      ar:"طُمُوحَاتُ الحَيَاةِ", sub:"This life and the next", bg:"طموح", color:"--c1" },
-    { id:"tools",      name:"Tools",           icon:"tools",      group:null,      sub:"Focus, prayer & countdowns", bg:"تركيز", color:"--c4" },
+    { id:"tools",      name:"Tools",           icon:"tools",      group:null,      sub:"Focus & stats", bg:"تركيز", color:"--c4" },
     { id:"settings",   name:"Settings",        icon:"settings",   group:null,      bg:"إعدادات" }
   ];
 
@@ -1374,11 +1374,12 @@ li.mrow2 .label{display:flex;flex-direction:column}
     }
     if (sec === "university" || p0.parent === "university") app.appendChild(yearTabs());
     if (NAV_GROUPS[sec]) { app.appendChild(groupTabs(sec, NAV_GROUPS[sec])); renderGroupHome(sec, NAV_GROUPS[sec]); }
+    if (sec === "university") renderCountdowns("uni@y" + state.uniYear);
     if (NAV_GROUPS[p0.parent]) app.appendChild(groupTabs(p0.parent, NAV_GROUPS[p0.parent]));
     if (TRK[sec]) renderTracker(sec);
     if (sec === "finance") renderFinance();
     if (sec === "studies" || p0.parent === "studies") app.appendChild(studyTabs());
-    if (sec === "studies") renderSciencesHome();
+    if (sec === "studies") { renderSciencesHome(); renderCountdowns("studies"); }
     if (sec === "quran") renderQuranTrackers();
     if (sec === "hadith") renderHadithTrackers();
     if (SCIENCES.indexOf(sec) >= 0) { if (sec !== "hadith") renderSciGoals(sec); renderMutoon(sec); renderPdfs(sec);
@@ -1979,8 +1980,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     p.appendChild(oneThingPicker());
     app.appendChild(p);
     renderFocusStats();
-    renderPrayer();
-    renderCountdowns();
+
     paintTimer();
   }
 
@@ -3003,19 +3003,21 @@ li.mrow2 .label{display:flex;flex-direction:column}
   function daysUntil(k){ var a = k.split("-"), t = new Date(+a[0], +a[1] - 1, +a[2]), n = new Date(); n.setHours(0,0,0,0); return Math.round((t - n) / 864e5); }
   function cdLabel(d){ return d === 0 ? "Today" : d === 1 ? "Tomorrow" : d < 0 ? (-d) + (d === -1 ? " day ago" : " days ago") : d + " days"; }
   function upcomingCountdowns(){ return state.countdowns.filter(function (c) { return daysUntil(c.date) >= 0; }).sort(function (a, b) { return a.date.localeCompare(b.date); }); }
-  function renderCountdowns(){
-    var p = el("div", "panel"); p.id = "tl-count";
+  state.countdowns.forEach(function (c) { if (!c.scope) c.scope = "uni@y" + (state.uniYear || 1); });
+  function cdScopeName(sc){ return sc === "studies" ? "Islamic Sciences" : "Year " + sc.split("@y")[1]; }
+  function renderCountdowns(scope){
+    var p = el("div", "panel"); p.id = "cd-" + scope.replace("@", "-");
     p.appendChild(el("h2", null, "Exams & deadlines"));
     var r = el("div", "row"); r.style.marginBottom = "8px";
-    var ti = el("input"); ti.type = "text"; ti.maxLength = 100; ti.placeholder = "e.g. Anatomy exam, Essay due"; ti.setAttribute("aria-label", "Name");
+    var ti = el("input"); ti.type = "text"; ti.maxLength = 100; ti.placeholder = scope === "studies" ? "e.g. Fiqh exam, Matn test" : "e.g. Anatomy exam, Essay due"; ti.setAttribute("aria-label", "Name");
     var dt = el("input"); dt.type = "date"; dt.className = "dateinp"; dt.setAttribute("aria-label", "Date");
     var kd = el("select"); kd.setAttribute("aria-label", "Type"); Object.keys(CD_KIND).forEach(function (k) { var o = el("option", null, CD_KIND[k].n); o.value = k; kd.appendChild(o); });
     var ab = el("button", "cta"); ab.appendChild(icon("plus")); ab.appendChild(document.createTextNode("Add"));
-    var add = function () { if (!ti.value.trim() || !dt.value) return; state.countdowns.push({ id:uid(), title:ti.value.trim(), date:dt.value, kind:kd.value }); save(); render(); };
+    var add = function () { if (!ti.value.trim() || !dt.value) return; state.countdowns.push({ id:uid(), title:ti.value.trim(), date:dt.value, kind:kd.value, scope:scope }); save(); render(); };
     ab.onclick = add; ti.onkeydown = function (e) { if (e.key === "Enter") add(); };
     r.appendChild(ti); r.appendChild(dt); r.appendChild(kd); r.appendChild(ab); p.appendChild(r);
-    var list = state.countdowns.slice().sort(function (a, b) { var da = daysUntil(a.date), db = daysUntil(b.date); if ((da < 0) !== (db < 0)) return da < 0 ? 1 : -1; return da < 0 ? db - da : da - db; });
-    if (!list.length) p.appendChild(el("p", "empty", "Add your exams and deadlines. The next ones also show on your Overview."));
+    var list = state.countdowns.filter(function (c) { return c.scope === scope; }).sort(function (a, b) { var da = daysUntil(a.date), db = daysUntil(b.date); if ((da < 0) !== (db < 0)) return da < 0 ? 1 : -1; return da < 0 ? db - da : da - db; });
+    if (!list.length) p.appendChild(el("p", "empty", "Add your " + (scope === "studies" ? "Islamic studies" : cdScopeName(scope)) + " exams and deadlines. The next ones also show on your Overview."));
     var g = el("div", "cdgrid");
     list.forEach(function (c) {
       var d = daysUntil(c.date), k = CD_KIND[c.kind] || CD_KIND.event;
@@ -3031,7 +3033,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
       g.appendChild(card);
     });
     p.appendChild(g);
-    app.appendChild(p); makeCollapsible("tl-count");
+    app.appendChild(p); makeCollapsible(p.id);
   }
   function countdownStrip(){
     var up = upcomingCountdowns().slice(0, 4); if (!up.length) return null;
@@ -3039,7 +3041,8 @@ li.mrow2 .label{display:flex;flex-direction:column}
     up.forEach(function (c) { var d = daysUntil(c.date), k = CD_KIND[c.kind] || CD_KIND.event;
       var b = el("button", "cdchip" + (d <= 7 ? " soon" : "")); b.style.setProperty("--k", k.c);
       b.appendChild(el("b", null, d === 0 ? "Today" : d === 1 ? "1 day" : d + " days")); b.appendChild(el("span", null, c.title));
-      b.title = k.n + " · " + c.date; b.onclick = function () { go("tools"); }; s.appendChild(b); });
+      b.title = k.n + " · " + cdScopeName(c.scope) + " · " + c.date;
+      b.onclick = function () { if (c.scope === "studies") go("studies"); else { state.uniYear = +c.scope.split("@y")[1]; go("university"); } }; s.appendChild(b); });
     return s;
   }
 
