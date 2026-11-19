@@ -467,7 +467,7 @@
     var name = el("b"); name.appendChild(svg("calendar", "gic")); name.appendChild(document.createTextNode(" Google Calendar")); l.appendChild(name);
     var right = el("div", "row");
     if (!g0.clientId) {
-      l.appendChild(el("span", null, "Link your Google account: your events show here, and tasks you add here go into Google Calendar with their reminders."));
+      l.appendChild(el("span", null, "Link your Google account: your Google events appear in your calendar and daily timeline, and fixed events you add here go into Google Calendar with their reminders."));
       var su = el("button", "cta", V.gSetup ? "Hide setup" : "Set up"); su.onclick = function () { V.gSetup = !V.gSetup; C.rerender(); }; right.appendChild(su);
     } else if (!g0.connected) {
       l.appendChild(el("span", null, "Ready to connect. You'll be asked to sign in with Google and allow access to your calendar."));
@@ -476,7 +476,7 @@
     } else {
       var ago = g0.lastSync ? Math.round((Date.now() - g0.lastSync) / 60000) : null;
       l.appendChild(el("span", null, "Connected · " + (ago == null ? "not synced yet" : ago < 1 ? "synced just now" : "synced " + (ago < 60 ? ago + " min" : Math.round(ago / 60) + " h") + " ago") +
-        ". Google events show in blue. New tasks also go to Google unless you untick it in the task."));
+        ". Google events show in blue as fixed events. Fixed tasks you add here also go to Google; routine tasks stay here unless you tick “Also save to Google Calendar”."));
       var sy = el("button", "cta", "Sync now"); sy.onclick = function () { gPull(); }; right.appendChild(sy);
       var dc = el("button", "ghost", "Disconnect"); dc.onclick = gDisconnect; right.appendChild(dc);
     }
@@ -829,8 +829,10 @@
     var add = function () {
       var t = ti.value.trim(); if (!t) { ti.focus(); return; }
       S().items.push({ id: uid(), title: t, icon: guessIcon(t) || "calendar", color: COLORS[1], date: dk, start: adc.checked ? null : (tm.value || "09:00"),
-        dur: adc.checked ? 0 : 60, allDay: adc.checked, repeat: { type: "none" }, remind: adc.checked ? null : 30, subtasks: [], notes: "", done: {}, fixed: true });
-      C.save(); V.toast = "Added “" + t + "” on " + dd.toLocaleDateString(undefined, { day: "numeric", month: "short" }) + "."; C.rerender();
+        dur: adc.checked ? 0 : 60, allDay: adc.checked, repeat: { type: "none" }, remind: adc.checked ? null : 30, subtasks: [], notes: "", done: {}, fixed: true,
+        gsync: !!(gc().connected && gc().pushDefault !== false) });
+      var added = S().items[S().items.length - 1];
+      C.save(); if (added.gsync) gPush(added); V.toast = "Added “" + t + "” on " + dd.toLocaleDateString(undefined, { day: "numeric", month: "short" }) + "."; C.rerender();
     };
     go.onclick = add; ti.onkeydown = function (e) { if (e.key === "Enter") add(); };
     var row = el("div", "row"); row.appendChild(tm); row.appendChild(ad); row.appendChild(go);
@@ -1068,9 +1070,9 @@
     bd.appendChild(c3);
 
     if (gc().connected && dr.source !== "gcal" && dr.source !== "ics") {
-      if (E.isNew && dr.gsync == null) dr.gsync = gc().pushDefault !== false;
+      if (E.isNew && !E.gsyncTouched) dr.gsync = isFixed(dr) && gc().pushDefault !== false;
       var gl = el("label", "sch-gsync"); var gcb = el("input"); gcb.type = "checkbox"; gcb.checked = !!dr.gsync;
-      gcb.onchange = function () { dr.gsync = gcb.checked; if (E.isNew) { gc().pushDefault = gcb.checked; C.save(); } };
+      gcb.onchange = function () { dr.gsync = gcb.checked; E.gsyncTouched = true; };
       gl.appendChild(gcb); gl.appendChild(svg("calendar", "acc")); gl.appendChild(document.createTextNode(dr.gid ? "Synced with Google Calendar" : "Also save to Google Calendar"));
       bd.appendChild(gl);
     }
