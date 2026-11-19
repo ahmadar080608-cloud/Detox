@@ -558,6 +558,7 @@
       if (V.toast) { var t0 = el("div", "sch-toast", V.toast); var tx0 = el("button", "sch-ib"); tx0.appendChild(svg("x")); tx0.onclick = function () { V.toast = ""; C.rerender(); }; t0.appendChild(tx0); root.appendChild(t0); }
       if (view === "month") root.appendChild(monthView(k, tk));
       else root.appendChild(columnsView(view === "multi" ? [k, addDays(k, 1), addDays(k, 2)] : weekDaysOf(k), tk, view));
+      if (view === "multi") root.appendChild(miniCal(k, tk));
       if (view === "week" || view === "month") root.appendChild(el("p", "meta sch-fixnote", "The calendar shows fixed tasks only, like lectures, appointments and events. Turn on “Fixed task” when adding one. Your full daily plan is in Day and Multi-Day."));
     } else {
 
