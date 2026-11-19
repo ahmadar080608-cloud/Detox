@@ -1263,7 +1263,8 @@ select.topsel.row{font-size:12px;padding:3px 8px;border-radius:8px;background:tr
     if (sec === "studies") renderSciencesHome();
     if (sec === "quran") renderQuranTrackers();
     if (sec === "hadith") renderHadithTrackers();
-    if (SCIENCES.indexOf(sec) >= 0) { if (sec !== "hadith") renderSciGoals(sec); renderMutoon(sec); renderPdfs(sec); }
+    if (SCIENCES.indexOf(sec) >= 0) { if (sec !== "hadith") renderSciGoals(sec); renderMutoon(sec); renderPdfs(sec);
+      if (sec === "hadith") { var hr = document.getElementById("h-rev"), mt = document.getElementById("mt-hadith"); if (hr && mt) hr.parentNode.insertBefore(mt, hr); } }
     if (sec === "isoc" || sec === "ambitions") renderSciGoals(sec);
 
     renderNotes(sec);
@@ -1709,7 +1710,7 @@ select.topsel.row{font-size:12px;padding:3px 8px;border-radius:8px;background:tr
 
     // ---- memorisation ----
     var pm = el("div", "panel"); pm.id = "h-mem";
-    pm.appendChild(el("h2", null, "Memorisation"));
+    pm.appendChild(el("h2", null, "Hadith memorisation"));
     var ctl = el("div", "row"); ctl.style.marginBottom = "12px";
     var sel = el("select"); sel.setAttribute("aria-label", "Collection");
     h.cols.forEach(function (c) { var o = el("option", null, colLabel(c) + " (" + c.count + ")"); o.value = c.id; sel.appendChild(o); });
