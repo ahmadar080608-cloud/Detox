@@ -1144,7 +1144,9 @@
       bd.appendChild(gl);
     }
     if (dr.source === "gcal") bd.appendChild(el("p", "meta", "From Google Calendar. Changes to the title, time, reminder and notes are saved back to Google" + (dr.recurringGoogle ? " for this day only." : ".")));
-    if (dr.repeat && dr.repeat.type !== "none" && !E.isNew) bd.appendChild(el("p", "meta", "Changes apply to every repeat of this task."));
+    var origRep = !E.isNew && (s.items.find(function (x) { return x.id === dr.id; }) || {}).repeat;
+    var repeating = !!(origRep && origRep.type !== "none" && dr.source !== "gcal");
+    if (repeating) bd.appendChild(el("p", "meta", "This task repeats. Save it for " + pk(E.occ).toLocaleDateString(undefined, { weekday:"long", day:"numeric", month:"short" }) + " only, or for every day."));
 
     // footer
     var ft = el("div", "sch-foot");
@@ -1164,19 +1166,35 @@
     }
     var sp = el("span"); sp.style.flex = "1"; ft.appendChild(sp);
     var cn = el("button", "ghost", "Cancel"); cn.onclick = closeEditor; ft.appendChild(cn);
-    var sv = el("button", "cta", E.isNew ? "Add" : "Save"); sv.onclick = saveEdit; ft.appendChild(sv);
+    if (repeating) {
+      var so = el("button", "ghost", "Save this day only"); so.onclick = function () { saveEdit(true); }; ft.appendChild(so);
+      var sa = el("button", "cta", "Save all days"); sa.onclick = function () { saveEdit(false); }; ft.appendChild(sa);
+    } else { var sv = el("button", "cta", E.isNew ? "Add" : "Save"); sv.onclick = function () { saveEdit(false); }; ft.appendChild(sv); }
     bd.appendChild(ft);
 
     sh.appendChild(bd);
     ov.appendChild(sh);
     return ov;
   }
-  function saveEdit() {
+  function saveEdit(onlyDay) {
     var E = V.edit, dr = E.draft, s = S();
     var t = document.querySelector(".sch-htitle"); if (t) dr.title = t.value;
     dr.title = (dr.title || "").trim() || "Untitled";
     if (!E.iconPicked) { var g = guessIcon(dr.title); if (g) dr.icon = g; }
     if (dr.allDay) { dr.start = null; dr.dur = 0; }
+    if (onlyDay && !E.isNew) {
+      // change one day of a repeating task: skip that day in the series and add a one-off copy
+      var orig = s.items.find(function (x) { return x.id === dr.id; }), k = E.occ;
+      if (orig) { orig.skip = orig.skip || {}; orig.skip[k] = true; }
+      var one = JSON.parse(JSON.stringify(dr));
+      one.id = uid(); one.date = k; one.repeat = { type: "none" }; delete one.skip; delete one.gid; one.gsync = false; one.oneOff = dr.id;
+      one.done = dr.done && dr.done[k] ? (function () { var o = {}; o[k] = dr.done[k]; return o; })() : {};
+      s.items.push(one);
+      if (E.fromCal) V.calSel = k;
+      V.toast = "Changed for " + pk(k).toLocaleDateString(undefined, { weekday:"long", day:"numeric", month:"short" }) + " only. Other days stay the same.";
+      C.save(); V.edit = null; C.rerender();
+      return;
+    }
     if (E.isNew) { dr.id = uid(); s.items.push(dr); }
     else { var i = s.items.findIndex(function (x) { return x.id === dr.id; }); if (i >= 0) s.items[i] = dr; }
     if (E.fromCal) V.calSel = dr.date; else V.day = E.isNew ? dr.date : V.day;
