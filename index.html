@@ -862,12 +862,20 @@ li.mrow2 .label{display:flex;flex-direction:column}
 
 
 /* adhkar */
+.duaform{display:flex;flex-direction:column;gap:8px;margin:10px 0 14px}
+.duaform textarea{min-height:64px;resize:vertical}
+.duaform .duaar{font-family:Amiri,serif;font-size:20px;line-height:1.8}
+.duaform .row{flex-wrap:wrap}
+.duaform select,.duaform input{flex:1;min-width:140px}
+.duacat{margin-left:auto;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.duaen{white-space:pre-wrap;color:var(--ink,inherit)}
+.ghost.sm{padding:6px 10px;font-size:13px}
 .adtabs{margin:6px 0 12px;flex-wrap:wrap}
 .adhead{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:10px}
 .adtitle{font-family:Amiri,serif;font-size:26px;direction:rtl;line-height:1.3}
 .adprog{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted);margin-bottom:10px}
 .adlist{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
-.aditem{background:var(--bg);border-radius:16px;padding:14px 16px;border:1.5px solid transparent}
+.aditem{display:block;background:var(--bg);border-radius:16px;padding:14px 16px;border:1.5px solid transparent}
 .aditem.done{background:color-mix(in srgb,#3f9a78 12%,var(--bg));border-color:color-mix(in srgb,#3f9a78 40%,transparent)}
 .adtop{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .adno{width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:none}
@@ -884,7 +892,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
 .adsrc{font-size:12px;font-style:italic;color:var(--muted)}
 .adcount{border:1.5px solid var(--accent);background:transparent;color:var(--accent);border-radius:999px;padding:8px 16px;font-weight:700;font-size:14px;min-width:120px;cursor:pointer}
 .adcount.done{background:#3f9a78;border-color:#3f9a78;color:#fff}
-.adsub{display:flex;justify-content:space-between;align-items:center;background:color-mix(in srgb,var(--accent) 16%,var(--bg));border-radius:999px;padding:8px 16px;font-weight:700;margin-top:6px}
+.adsub{border-bottom:0;display:flex;justify-content:space-between;align-items:center;background:color-mix(in srgb,var(--accent) 16%,var(--bg));border-radius:999px;padding:8px 16px;font-weight:700;margin-top:6px}
 .adsubar{font-family:Amiri,serif;font-size:19px;direction:rtl}
 .adend{margin-top:14px}
 .adgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
@@ -947,7 +955,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
 </section>
 
 <script src="schedule.js?v=20261119e"></script>
-<script src="adhkar.js?v=20261119a"></script>
+<script src="adhkar.js?v=20261119b"></script>
 <script>
 (function () {
   // ---------- icons (line icons, Lucide-style) ----------
@@ -1124,7 +1132,17 @@ li.mrow2 .label{display:flex;flex-direction:column}
         pb.appendChild(tg);
         if (!closed) ISLAMIC_SUBS.forEach(function (id) {
           var cb = navBtn(byId[id], true); navEl.appendChild(cb);
-          if (id === "isoc") { var bd = navBtn(byId.dawah, true); bd.classList.add("child2"); navEl.appendChild(bd); return; }
+          if (id === "isoc") {
+            var ic = !!state.navIsocClosed;
+            var t3 = el("span", "navfold" + (ic ? " closed" : "")); t3.setAttribute("role", "button"); t3.setAttribute("tabindex", "0");
+            t3.setAttribute("aria-label", ic ? "Show ISOC sections" : "Hide ISOC sections"); t3.setAttribute("aria-expanded", ic ? "false" : "true");
+            t3.innerHTML = '<svg viewBox="0 0 24 24" class="ic"><path d="M6 9l6 6 6-6"/></svg>';
+            var tog3 = function (e) { e.stopPropagation(); e.preventDefault(); state.navIsocClosed = !state.navIsocClosed; save(); renderNav(); };
+            t3.onclick = tog3; t3.onkeydown = function (e) { if (e.key === "Enter" || e.key === " ") tog3(e); };
+            cb.appendChild(t3);
+            if (!ic) { var bd = navBtn(byId.dawah, true); bd.classList.add("child2"); navEl.appendChild(bd); }
+            return;
+          }
           if (id !== "studies") return;
           var sc = !!state.navSciClosed;
           var t2 = el("span", "navfold" + (sc ? " closed" : "")); t2.setAttribute("role", "button"); t2.setAttribute("tabindex", "0");
@@ -3342,6 +3360,68 @@ li.mrow2 .label{display:flex;flex-direction:column}
     p.appendChild(el("p", "meta", "Arabic and sources follow your Daily Adhkār booklet; Qur’ān text is the Uthmani muṣḥaf. English lines are short meanings, not a full translation. Counters reset each day."));
     app.appendChild(p); makeCollapsible("ad-read");
   }
+  var editDua = null;
+  function renderMyDuas(){
+    var L = state.myDuas = state.myDuas || [], tk = dkey(new Date());
+    var p = el("div", "panel"); p.id = "ad-mine";
+    p.appendChild(el("h2", null, "My du‘ā’ list"));
+    p.appendChild(el("p", "meta", "Your own du‘ās: for yourself, family, exams, the ummah. Write them in Arabic, English or both."));
+    var cats = ["Me", "Family", "Studies", "Ākhirah", "Ummah", "Other"];
+    var form = el("div", "duaform");
+    var ti = el("input"); ti.type = "text"; ti.placeholder = "Title, e.g. For my exams"; ti.setAttribute("aria-label", "Du‘ā’ title");
+    var ar = el("textarea"); ar.placeholder = "Arabic (optional)"; ar.dir = "rtl"; ar.className = "duaar"; ar.setAttribute("aria-label", "Arabic text");
+    var en = el("textarea"); en.placeholder = "Meaning, or your du‘ā’ in English"; en.setAttribute("aria-label", "Meaning or English");
+    var row = el("div", "row");
+    var ca = el("select"); ca.setAttribute("aria-label", "Category"); cats.forEach(function (c) { var o = el("option", null, c); o.value = c; ca.appendChild(o); });
+    var sr = el("input"); sr.type = "text"; sr.placeholder = "Source (optional)"; sr.setAttribute("aria-label", "Source");
+    var add = el("button", "cta"); add.appendChild(icon("plus")); add.appendChild(document.createTextNode("Add du‘ā’"));
+    add.onclick = function () {
+      if (!ar.value.trim() && !en.value.trim()) { en.focus(); return; }
+      var nd = { id:uid(), t:ti.value.trim(), ar:ar.value.trim(), en:en.value.trim(), cat:ca.value, src:sr.value.trim(), made:{} };
+      var ei = editDua ? L.findIndex(function (x) { return x.id === editDua; }) : -1;
+      if (ei >= 0) { nd.id = L[ei].id; nd.made = L[ei].made || {}; L[ei] = nd; } else L.push(nd);
+      editDua = null;
+      save(); render(); var m = document.getElementById("ad-mine"); if (m) m.scrollIntoView({ block:"start" });
+    };
+    row.appendChild(ca); row.appendChild(sr); row.appendChild(add);
+    form.appendChild(ti); form.appendChild(ar); form.appendChild(en); form.appendChild(row);
+    p.appendChild(form);
+    var f = state.duaCat || "All", ft = el("div", "subtabs adtabs");
+    ["All"].concat(cats).forEach(function (c) { var n = c === "All" ? L.length : L.filter(function (d) { return d.cat === c; }).length;
+      if (c !== "All" && !n) return;
+      var b = el("button", f === c ? "on" : null, c + " · " + n); b.onclick = function () { state.duaCat = c; save(); render(); document.getElementById("ad-mine").scrollIntoView({ block:"start" }); }; ft.appendChild(b); });
+    if (L.length) p.appendChild(ft);
+    var shown = L.filter(function (d) { return f === "All" || d.cat === f; });
+    if (!L.length) p.appendChild(el("p", "empty", "No du‘ās yet. Add the first one above."));
+    var made = shown.filter(function (d) { return d.made && d.made[tk]; }).length;
+    if (shown.length) p.appendChild(el("p", "meta", made + " of " + shown.length + " made today"));
+    var ol = el("ol", "adlist");
+    shown.forEach(function (d, i) {
+      var li = el("li", "aditem" + (d.made && d.made[tk] ? " done" : ""));
+      var top = el("div", "adtop"); top.appendChild(el("span", "adno", i + 1)); if (d.t) top.appendChild(el("b", null, d.t));
+      top.appendChild(el("span", "duacat", d.cat || "Other")); li.appendChild(top);
+      if (d.ar) li.appendChild(el("div", "adtext", d.ar));
+      if (d.en) li.appendChild(el("p", "aden duaen", d.en));
+      var foot = el("div", "adfoot"); foot.appendChild(el("span", "adsrc", d.src ? "(" + d.src + ")" : ""));
+      var acts = el("div", "row");
+      var idx = L.indexOf(d);
+      var up = el("button", "ghost sm", "↑"); up.title = "Move up"; up.disabled = idx === 0;
+      up.onclick = function () { L.splice(idx, 1); L.splice(idx - 1, 0, d); save(); render(); document.getElementById("ad-mine").scrollIntoView({ block:"start" }); };
+      var ed = el("button", "ghost sm", "Edit");
+      ed.onclick = function () { ti.value = d.t || ""; ar.value = d.ar || ""; en.value = d.en || ""; ca.value = d.cat || "Other"; sr.value = d.src || "";
+        editDua = d.id; add.lastChild.textContent = "Save changes"; ti.focus(); form.scrollIntoView({ block:"center" }); };
+      var del = el("button", "ghost sm", "Delete");
+      del.onclick = function () { if (confirm("Delete this du‘ā’?")) { L.splice(idx, 1); save(); render(); } };
+      var mk = el("button", "adcount" + (d.made && d.made[tk] ? " done" : ""), d.made && d.made[tk] ? "✓ Made today" : "Made it today");
+      mk.onclick = function () { d.made = d.made || {}; if (d.made[tk]) delete d.made[tk]; else d.made[tk] = 1;
+        Object.keys(d.made).forEach(function (k) { if (k < dkey(new Date(Date.now() - 60 * 864e5))) delete d.made[k]; });
+        save(); render(); document.getElementById("ad-mine").scrollIntoView({ block:"start" }); };
+      acts.appendChild(up); acts.appendChild(ed); acts.appendChild(del); acts.appendChild(mk);
+      foot.appendChild(acts); li.appendChild(foot); ol.appendChild(li);
+    });
+    p.appendChild(ol);
+    app.appendChild(p); makeCollapsible("ad-mine");
+  }
   function renderAdhkar(){
     var tk = dkey(new Date()), log = state.adhkarLog[tk] = state.adhkarLog[tk] || {}, h = new Date().getHours();
     var now = h < 12 ? "morning" : h >= 15 && h < 20 ? "evening" : h >= 20 || h < 3 ? "sleep" : null;
@@ -3389,32 +3469,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     app.appendChild(p); makeCollapsible("ad-today");
     renderAdhkarReader(log);
 
-    // my booklets
-    var q = el("div", "panel"); q.id = "ad-books";
-    q.appendChild(el("h2", null, "My adhkar PDFs (optional)"));
-    q.appendChild(el("p", "meta", "All the adhkār are written out above. If you also want the original booklets, upload them here; they're stored privately in this browser on this device."));
-    BOOKS.forEach(function (bk) {
-      var have = state.adhkarBooks[bk.key], c = el("div", "adbook" + (have ? " have" : ""));
-      var hd = el("div", "row"); hd.style.justifyContent = "space-between";
-      var tl = el("div"); tl.appendChild(el("b", null, bk.name)); tl.appendChild(el("span", "meta", have ? " · " + have.name : " · not uploaded yet")); hd.appendChild(tl);
-      var fi = el("input"); fi.type = "file"; fi.accept = "application/pdf,.pdf"; fi.style.display = "none";
-      fi.onchange = function () { var f = fi.files && fi.files[0]; if (!f) return;
-        try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
-        fPut({ id:bookId(bk.key), sec:"adhkar", name:f.name, type:"application/pdf", blob:f }).then(function () { state.adhkarBooks[bk.key] = { name:f.name, size:f.size, added:Date.now() }; save(); render(); })
-          .catch(function () { alertMsg("Couldn't save that file. Your browser storage may be full."); }); };
-      var ub = el("button", have ? "ghost" : "cta"); ub.appendChild(icon("upload")); ub.appendChild(document.createTextNode(have ? "Replace" : "Upload PDF")); ub.onclick = function () { fi.click(); };
-      var br = el("div", "row"); br.appendChild(ub); br.appendChild(fi); hd.appendChild(br);
-      c.appendChild(hd);
-      c.appendChild(el("p", "meta", bk.sub));
-      if (have) {
-        var parts = el("div", "adparts");
-        bk.parts.forEach(function (pt) { var b = el("button", "adpart"); b.appendChild(el("span", null, pt[0])); b.appendChild(el("small", null, "p. " + pt[1]));
-          b.onclick = function () { openBook(bk.key, pt[1], bk.name + " · " + pt[0]); }; parts.appendChild(b); });
-        c.appendChild(parts);
-      }
-      q.appendChild(c);
-    });
-    app.appendChild(q); makeCollapsible("ad-books");
+    renderMyDuas();
   }
 
   function render(){

@@ -19,7 +19,7 @@ window.ADHKAR_DATA = (function () {
   // shared morning & evening (booklet items 1–7)
   var ME1 = [
     { t: "Āyat al-Kursī", q: [Q.kursi], src: "Ṭabarānī", en: "Allah's greatness, knowledge and protection over everything." },
-    { t: "The three Quls", q: [Q.ikhlas, Q.falaq, Q.nas], n: 3, src: "Tirmidhī", en: "Each sūrah three times; enough for you against everything." },
+    { t: "The three Quls", q: [Q.ikhlas, Q.falaq, Q.nas], n: 3, src: "Tirmidhī", en: "Each sūrah three times." },
     { t: "Sayyid al-Istighfār", ar: "اَللّٰهُمَّ أَنْتَ رَبِّيْ لَا إِلٰهَ إِلَّا أَنْتَ، خَلَقْتَنِيْ وَأَنَا عَبْدُكَ، وَأَنَا عَلَىٰ عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوْذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوْءُ لَكَ بِنِعْمَتِكَ عَلَيَّ وَأَبُوْءُ بِذَنْبِيْ، فَاغْفِرْ لِيْ، فَإِنَّهُ لَا يَغْفِرُ الذُّنُوْبَ إِلَّا أَنْتَ", src: "Bukhārī", en: "You are my Lord and I am Your servant. I admit Your favours and my sins, so forgive me; only You forgive sins." },
     { ar: "اَللّٰهُمَّ إِنِّيْ أَعُوْذُ بِكَ مِنَ الْهَمِّ وَالْحَزَنِ، وَأَعُوْذُ بِكَ مِنَ الْعَجْزِ وَالْكَسَلِ، وَأَعُوْذُ بِكَ مِنَ الْجُبْنِ وَالْبُخْلِ، وَأَعُوْذُ بِكَ مِنْ غَلَبَةِ الدَّيْنِ وَقَهْرِ الرِّجَالِ", src: "Abū Dāwud", en: "Protection from worry, grief, helplessness, laziness, cowardice, stinginess, crushing debt and being overpowered by people." },
     { ar: "اَللّٰهُمَّ إِنِّيْ أَسْأَلُكَ الْعَافِيَةَ فِي الدُّنْيَا وَالْآخِرَةِ، اَللّٰهُمَّ إِنِّيْ أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِيْ دِيْنِيْ وَدُنْيَايَ وَأَهْلِيْ وَمَالِيْ، اَللّٰهُمَّ اسْتُرْ عَوْرَاتِيْ وَآمِنْ رَوْعَاتِيْ، اَللّٰهُمَّ احْفَظْنِيْ مِنْ بَيْنِ يَدَيَّ، وَمِنْ خَلْفِيْ، وَعَنْ يَمِيْنِيْ، وَعَنْ شِمَالِيْ، وَمِنْ فَوْقِيْ، وَأَعُوْذُ بِعَظَمَتِكَ أَنْ أُغْتَالَ مِنْ تَحْتِيْ", src: "Abū Dāwud", en: "Asking for well-being and pardon in religion, life, family and wealth; to have faults covered, fears calmed, and protection from every side." },
@@ -60,11 +60,11 @@ window.ADHKAR_DATA = (function () {
 
   var sleep = [
     { t: "Sūrat as-Sajdah & Sūrat al-Mulk", ar: "الٓمٓ تَنزِيلُ … (السجدة) & تَبَٰرَكَ ٱلَّذِى … (الملك)", src: "Tirmidhī", en: "Recite both sūrahs in full before sleeping.", links: [["Open as-Sajdah (32)", "https://quran.com/32"], ["Open al-Mulk (67)", "https://quran.com/67"]] },
-    { t: "Āyat al-Kursī", q: [Q.kursi], src: "Bukhārī", en: "A guardian from Allah stays with you and Shayṭān cannot come near until morning." },
-    { t: "Last two āyāt of al-Baqarah", q: [Q.baqarahEnd], src: "Bukhārī", en: "They will be enough for you for the night." },
-    { t: "Sūrat al-Kāfirūn", q: [Q.kafirun], src: "Tirmidhī", en: "A declaration of freedom from shirk." },
+    { t: "Āyat al-Kursī", q: [Q.kursi], src: "Bukhārī", en: "The Verse of the Throne." },
+    { t: "Last two āyāt of al-Baqarah", q: [Q.baqarahEnd], src: "Bukhārī", en: "The last two verses of Sūrat al-Baqarah (2:285–286)." },
+    { t: "Sūrat al-Kāfirūn", q: [Q.kafirun], src: "Tirmidhī", en: "Sūrat al-Kāfirūn." },
     { t: "The three Quls", q: [Q.ikhlas, Q.falaq, Q.nas], n: 3, src: "Bukhārī", en: "Recite them into your cupped hands, blow into them, then wipe over as much of your body as you can, starting with the head and face. Do this three times." },
-    { t: "Tasbīḥ before sleep", ar: "سُبْحَانَ اللهِ ×٣٣ ، اَلْحَمْدُ لِلّٰهِ ×٣٣ ، اَللهُ أَكْبَرُ ×٣٤", n: 100, split: [33, 33, 34], src: "Bukhārī", en: "SubḥānAllāh 33, alḥamdulillāh 33, Allāhu akbar 34; better for you than a servant." },
+    { t: "Tasbīḥ before sleep", ar: "سُبْحَانَ اللهِ ×٣٣ ، اَلْحَمْدُ لِلّٰهِ ×٣٣ ، اَللهُ أَكْبَرُ ×٣٤", n: 100, split: [33, 33, 34], src: "Bukhārī", en: "SubḥānAllāh 33, alḥamdulillāh 33, Allāhu akbar 34." },
     { ar: "بِاسْمِكَ رَبِّيْ وَضَعْتُ جَنْبِيْ، وَبِكَ أَرْفَعُهُ، إِنْ أَمْسَكْتَ نَفْسِيْ فَارْحَمْهَا، وَإِنْ أَرْسَلْتَهَا فَاحْفَظْهَا بِمَا تَحْفَظُ بِهِ عِبَادَكَ الصَّالِحِيْنَ", src: "Bukhārī", en: "In Your name I lie down and rise. If You take my soul, have mercy on it; if You return it, protect it as You protect the righteous." },
     { ar: "اَللّٰهُمَّ قِنِيْ عَذَابَكَ يَوْمَ تَبْعَثُ عِبَادَكَ", n: 3, src: "Tirmidhī", en: "Save me from Your punishment on the Day You raise Your servants." },
     { ar: "اَلْحَمْدُ لِلّٰهِ الَّذِيْ أَطْعَمَنَا وَسَقَانَا وَكَفَانَا وَآوَانَا، فَكَمْ مِمَّنْ لَا كَافِيَ لَهُ وَلَا مُؤْوِيَ", src: "Muslim", en: "Praise to Allah who fed us, gave us drink, sufficed us and sheltered us; so many have no one to suffice or shelter them." },
@@ -76,7 +76,7 @@ window.ADHKAR_DATA = (function () {
     { ar: "اَلْحَمْدُ لِلّٰهِ الَّذِيْ كَفَانِيْ وَآوَانِيْ، اَلْحَمْدُ لِلّٰهِ الَّذِيْ أَطْعَمَنِيْ وَسَقَانِيْ، اَلْحَمْدُ لِلّٰهِ الَّذِيْ مَنَّ عَلَيَّ فَأَفْضَلَ، اَللّٰهُمَّ إِنِّيْ أَسْأَلُكَ بِعِزَّتِكَ أَنْ تُنَجِّيَنِيْ مِنَ النَّارِ", src: "Ḥākim", en: "Praise to Allah who sufficed, sheltered, fed and favoured me. By Your might, save me from the Fire." },
     { ar: "اَللّٰهُمَّ بِاسْمِكَ أَمُوْتُ وَأَحْيَا", src: "Bukhārī", en: "O Allah, in Your name I die and I live." },
     { ar: TAHLIL + "، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللهِ، سُبْحَانَ اللهِ، وَالْحَمْدُ لِلّٰهِ، وَلَا إِلٰهَ إِلَّا اللهُ، وَاللهُ أَكْبَرُ", src: "Nasā’ī", en: "Tawḥīd, then: no power except through Allah; glory, praise, none but Allah, Allah is the Greatest." },
-    { ar: "اَللّٰهُمَّ أَسْلَمْتُ نَفْسِيْ إِلَيْكَ، وَفَوَّضْتُ أَمْرِيْ إِلَيْكَ، وَوَجَّهْتُ وَجْهِيْ إِلَيْكَ، وَأَلْجَأْتُ ظَهْرِيْ إِلَيْكَ، رَغْبَةً وَرَهْبَةً إِلَيْكَ، لَا مَلْجَأَ وَلَا مَنْجَا مِنْكَ إِلَّا إِلَيْكَ، آمَنْتُ بِكِتَابِكَ الَّذِيْ أَنْزَلْتَ وَبِنَبِيِّكَ الَّذِيْ أَرْسَلْتَ", src: "Bukhārī", en: "I submit myself, my affairs, my face and my back to You, in hope and fear. There is no refuge from You except to You. Say this last, on your right side." }
+    { ar: "اَللّٰهُمَّ أَسْلَمْتُ نَفْسِيْ إِلَيْكَ، وَفَوَّضْتُ أَمْرِيْ إِلَيْكَ، وَوَجَّهْتُ وَجْهِيْ إِلَيْكَ، وَأَلْجَأْتُ ظَهْرِيْ إِلَيْكَ، رَغْبَةً وَرَهْبَةً إِلَيْكَ، لَا مَلْجَأَ وَلَا مَنْجَا مِنْكَ إِلَّا إِلَيْكَ، آمَنْتُ بِكِتَابِكَ الَّذِيْ أَنْزَلْتَ وَبِنَبِيِّكَ الَّذِيْ أَرْسَلْتَ", src: "Bukhārī", en: "I submit myself, my affairs, my face and my back to You, in hope and fear. There is no refuge from You except to You." }
   ];
 
   var salah = [
@@ -85,9 +85,9 @@ window.ADHKAR_DATA = (function () {
     { ar: TAHLIL + "، لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللهِ، لَا إِلٰهَ إِلَّا اللهُ، وَلَا نَعْبُدُ إِلَّا إِيَّاهُ، لَهُ النِّعْمَةُ وَلَهُ الْفَضْلُ وَلَهُ الثَّنَاءُ الْحَسَنُ، لَا إِلٰهَ إِلَّا اللهُ مُخْلِصِيْنَ لَهُ الدِّيْنَ وَلَوْ كَرِهَ الْكَافِرُوْنَ", src: "Muslim", en: "We worship none but Him; His are all blessings, favour and the best praise, sincerely His even if the disbelievers dislike it." },
     { ar: "اَللّٰهُمَّ أَعِنِّيْ عَلَىٰ ذِكْرِكَ وَشُكْرِكَ وَحُسْنِ عِبَادَتِكَ", src: "Abū Dāwud", en: "O Allah, help me to remember You, thank You and worship You well." },
     { ar: "اَللّٰهُمَّ إِنِّيْ أَعُوْذُ بِكَ مِنَ الْبُخْلِ، وَأَعُوْذُ بِكَ مِنَ الْجُبْنِ، وَأَعُوْذُ بِكَ مِنْ أَنْ أُرَدَّ إِلَىٰ أَرْذَلِ الْعُمُرِ، وَأَعُوْذُ بِكَ مِنْ فِتْنَةِ الدُّنْيَا، وَأَعُوْذُ بِكَ مِنْ عَذَابِ الْقَبْرِ", src: "Bukhārī", en: "Refuge from stinginess, cowardice, the weakest old age, the trials of this world and the punishment of the grave." },
-    { t: "Tasbīḥ after ṣalāh", ar: "سُبْحَانَ اللهِ ×٣٣ ، اَلْحَمْدُ لِلّٰهِ ×٣٣ ، اَللهُ أَكْبَرُ ×٣٣ ، " + TAHLIL + " ×١", n: 100, split: [33, 33, 33, 1], src: "Muslim", en: "33 each, then the tahlīl once to complete 100; sins forgiven even if like the foam of the sea." },
-    { t: "Āyat al-Kursī", q: [Q.kursi], src: "Nasā’ī", en: "Nothing stands between you and Jannah except death." },
-    { t: "The three Quls", q: [Q.ikhlas, Q.falaq, Q.nas], src: "Abū Dāwud", en: "Once after each ṣalāh." },
+    { t: "Tasbīḥ after ṣalāh", ar: "سُبْحَانَ اللهِ ×٣٣ ، اَلْحَمْدُ لِلّٰهِ ×٣٣ ، اَللهُ أَكْبَرُ ×٣٣ ، " + TAHLIL + " ×١", n: 100, split: [33, 33, 33, 1], src: "Muslim", en: "SubḥānAllāh, alḥamdulillāh and Allāhu akbar 33 each, then the tahlīl once." },
+    { t: "Āyat al-Kursī", q: [Q.kursi], src: "Nasā’ī", en: "The Verse of the Throne." },
+    { t: "The three Quls", q: [Q.ikhlas, Q.falaq, Q.nas], src: "Abū Dāwud", en: "Al-Ikhlāṣ, al-Falaq and an-Nās." },
     { h: "After Fajr & Maghrib" },
     { ar: "لَا إِلٰهَ إِلَّا اللهُ وَحْدَهُ لَا شَرِيْكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، يُحْيِيْ وَيُمِيْتُ، وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيْرٌ", n: 10, src: "Aḥmad", en: "Tawḥīd, adding: He gives life and causes death." },
     { ar: "اَللّٰهُمَّ أَجِرْنِيْ مِنَ النَّارِ", n: 7, src: "Abū Dāwud", en: "O Allah, save me from the Fire." },
@@ -97,7 +97,7 @@ window.ADHKAR_DATA = (function () {
 
   var actions = [
     { h: "When one wakes up in the night", hAr: "من تعارّ من الليل" },
-    { ar: TAHLIL + "، اَلْحَمْدُ لِلّٰهِ، وَسُبْحَانَ اللهِ، وَلَا إِلٰهَ إِلَّا اللهُ، وَاللهُ أَكْبَرُ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللهِ، اَللّٰهُمَّ اغْفِرْ لِيْ", src: "Bukhārī", en: "Then ask forgiveness or make du‘ā’: it is answered; pray and it is accepted." },
+    { ar: TAHLIL + "، اَلْحَمْدُ لِلّٰهِ، وَسُبْحَانَ اللهِ، وَلَا إِلٰهَ إِلَّا اللهُ، وَاللهُ أَكْبَرُ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللهِ، اَللّٰهُمَّ اغْفِرْ لِيْ", src: "Bukhārī", en: "Tawḥīd, praise and glorification, then: O Allah, forgive me." },
     { h: "When one wakes up", hAr: "عند الاستيقاظ من النوم" },
     { ar: "اَلْحَمْدُ لِلّٰهِ الَّذِيْ عَافَانِيْ فِيْ جَسَدِيْ، وَرَدَّ عَلَيَّ رُوْحِيْ، وَأَذِنَ لِيْ بِذِكْرِهِ", src: "Tirmidhī", en: "Praise to Allah who kept my body well, returned my soul and allowed me to remember Him." },
     { ar: "اَلْحَمْدُ لِلّٰهِ الَّذِيْ أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُوْرُ", src: "Bukhārī", en: "Praise to Allah who gave us life after death, and to Him is the rising." },
@@ -116,7 +116,7 @@ window.ADHKAR_DATA = (function () {
     { h: "After wearing clothes", hAr: "بعد لبس الملابس" },
     { ar: "اَلْحَمْدُ لِلّٰهِ الَّذِيْ كَسَانِيْ هٰذَا الثَّوْبَ، وَرَزَقَنِيْهِ مِنْ غَيْرِ حَوْلٍ مِنِّيْ وَلَا قُوَّةٍ", src: "Abū Dāwud", en: "Praise to Allah who clothed me with this and provided it without any power of my own." },
     { h: "Before eating", hAr: "قبل الطعام" },
-    { ar: BISM, src: "Tirmidhī", en: "In the name of Allah. (If you forget: بِسْمِ اللهِ أَوَّلَهُ وَآخِرَهُ)" },
+    { ar: BISM, src: "Tirmidhī", en: "In the name of Allah." },
     { h: "After eating", hAr: "بعد الفراغ من الطعام" },
     { ar: "اَلْحَمْدُ لِلّٰهِ الَّذِيْ أَطْعَمَنِيْ هٰذَا، وَرَزَقَنِيْهِ مِنْ غَيْرِ حَوْلٍ مِنِّيْ وَلَا قُوَّةٍ", src: "Tirmidhī", en: "Praise to Allah who fed me this and provided it without any power of my own." },
     { ar: "اَلْحَمْدُ لِلّٰهِ حَمْدًا كَثِيْرًا طَيِّبًا مُبَارَكًا فِيْهِ، غَيْرَ مَكْفِيٍّ وَلَا مُوَدَّعٍ، وَلَا مُسْتَغْنًى عَنْهُ رَبَّنَا", src: "Bukhārī", en: "Abundant, pure, blessed praise, never enough, never abandoned, never done without, our Lord." },
@@ -125,20 +125,20 @@ window.ADHKAR_DATA = (function () {
     { ar: "بِسْمِ اللهِ، تَوَكَّلْتُ عَلَى اللهِ، لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللهِ", src: "Abū Dāwud", en: "In Allah's name, I rely on Allah; there is no power except through Allah." },
     { ar: "اَللّٰهُمَّ إِنِّيْ أَعُوْذُ بِكَ أَنْ أَضِلَّ أَوْ أُضَلَّ، أَوْ أَزِلَّ أَوْ أُزَلَّ، أَوْ أَظْلِمَ أَوْ أُظْلَمَ، أَوْ أَجْهَلَ أَوْ يُجْهَلَ عَلَيَّ", src: "Abū Dāwud", en: "Refuge from going astray or being led astray, slipping or being made to slip, wronging or being wronged, acting foolishly or being treated foolishly." },
     { h: "When entering the house", hAr: "عند دخول البيت" },
-    { ar: "اَللّٰهُمَّ إِنِّيْ أَسْأَلُكَ خَيْرَ الْمَوْلَجِ، وَخَيْرَ الْمَخْرَجِ، بِسْمِ اللهِ وَلَجْنَا، وَبِسْمِ اللهِ خَرَجْنَا، وَعَلَى اللهِ رَبِّنَا تَوَكَّلْنَا", src: "Abū Dāwud", en: "I ask for the best entering and leaving. In Allah's name we enter and leave, and on our Lord we rely. Then greet your family." },
+    { ar: "اَللّٰهُمَّ إِنِّيْ أَسْأَلُكَ خَيْرَ الْمَوْلَجِ، وَخَيْرَ الْمَخْرَجِ، بِسْمِ اللهِ وَلَجْنَا، وَبِسْمِ اللهِ خَرَجْنَا، وَعَلَى اللهِ رَبِّنَا تَوَكَّلْنَا", src: "Abū Dāwud", en: "I ask for the best entering and leaving. In Allah's name we enter and leave, and on our Lord we rely." },
     { h: "Whilst going to the masjid", hAr: "الذهاب إلى المسجد" },
     { ar: "اَللّٰهُمَّ اجْعَلْ فِيْ قَلْبِيْ نُوْرًا، وَفِيْ بَصَرِيْ نُوْرًا، وَفِيْ سَمْعِيْ نُوْرًا، وَعَنْ يَمِيْنِيْ نُوْرًا، وَعَنْ يَسَارِيْ نُوْرًا، وَفَوْقِيْ نُوْرًا، وَتَحْتِيْ نُوْرًا، وَأَمَامِيْ نُوْرًا، وَخَلْفِيْ نُوْرًا، وَاجْعَلْ لِيْ نُوْرًا", src: "Bukhārī", en: "Place light in my heart, sight and hearing, on every side of me, and give me light." },
     { h: "When entering the masjid", hAr: "عند دخول المسجد" },
     { ar: "أَعُوْذُ بِاللهِ الْعَظِيْمِ، وَبِوَجْهِهِ الْكَرِيْمِ، وَسُلْطَانِهِ الْقَدِيْمِ، مِنَ الشَّيْطَانِ الرَّجِيْمِ", src: "Abū Dāwud", en: "Refuge in Allah the Mighty, His noble Face and eternal authority from the accursed Shayṭān." },
-    { ar: "بِسْمِ اللهِ، وَالصَّلَاةُ وَالسَّلَامُ عَلَىٰ رَسُوْلِ اللهِ، اَللّٰهُمَّ اغْفِرْ لِيْ ذُنُوْبِيْ، اَللّٰهُمَّ افْتَحْ لِيْ أَبْوَابَ رَحْمَتِكَ", src: "Composite: Ibn Mājah & Ibn al-Sunnī", en: "Enter with the right foot. Forgive my sins and open for me the doors of Your mercy." },
+    { ar: "بِسْمِ اللهِ، وَالصَّلَاةُ وَالسَّلَامُ عَلَىٰ رَسُوْلِ اللهِ، اَللّٰهُمَّ اغْفِرْ لِيْ ذُنُوْبِيْ، اَللّٰهُمَّ افْتَحْ لِيْ أَبْوَابَ رَحْمَتِكَ", src: "Composite: Ibn Mājah & Ibn al-Sunnī", en: "Peace and blessings on the Messenger of Allah. Forgive my sins and open for me the doors of Your mercy." },
     { h: "When leaving the masjid", hAr: "عند الخروج من المسجد" },
-    { ar: "بِسْمِ اللهِ، وَالصَّلَاةُ وَالسَّلَامُ عَلَىٰ رَسُوْلِ اللهِ، اَللّٰهُمَّ إِنِّيْ أَسْأَلُكَ مِنْ فَضْلِكَ، اَللّٰهُمَّ اعْصِمْنِيْ مِنَ الشَّيْطَانِ الرَّجِيْمِ", src: "Composite: Ibn Mājah, Ibn al-Sunnī & Muslim", en: "Leave with the left foot. I ask You of Your bounty; protect me from the accursed Shayṭān." },
+    { ar: "بِسْمِ اللهِ، وَالصَّلَاةُ وَالسَّلَامُ عَلَىٰ رَسُوْلِ اللهِ، اَللّٰهُمَّ إِنِّيْ أَسْأَلُكَ مِنْ فَضْلِكَ، اَللّٰهُمَّ اعْصِمْنِيْ مِنَ الشَّيْطَانِ الرَّجِيْمِ", src: "Composite: Ibn Mājah, Ibn al-Sunnī & Muslim", en: "Peace and blessings on the Messenger of Allah. I ask You of Your bounty; protect me from the accursed Shayṭān." },
     { h: "Responding to the adhān", hAr: "أذكار الأذان" },
-    { t: "Repeat after the mu’adhdhin", ar: "حَيَّ عَلَى الصَّلَاةِ ، حَيَّ عَلَى الْفَلَاحِ ← لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللهِ", src: "Bukhārī, Muslim", en: "Repeat each phrase after him, except at “ḥayya ‘alaṣ-ṣalāh” and “ḥayya ‘alal-falāḥ”, where you say lā ḥawla wa lā quwwata illā billāh." },
+    { t: "Repeat after the mu’adhdhin", ar: "حَيَّ عَلَى الصَّلَاةِ ، حَيَّ عَلَى الْفَلَاحِ ← لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللهِ", src: "", en: "Repeat each phrase after him, except at “ḥayya ‘alaṣ-ṣalāh” and “ḥayya ‘alal-falāḥ”, where you say lā ḥawla wa lā quwwata illā billāh." },
     { h: "After the adhān is complete", hAr: "بعد الأذان" },
-    { ar: "وَأَنَا أَشْهَدُ أَنْ لَا إِلٰهَ إِلَّا اللهُ وَحْدَهُ لَا شَرِيْكَ لَهُ، وَأَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُوْلُهُ، رَضِيْتُ بِاللهِ رَبًّا، وَبِمُحَمَّدٍ رَسُوْلًا، وَبِالْإِسْلَامِ دِيْنًا", src: "Muslim", en: "I too bear witness; I am pleased with Allah as Lord, Muḥammad ﷺ as Messenger and Islam as religion. (Sins forgiven.)" },
-    { t: "Ṣalāh on the Prophet ﷺ", ar: SALAWAT, src: "Muslim", en: "Then send blessings on the Prophet ﷺ." },
-    { ar: "اَللّٰهُمَّ رَبَّ هٰذِهِ الدَّعْوَةِ التَّامَّةِ وَالصَّلَاةِ الْقَائِمَةِ، آتِ مُحَمَّدًا الْوَسِيْلَةَ وَالْفَضِيْلَةَ، وَابْعَثْهُ مَقَامًا مَحْمُوْدًا الَّذِيْ وَعَدْتَّهُ", src: "Bukhārī", en: "Lord of this perfect call and established prayer, give Muḥammad ﷺ al-Wasīlah and virtue, and raise him to the praised station You promised. (His intercession becomes due.)" }
+    { ar: "وَأَنَا أَشْهَدُ أَنْ لَا إِلٰهَ إِلَّا اللهُ وَحْدَهُ لَا شَرِيْكَ لَهُ، وَأَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُوْلُهُ، رَضِيْتُ بِاللهِ رَبًّا، وَبِمُحَمَّدٍ رَسُوْلًا، وَبِالْإِسْلَامِ دِيْنًا", src: "Muslim", en: "I too bear witness; I am pleased with Allah as Lord, Muḥammad ﷺ as Messenger and Islam as religion." },
+    { t: "Ṣalāh on the Prophet ﷺ", ar: SALAWAT, src: "Muslim", en: "Send blessings on the Prophet ﷺ." },
+    { ar: "اَللّٰهُمَّ رَبَّ هٰذِهِ الدَّعْوَةِ التَّامَّةِ وَالصَّلَاةِ الْقَائِمَةِ، آتِ مُحَمَّدًا الْوَسِيْلَةَ وَالْفَضِيْلَةَ، وَابْعَثْهُ مَقَامًا مَحْمُوْدًا الَّذِيْ وَعَدْتَّهُ", src: "Bukhārī", en: "Lord of this perfect call and established prayer, give Muḥammad ﷺ al-Wasīlah and virtue, and raise him to the praised station You promised." }
   ];
 
   var general = [
@@ -150,8 +150,8 @@ window.ADHKAR_DATA = (function () {
     { ar: "يَا ذَا الْجَلَالِ وَالْإِكْرَامِ", src: "Tirmidhī", en: "“Call on Allah often with this.”" },
     { ar: "يَا حَيُّ يَا قَيُّوْمُ، بِرَحْمَتِكَ أَسْتَغِيْثُ", src: "Tirmidhī", en: "What the Prophet ﷺ would say when distressed." },
     { t: "Ṣalāh on the Prophet ﷺ", ar: SALAWAT, src: "Nasā’ī", en: "10 blessings from Allah, 10 sins erased and 10 ranks raised." },
-    { ar: "لَا إِلٰهَ إِلَّا أَنْتَ سُبْحَانَكَ إِنِّيْ كُنْتُ مِنَ الظَّالِمِيْنَ", src: "Nasā’ī · Tirmidhī", en: "The du‘ā’ of Yūnus: for difficult times; Allah answers whoever calls with it." },
-    { ar: "أَسْتَغْفِرُ اللهَ الْعَظِيْمَ الَّذِيْ لَا إِلٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّوْمُ وَأَتُوْبُ إِلَيْهِ", src: "Tirmidhī", en: "Sins forgiven, even if one fled from the battlefield." }
+    { ar: "لَا إِلٰهَ إِلَّا أَنْتَ سُبْحَانَكَ إِنِّيْ كُنْتُ مِنَ الظَّالِمِيْنَ", src: "Nasā’ī · Tirmidhī", en: "For difficult times; Allah answers prayers when He is supplicated with it." },
+    { ar: "أَسْتَغْفِرُ اللهَ الْعَظِيْمَ الَّذِيْ لَا إِلٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّوْمُ وَأَتُوْبُ إِلَيْهِ", src: "Tirmidhī", en: "All sins will be forgiven." }
   ];
 
   return {
