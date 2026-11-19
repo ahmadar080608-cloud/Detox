@@ -582,6 +582,9 @@
     // day heading
     var dh = el("div", "sch-dayh");
     dh.appendChild(el("h2", null, (k === tk ? "Today · " : "") + d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })));
+    var dadd = el("button", "sch-pill"); dadd.appendChild(svg("plus")); dadd.appendChild(document.createTextNode(" Add")); dadd.title = "Add to this day";
+    dadd.onclick = function () { openEditor(null, k, k === tk ? Math.ceil((nowMin() + 1) / 15) * 15 : 9 * 60); };
+    dh.appendChild(dadd);
     root.appendChild(dh);
 
     if (V.toast) { var t = el("div", "sch-toast", V.toast); var tx = el("button", "sch-ib"); tx.appendChild(svg("x")); tx.onclick = function () { V.toast = ""; C.rerender(); }; t.appendChild(tx); root.appendChild(t); }
@@ -655,16 +658,17 @@
     }
 
     // the calendar: the same under every view
+    // wrap the daily plan in its own collapsible section
+    var plan = el("div", "panel sch-plan"); plan.id = "sch-plan"; plan.appendChild(el("h2", null, "Daily plan"));
+    while (root.firstChild) plan.appendChild(root.firstChild);
+    root.appendChild(plan);
     root.appendChild(calendarSection(tk));
 
 
     // add button
-    var fab = el("button", "sch-fab"); fab.title = "Add to schedule"; fab.appendChild(svg("plus"));
-    fab.onclick = function () { openEditor(null, k, isToday ? Math.ceil((now + 1) / 15) * 15 : 9 * 60);
-      if (view === "week" || view === "month") { V.edit.draft.fixed = true; V.edit.draft.icon = "calendar"; V.edit.fromCal = true; C.rerender(); } };
-    root.appendChild(fab);
 
     app.appendChild(root);
+    if (C.collapse) { C.collapse("sch-plan"); C.collapse("sch-cal"); }
     if (V.edit) app.appendChild(editor());
   }
 
@@ -793,9 +797,9 @@
   // small month calendar under the Day view: tap a date to open it
   function calendarSection(tk) {
     var s = S(), sel = V.calSel || tk, cv = s.calView || "month";
-    var wrap = el("div", "sch-calsec");
+    var wrap = el("div", "panel sch-calsec"); wrap.id = "sch-cal";
+    wrap.appendChild(el("h2", "sch-calh", "Calendar"));
     var head = el("div", "sch-calhead");
-    head.appendChild(el("h2", "sch-calh", "Calendar"));
     var seg = el("div", "sch-views sm");
     [["day","Day"],["multi","3 days"],["week","Week"],["month","Month"]].forEach(function (o) {
       var b = el("button", cv === o[0] ? "on" : null, o[1]); b.onclick = function () { s.calView = o[0]; C.save(); C.rerender(); }; seg.appendChild(b); });

@@ -324,7 +324,10 @@ ul.wgl .iconbtn{padding:2px}
 .sch-day .dots i:first-child{margin-left:0}
 .sch-day .dots i svg.ic{width:10px;height:10px;stroke-width:2.6}
 .sch-day .dots em{font-style:normal;font-size:10px;color:var(--muted);margin-left:3px}
+.sch-dayh{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .sch-dayh h2{margin-bottom:14px}
+.sch-dayh .sch-pill{display:inline-flex;align-items:center;gap:4px}
+.sch-dayh .sch-pill svg{width:14px;height:14px}
 .sch-toast{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--accent-soft);color:var(--ink);border-radius:14px;padding:10px 10px 10px 16px;margin-bottom:14px;font-weight:600;font-size:14px}
 .sch-allday{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
 .sch-chip{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:14px;padding:8px 12px}
@@ -897,7 +900,10 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
 /* calendar section under every schedule view */
 .sch-calsec{background:var(--card);border-radius:var(--r);padding:20px 20px 18px;margin-bottom:20px}
 .sch-calsec .sch-calh{margin-bottom:14px}
-.sch-calhead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.sch-calhead{display:flex;justify-content:flex-end;gap:12px;flex-wrap:wrap}
+.panel.sch-plan{background:transparent;border:0;box-shadow:none;padding:0 0 4px}
+.panel.sch-plan > .phead{margin-bottom:14px}
+.panel.sch-plan.collapsed{margin-bottom:18px}
 .sch-views.sm{margin-bottom:12px;padding:4px}
 .sch-views.sm button{padding:6px 12px;font-size:13px;white-space:nowrap}
 .sch-calnav{display:flex;align-items:center;gap:10px;margin-bottom:12px}
@@ -1074,7 +1080,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
   <div id="arFrameHost"></div>
 </section>
 
-<script src="schedule.js?v=20261119h"></script>
+<script src="schedule.js?v=20261119j"></script>
 <script src="adhkar.js?v=20261119b"></script>
 <script type="module" src="sync.js?v=2"></script>
 <script>
@@ -2369,7 +2375,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
 
 
   // ---------- Schedule (module in schedule.js) ----------
-  if (window.DetoxSchedule) DetoxSchedule.init({ state:state, save:save, rerender:function () { render(); }, go:go });
+  if (window.DetoxSchedule) DetoxSchedule.init({ state:state, save:save, rerender:function () { render(); }, go:go, collapse:function (id) { makeCollapsible(id); } });
   window.DETOX = { KEY:KEY, getState:function () { return state; },
     onSync:function () { var u = window.DetoxSync && DetoxSync.user ? DetoxSync.user.uid : null, changedUser = u !== lastSyncUser; lastSyncUser = u;
       if ((changedUser || state.tab === "settings") && !document.activeElement.matches("input,textarea,select")) render(); paintSyncDot(); } };
