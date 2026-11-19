@@ -534,12 +534,11 @@
     function shift(dir) {
       if (view === "month") { var dd = pk(k); V.day = dkey(new Date(dd.getFullYear(), dd.getMonth() + dir, 1)); }
       else V.day = addDays(k, dir * (view === "multi" ? 3 : view === "day" ? 1 : 7));
-      V.miniMonth = null;
       C.rerender();
     }
     var unit = view === "month" ? "month" : view === "multi" ? "3 days" : view === "day" ? "day" : "week";
     var prev = el("button", "sch-ib"); prev.title = "Previous " + unit; prev.appendChild(svg("left")); prev.onclick = function () { shift(-1); };
-    var tdy = el("button", "sch-pill", "Today"); tdy.onclick = function () { V.day = tk; V.miniMonth = null; C.rerender(); };
+    var tdy = el("button", "sch-pill", "Today"); tdy.onclick = function () { V.day = tk; C.rerender(); };
     var next = el("button", "sch-ib"); next.title = "Next " + unit; next.appendChild(svg("right")); next.onclick = function () { shift(1); };
     tools.appendChild(prev); tools.appendChild(tdy); tools.appendChild(next);
     top.appendChild(tools);
@@ -558,7 +557,6 @@
       if (V.toast) { var t0 = el("div", "sch-toast", V.toast); var tx0 = el("button", "sch-ib"); tx0.appendChild(svg("x")); tx0.onclick = function () { V.toast = ""; C.rerender(); }; t0.appendChild(tx0); root.appendChild(t0); }
       if (view === "month") root.appendChild(monthView(k, tk));
       else root.appendChild(columnsView(view === "multi" ? [k, addDays(k, 1), addDays(k, 2)] : weekDaysOf(k), tk, view));
-      if (view === "multi") root.appendChild(miniCal(k, tk));
       if (view === "week" || view === "month") root.appendChild(el("p", "meta sch-fixnote", "The calendar shows fixed tasks only, like lectures, appointments and events. Turn on “Fixed task” when adding one. Your full daily plan is in Day and Multi-Day."));
     } else {
 
@@ -634,9 +632,11 @@
     });
     if (!nowPlaced && timed.length) tl.appendChild(nowRow(now, "Day's plan finished. What's next?"));
     root.appendChild(tl);
-    root.appendChild(miniCal(k, tk));
 
     }
+
+    // the calendar: the same under every view
+    root.appendChild(calendarSection(tk));
 
     // reminders / calendar tools
     var tp = el("div", "panel sch-panel");
@@ -698,7 +698,7 @@
   }
 
   function weekDaysOf(k) { var m = mondayOf(k), a = []; for (var i = 0; i < 7; i++) a.push(addDays(m, i)); return a; }
-  function openDay(dk) { V.day = dk; V.miniMonth = null; S().view = "day"; C.save(); C.rerender(); }
+  function openDay(dk) { V.day = dk; S().view = "day"; C.save(); C.rerender(); }
 
   // Multi-Day and Week: one column per day
   function columnsView(days, tk, view) {
@@ -766,8 +766,19 @@
   }
 
   // small month calendar under the Day view: tap a date to open it
-  function miniCal(k, tk) {
-    var base = V.miniMonth || k.slice(0, 7), p0 = base.split("-"), m0 = new Date(+p0[0], +p0[1] - 1, 1);
+  function calendarSection(tk) {
+    var sel = V.calSel || tk;
+    var wrap = el("div", "sch-calsec");
+    wrap.appendChild(el("h2", "sch-calh", "Calendar"));
+    var inner = el("div", "sch-calrow");
+    inner.appendChild(miniCal(sel, tk));
+    inner.appendChild(dayEvents(sel, tk));
+    wrap.appendChild(inner);
+    return wrap;
+  }
+  // small month calendar of fixed tasks: tap a date to see and add its events
+  function miniCal(sel, tk) {
+    var base = V.miniMonth || sel.slice(0, 7), p0 = base.split("-"), m0 = new Date(+p0[0], +p0[1] - 1, 1);
     var box = el("div", "sch-mini");
     var hd = el("div", "mini-h");
     var pv = el("button", "sch-ib sm"); pv.title = "Previous month"; pv.appendChild(svg("left"));
@@ -782,15 +793,52 @@
     var cells = Math.ceil(((m0.getDay() + 6) % 7 + days) / 7) * 7;
     for (var i = 0; i < cells; i++) (function (dk) {
       var dd = pk(dk), its = fixedOn(dk);
-      var b = el("button", "mini-d" + (dd.getMonth() !== m0.getMonth() ? " out" : "") + (dk === tk ? " today" : "") + (dk === k ? " sel" : ""));
+      var b = el("button", "mini-d" + (dd.getMonth() !== m0.getMonth() ? " out" : "") + (dk === tk ? " today" : "") + (dk === sel ? " sel" : ""));
       b.appendChild(el("span", "n", String(dd.getDate())));
       var dots = el("span", "dots"); its.slice(0, 3).forEach(function (it) { var x = el("i"); x.style.background = it.color; dots.appendChild(x); });
       b.appendChild(dots);
-      b.title = dd.toDateString() + (its.length ? " · " + its.length + (its.length === 1 ? " item" : " items") : "");
-      b.onclick = function () { V.day = dk; V.miniMonth = dk.slice(0, 7); C.rerender(); window.scrollTo({ top: 0, behavior: "smooth" }); };
+      b.title = dd.toDateString() + (its.length ? " · " + its.length + (its.length === 1 ? " event" : " events") : "");
+      b.onclick = function () { V.calSel = dk; if (dd.getMonth() !== m0.getMonth()) V.miniMonth = dk.slice(0, 7); C.rerender(); };
       g.appendChild(b);
     })(addDays(start, i));
     box.appendChild(g);
+    return box;
+  }
+  // the selected date's events, with a quick way to add one
+  function dayEvents(dk, tk) {
+    var box = el("div", "sch-dayev"), dd = pk(dk);
+    box.appendChild(el("b", "dev-h", (dk === tk ? "Today · " : "") + dd.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })));
+    var its = fixedOn(dk);
+    if (!its.length) box.appendChild(el("p", "sch-cempty", "No events on this day."));
+    its.forEach(function (it) {
+      var r = el("div", "sch-citem" + (isDone(it, dk) ? " done" : "")); r.style.setProperty("--c", it.color);
+      var ic = el("span", "ci"); ic.style.background = it.color; ic.appendChild(svg(it.icon)); r.appendChild(ic);
+      var b = el("button", "ctx"); var st = it.start && !it.allDay ? hm(it.start) : null;
+      b.appendChild(el("span", "ctime", st == null ? "All day" : fmtT(st) + (it.dur ? " – " + fmtT(st + it.dur) : "")));
+      b.appendChild(el("span", "cname", it.title));
+      b.onclick = function () { openEditor(it, dk); V.edit.fromCal = true; C.rerender(); };
+      r.appendChild(b); r.appendChild(doneBtn(it, dk)); box.appendChild(r);
+    });
+    // quick add
+    var f = el("div", "dev-add");
+    var ti = el("input"); ti.type = "text"; ti.maxLength = 120; ti.placeholder = "Add an event, e.g. Dentist, Anatomy exam"; ti.setAttribute("aria-label", "New event");
+    var tm = el("input"); tm.type = "time"; tm.value = "09:00"; tm.setAttribute("aria-label", "Time");
+    var ad = el("label", "dev-allday"); var adc = el("input"); adc.type = "checkbox"; adc.onchange = function () { tm.disabled = adc.checked; };
+    ad.appendChild(adc); ad.appendChild(document.createTextNode("All day"));
+    var go = el("button", "cta"); go.appendChild(svg("plus")); go.appendChild(document.createTextNode("Add"));
+    var add = function () {
+      var t = ti.value.trim(); if (!t) { ti.focus(); return; }
+      S().items.push({ id: uid(), title: t, icon: guessIcon(t) || "calendar", color: COLORS[1], date: dk, start: adc.checked ? null : (tm.value || "09:00"),
+        dur: adc.checked ? 0 : 60, allDay: adc.checked, repeat: { type: "none" }, remind: adc.checked ? null : 30, subtasks: [], notes: "", done: {}, fixed: true });
+      C.save(); V.toast = "Added “" + t + "” on " + dd.toLocaleDateString(undefined, { day: "numeric", month: "short" }) + "."; C.rerender();
+    };
+    go.onclick = add; ti.onkeydown = function (e) { if (e.key === "Enter") add(); };
+    var row = el("div", "row"); row.appendChild(tm); row.appendChild(ad); row.appendChild(go);
+    f.appendChild(ti); f.appendChild(row);
+    var more = el("button", "linkbtn", "More options (repeat, colour, reminder…)");
+    more.onclick = function () { openEditor(null, dk, adc.checked ? null : hm(tm.value || "09:00")); var d = V.edit.draft; d.fixed = true; d.title = ti.value.trim(); d.icon = guessIcon(d.title) || "calendar"; d.dur = 60; if (adc.checked) d.allDay = true; V.edit.fromCal = true; C.rerender(); };
+    f.appendChild(more);
+    box.appendChild(f);
     return box;
   }
 
@@ -1062,7 +1110,7 @@
     if (dr.allDay) { dr.start = null; dr.dur = 0; }
     if (E.isNew) { dr.id = uid(); s.items.push(dr); }
     else { var i = s.items.findIndex(function (x) { return x.id === dr.id; }); if (i >= 0) s.items[i] = dr; }
-    V.day = E.isNew ? dr.date : V.day;
+    if (E.fromCal) V.calSel = dr.date; else V.day = E.isNew ? dr.date : V.day;
     C.save(); V.edit = null; C.rerender();
     if (dr.source === "gcal" || dr.gsync) gPush(dr);
   }
