@@ -901,9 +901,9 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
 .sch-calsec{background:var(--card);border-radius:var(--r);padding:20px 20px 18px;margin-bottom:20px}
 .sch-calsec .sch-calh{margin-bottom:14px}
 .sch-calhead{display:flex;justify-content:flex-end;gap:12px;flex-wrap:wrap}
-.panel.sch-plan{background:transparent;border:0;box-shadow:none;padding:0 0 4px}
-.panel.sch-plan > .phead{margin-bottom:14px}
-.panel.sch-plan.collapsed{margin-bottom:18px}
+.panel.sch-plan,.panel.sch-calsec{padding:20px 20px 18px;margin-bottom:20px}
+.panel.sch-plan > .phead,.panel.sch-calsec > .phead{margin-bottom:14px}
+.panel.sch-plan.collapsed > .phead,.panel.sch-calsec.collapsed > .phead{margin-bottom:0}
 .sch-views.sm{margin-bottom:12px;padding:4px}
 .sch-views.sm button{padding:6px 12px;font-size:13px;white-space:nowrap}
 .sch-calnav{display:flex;align-items:center;gap:10px;margin-bottom:12px}
