@@ -897,6 +897,13 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
 /* calendar section under every schedule view */
 .sch-calsec{background:var(--card);border-radius:var(--r);padding:20px 20px 18px;margin-bottom:20px}
 .sch-calsec .sch-calh{margin-bottom:14px}
+.sch-calhead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.sch-views.sm{margin-bottom:12px;padding:4px}
+.sch-views.sm button{padding:6px 12px;font-size:13px;white-space:nowrap}
+.sch-calnav{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.sch-calnav b{flex:1;text-align:center;font-size:15px}
+.sch-dayev.full{max-width:640px}
+.calcols{margin-bottom:0}
 .sch-calrow{display:grid;grid-template-columns:minmax(260px,380px) 1fr;gap:20px;align-items:start}
 .sch-calsec .sch-mini{background:none;padding:0;margin:0;max-width:none}
 .sch-dayev{display:flex;flex-direction:column;gap:8px}
@@ -1067,7 +1074,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
   <div id="arFrameHost"></div>
 </section>
 
-<script src="schedule.js?v=20261119g"></script>
+<script src="schedule.js?v=20261119h"></script>
 <script src="adhkar.js?v=20261119b"></script>
 <script type="module" src="sync.js?v=2"></script>
 <script>
@@ -2247,6 +2254,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
 
     // account & sync
     renderAccount();
+    if (window.DetoxSchedule && DetoxSchedule.settings) DetoxSchedule.settings(app);
     // data
     var p4 = el("div", "panel"); p4.appendChild(el("h2", null, "Your data"));
     p4.appendChild(el("p", "meta", window.DetoxSync && DetoxSync.user ? "Everything is backed up to your Google account. You can also keep a copy as a file." : "Not signed in: your data is only in this browser. Download a backup now and then, or sign in with Google above."));
@@ -2363,7 +2371,9 @@ li.mrow2 .label{display:flex;flex-direction:column}
   // ---------- Schedule (module in schedule.js) ----------
   if (window.DetoxSchedule) DetoxSchedule.init({ state:state, save:save, rerender:function () { render(); }, go:go });
   window.DETOX = { KEY:KEY, getState:function () { return state; },
-    onSync:function () { if (state.tab === "settings" && !document.activeElement.matches("input,textarea,select")) render(); paintSyncDot(); } };
+    onSync:function () { var u = window.DetoxSync && DetoxSync.user ? DetoxSync.user.uid : null, changedUser = u !== lastSyncUser; lastSyncUser = u;
+      if ((changedUser || state.tab === "settings") && !document.activeElement.matches("input,textarea,select")) render(); paintSyncDot(); } };
+  var lastSyncUser = undefined;
   function paintSyncDot(){ var b = document.getElementById("syncdot"); if (!b) return; var Y = window.DetoxSync;
     var st = !Y ? "" : Y.user ? Y.status : "out"; b.className = "syncdot " + st;
     b.title = !Y ? "" : !Y.user ? "Not signed in: data is only on this device" : st === "synced" ? "Synced with your Google account" : st === "syncing" ? "Syncing…" : st === "error" ? "Sync problem: open Settings" : "Signed in"; }

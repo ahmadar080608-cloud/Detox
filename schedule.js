@@ -486,8 +486,8 @@
     var right = el("div", "row");
     var acc = viaAccount();
     if (!g0.clientId && !acc) {
-      l.appendChild(el("span", null, "Sign in with Google in Settings to link your calendar: your Google events appear in your calendar and daily timeline, and fixed events you add here go into Google Calendar with their reminders."));
-      var su = el("button", "cta", "Go to Settings"); su.onclick = function () { C.go("settings"); }; right.appendChild(su);
+      l.appendChild(el("span", null, "Sign in with Google above to link your calendar: your Google events appear in your calendar and daily timeline, and fixed events you add go into Google Calendar with their reminders."));
+      var su = el("button", "cta", "Sign in above"); su.onclick = function () { var a = document.getElementById("set-acc"); if (a) a.scrollIntoView({ behavior:"smooth" }); }; right.appendChild(su);
     } else if (!g0.connected) {
       l.appendChild(el("span", null, acc ? "Ready to connect with your Google account." : "Ready to connect. You'll be asked to sign in with Google and allow access to your calendar."));
       var cn = el("button", "cta", "Connect Google Calendar"); cn.onclick = function () { gAuth(null); }; right.appendChild(cn);
@@ -657,9 +657,22 @@
     // the calendar: the same under every view
     root.appendChild(calendarSection(tk));
 
-    // reminders / calendar tools
+
+    // add button
+    var fab = el("button", "sch-fab"); fab.title = "Add to schedule"; fab.appendChild(svg("plus"));
+    fab.onclick = function () { openEditor(null, k, isToday ? Math.ceil((now + 1) / 15) * 15 : 9 * 60);
+      if (view === "week" || view === "month") { V.edit.draft.fixed = true; V.edit.draft.icon = "calendar"; V.edit.fromCal = true; C.rerender(); } };
+    root.appendChild(fab);
+
+    app.appendChild(root);
+    if (V.edit) app.appendChild(editor());
+  }
+
+  // settings panel: reminders, Google Calendar, .ics import/export (shown on the Settings page)
+  function settingsPanel(app) {
+    var s = S();
     var tp = el("div", "panel sch-panel");
-    tp.appendChild(el("h2", null, "Calendar & reminders"));
+    tp.appendChild(el("h2", null, "Calendar & reminders")); tp.id = "set-cal";
     var r1 = el("div", "setrow");
     var l1 = el("div", "sl"); l1.appendChild(el("b", null, "Reminders"));
     l1.appendChild(el("span", null, typeof Notification === "undefined" ? "This browser can't show notifications, so reminders appear at the top of this page." :
@@ -705,16 +718,7 @@
       rb.onclick = function () { if (!armed) { armed = true; rb.textContent = "Press again to remove"; return; } s.items = s.items.filter(function (x) { return x.source !== "ics"; }); C.save(); C.rerender(); };
       r4.appendChild(rb); tp.appendChild(r4);
     }
-    root.appendChild(tp);
-
-    // add button
-    var fab = el("button", "sch-fab"); fab.title = "Add to schedule"; fab.appendChild(svg("plus"));
-    fab.onclick = function () { openEditor(null, k, isToday ? Math.ceil((now + 1) / 15) * 15 : 9 * 60);
-      if (view === "week" || view === "month") { V.edit.draft.fixed = true; V.edit.draft.icon = "calendar"; V.edit.fromCal = true; C.rerender(); } };
-    root.appendChild(fab);
-
-    app.appendChild(root);
-    if (V.edit) app.appendChild(editor());
+    app.appendChild(tp);
   }
 
   function weekDaysOf(k) { var m = mondayOf(k), a = []; for (var i = 0; i < 7; i++) a.push(addDays(m, i)); return a; }
@@ -788,13 +792,61 @@
 
   // small month calendar under the Day view: tap a date to open it
   function calendarSection(tk) {
-    var sel = V.calSel || tk;
+    var s = S(), sel = V.calSel || tk, cv = s.calView || "month";
     var wrap = el("div", "sch-calsec");
-    wrap.appendChild(el("h2", "sch-calh", "Calendar"));
-    var inner = el("div", "sch-calrow");
-    inner.appendChild(miniCal(sel, tk));
-    inner.appendChild(dayEvents(sel, tk));
-    wrap.appendChild(inner);
+    var head = el("div", "sch-calhead");
+    head.appendChild(el("h2", "sch-calh", "Calendar"));
+    var seg = el("div", "sch-views sm");
+    [["day","Day"],["multi","3 days"],["week","Week"],["month","Month"]].forEach(function (o) {
+      var b = el("button", cv === o[0] ? "on" : null, o[1]); b.onclick = function () { s.calView = o[0]; C.save(); C.rerender(); }; seg.appendChild(b); });
+    head.appendChild(seg); wrap.appendChild(head);
+    if (cv === "month") {
+      var inner = el("div", "sch-calrow");
+      inner.appendChild(miniCal(sel, tk));
+      inner.appendChild(dayEvents(sel, tk));
+      wrap.appendChild(inner);
+      return wrap;
+    }
+    // Day, 3 days and Week: move through dates without touching the routine above
+    var step = cv === "day" ? 1 : cv === "multi" ? 3 : 7;
+    var startK = cv === "week" ? mondayOf(sel) : sel, days = []; for (var i = 0; i < step; i++) days.push(addDays(startK, i));
+    var nav = el("div", "sch-calnav");
+    var pv = el("button", "sch-ib sm"); pv.title = "Back"; pv.appendChild(svg("left")); pv.onclick = function () { V.calSel = addDays(sel, -step); C.rerender(); };
+    var nx = el("button", "sch-ib sm"); nx.title = "Forward"; nx.appendChild(svg("right")); nx.onclick = function () { V.calSel = addDays(sel, step); C.rerender(); };
+    var td = el("button", "sch-pill", "Today"); td.onclick = function () { V.calSel = tk; C.rerender(); };
+    var a0 = pk(days[0]), a1 = pk(days[days.length - 1]);
+    var lab = cv === "day" ? a0.toLocaleDateString(undefined, { weekday:"long", day:"numeric", month:"long" }) :
+      a0.toLocaleDateString(undefined, { day:"numeric", month:"short" }) + " – " + a1.toLocaleDateString(undefined, { day:"numeric", month:"short", year:"numeric" });
+    nav.appendChild(pv); nav.appendChild(el("b", null, lab)); nav.appendChild(nx); nav.appendChild(td);
+    wrap.appendChild(nav);
+    if (cv === "day") { var one = dayEvents(sel, tk); one.classList.add("full"); wrap.appendChild(one); return wrap; }
+    var cols = el("div", "sch-cols " + (cv === "week" ? "week" : "multi") + " calcols");
+    days.forEach(function (dk) {
+      var dd = pk(dk), col = el("div", "sch-col" + (dk === tk ? " today" : ""));
+      var hd = el("div", "sch-colh");
+      var hb = el("button", "sch-colday"); hb.title = "Show this day";
+      hb.appendChild(el("span", "wd", dd.toLocaleDateString(undefined, { weekday: "short" })));
+      hb.appendChild(el("span", "dn", String(dd.getDate())));
+      hb.onclick = function () { V.calSel = dk; s.calView = "day"; C.save(); C.rerender(); };
+      hd.appendChild(hb);
+      var ad = el("button", "sch-ib sm"); ad.title = "Add an event on this day"; ad.appendChild(svg("plus"));
+      ad.onclick = function () { openEditor(null, dk, 9 * 60); var d0 = V.edit.draft; d0.fixed = true; d0.icon = "calendar"; d0.dur = 60; V.edit.fromCal = true; C.rerender(); };
+      hd.appendChild(ad); col.appendChild(hd);
+      var its = fixedOn(dk), list = el("div", "sch-clist");
+      if (!its.length) list.appendChild(el("p", "sch-cempty", "No events"));
+      its.forEach(function (it) {
+        var st = it.start && !it.allDay ? hm(it.start) : null;
+        var r = el("div", "sch-citem" + (isDone(it, dk) ? " done" : "")); r.style.setProperty("--c", it.color);
+        var ic = el("span", "ci"); ic.style.background = it.color; ic.appendChild(svg(it.icon)); r.appendChild(ic);
+        var b = el("button", "ctx");
+        b.appendChild(el("span", "ctime", st == null ? "All day" : fmtT(st) + (it.dur ? " – " + fmtT(st + it.dur) : "")));
+        b.appendChild(el("span", "cname", it.title));
+        b.onclick = function () { openEditor(it, dk); V.edit.fromCal = true; C.rerender(); };
+        r.appendChild(b); r.appendChild(doneBtn(it, dk)); list.appendChild(r);
+      });
+      col.appendChild(list); cols.appendChild(col);
+    });
+    wrap.appendChild(cols);
     return wrap;
   }
   // small month calendar of fixed tasks: tap a date to see and add its events
@@ -1136,6 +1188,7 @@
       setInterval(function () { var g1 = gc(); if (viaAccount() && g1.connected && !G.busy && gOK() && (!g1.lastSync || Date.now() - g1.lastSync > 10 * 60000)) gPull(true); }, 15000);
     },
     render: function (app, page) { render(app, page); },
+    settings: function (app) { settingsPanel(app); },
     today: function () { var k = today(), its = itemsOn(k), now = nowMin();
       var left = its.filter(function (it) { return !isDone(it, k); }).length;
       var nxt = its.filter(function (it) { return !it.allDay && it.start && hm(it.start) >= now && !isDone(it, k); })[0];
