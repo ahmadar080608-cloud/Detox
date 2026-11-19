@@ -193,6 +193,19 @@ button.tag{cursor:pointer}
 .mh .mb i{display:block;height:100%;background:var(--accent)}
 .mrow.none .mb i{display:none}
 .med{padding:4px 10px 0 42px}
+.mlist.byjuz{display:block;max-height:560px}
+.mjuz{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:4px 12px;width:100%;border:0;background:var(--bg);color:var(--ink);font:inherit;text-align:left;padding:10px 14px;border-radius:12px;margin:10px 0 6px;cursor:pointer;position:sticky;top:0;z-index:1}
+.mjuz:first-child{margin-top:0}
+.mjuz b{font-size:15px}
+.mjuz .mc{justify-self:end;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.mjuz.full .mc{color:var(--accent);font-weight:700}
+.mjuz .mb{grid-column:1/-1;height:5px;border-radius:999px;background:var(--line);overflow:hidden;display:block}
+.mjuz .mb i{display:block;height:100%;background:var(--accent)}
+.mjuz::after{content:"";position:absolute;right:14px;top:14px;width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg)}
+.mjuz.closed::after{transform:rotate(-45deg)}
+.mjuz .mc{margin-right:22px}
+.mjbox{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px 14px;align-items:start}
+.mseg{font-size:11px;color:var(--muted);font-weight:500}
 .med input[type=range]{width:100%;accent-color:var(--accent);margin:4px 0 10px}
 .hgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:6px;max-height:440px;overflow-y:auto;padding-right:4px}
 .hgrid.titled{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
@@ -1519,6 +1532,11 @@ li.mrow2 .label{display:flex;flex-direction:column}
   // ---------- Qur'an trackers ----------
   var SURAH = ("Al-Fatihah|Al-Baqarah|Al 'Imran|An-Nisa'|Al-Ma'idah|Al-An'am|Al-A'raf|Al-Anfal|At-Tawbah|Yunus|Hud|Yusuf|Ar-Ra'd|Ibrahim|Al-Hijr|An-Nahl|Al-Isra'|Al-Kahf|Maryam|Ta-Ha|Al-Anbiya'|Al-Hajj|Al-Mu'minun|An-Nur|Al-Furqan|Ash-Shu'ara'|An-Naml|Al-Qasas|Al-'Ankabut|Ar-Rum|Luqman|As-Sajdah|Al-Ahzab|Saba'|Fatir|Ya-Sin|As-Saffat|Sad|Az-Zumar|Ghafir|Fussilat|Ash-Shura|Az-Zukhruf|Ad-Dukhan|Al-Jathiyah|Al-Ahqaf|Muhammad|Al-Fath|Al-Hujurat|Qaf|Adh-Dhariyat|At-Tur|An-Najm|Al-Qamar|Ar-Rahman|Al-Waqi'ah|Al-Hadid|Al-Mujadilah|Al-Hashr|Al-Mumtahanah|As-Saff|Al-Jumu'ah|Al-Munafiqun|At-Taghabun|At-Talaq|At-Tahrim|Al-Mulk|Al-Qalam|Al-Haqqah|Al-Ma'arij|Nuh|Al-Jinn|Al-Muzzammil|Al-Muddaththir|Al-Qiyamah|Al-Insan|Al-Mursalat|An-Naba'|An-Nazi'at|'Abasa|At-Takwir|Al-Infitar|Al-Mutaffifin|Al-Inshiqaq|Al-Buruj|At-Tariq|Al-A'la|Al-Ghashiyah|Al-Fajr|Al-Balad|Ash-Shams|Al-Layl|Ad-Duha|Ash-Sharh|At-Tin|Al-'Alaq|Al-Qadr|Al-Bayyinah|Az-Zalzalah|Al-'Adiyat|Al-Qari'ah|At-Takathur|Al-'Asr|Al-Humazah|Al-Fil|Quraysh|Al-Ma'un|Al-Kawthar|Al-Kafirun|An-Nasr|Al-Masad|Al-Ikhlas|Al-Falaq|An-Nas").split("|");
   var AYAT = [7,286,200,176,120,165,206,75,129,109,123,111,43,52,99,128,111,110,98,135,112,78,118,64,77,227,93,88,69,60,34,30,73,54,45,83,182,88,75,85,54,53,89,59,37,35,38,29,18,45,60,49,62,55,78,96,29,22,24,13,14,11,11,18,12,12,30,52,52,44,28,28,20,56,40,31,50,40,46,42,29,19,36,25,22,17,19,26,30,20,15,21,11,8,8,19,5,8,8,11,11,8,3,9,5,4,7,3,6,3,5,4,5,6];
+  // first ayah of each juz' (surah, ayah)
+  var JUZ = [[1,1],[2,142],[2,253],[3,93],[4,24],[4,148],[5,82],[6,111],[7,88],[8,41],[9,93],[11,6],[12,53],[15,1],[17,1],[18,75],[21,1],[23,1],[25,21],[27,56],[29,46],[33,31],[36,28],[39,32],[41,47],[46,1],[51,31],[58,1],[67,1],[78,1]];
+  function juzSegs(j){ var st = JUZ[j-1], nx = JUZ[j], es, ea;
+    if (!nx) { es = 114; ea = 6; } else if (nx[1] > 1) { es = nx[0]; ea = nx[1] - 1; } else { es = nx[0] - 1; ea = AYAT[es-1]; }
+    var out = []; for (var n = st[0]; n <= es; n++) out.push({ n:n, a:n === st[0] ? st[1] : 1, b:n === es ? ea : AYAT[n-1] }); return out; }
   var TOTAL_AYAT = AYAT.reduce(function (a,b) { return a+b; }, 0);   // 6236
   // first page of each surah in the 604-page Madinah mushaf
   var SPAGE = [1,2,50,77,106,128,151,177,187,208,221,235,249,255,262,267,282,293,305,312,322,332,342,350,359,367,377,385,396,404,411,415,418,428,434,440,446,453,458,467,477,483,489,496,499,502,507,511,515,518,520,523,526,528,531,534,537,542,545,549,551,553,554,556,558,560,562,564,566,568,570,572,574,575,577,578,580,582,583,585,586,587,587,589,590,591,591,592,593,594,595,595,596,596,597,597,598,598,599,599,600,600,601,601,601,602,602,602,603,603,603,604,604,604];
@@ -1688,7 +1706,10 @@ li.mrow2 .label{display:flex;flex-direction:column}
     var ord = el("select"); ord.setAttribute("aria-label", "Order");
     [["start","1 → 114"],["end","114 → 1"]].forEach(function (o) { var x = el("option", null, o[1]); x.value = o[0]; ord.appendChild(x); });
     ord.value = q.memOrder;
-    ctl.appendChild(srch); ctl.appendChild(flt); ctl.appendChild(ord);
+    var grp = el("select"); grp.setAttribute("aria-label", "Group by");
+    [["surah","By sūrah"],["juz","By juz’"]].forEach(function (o) { var x = el("option", null, o[1]); x.value = o[0]; grp.appendChild(x); });
+    grp.value = q.memGroup || "surah";
+    ctl.appendChild(srch); ctl.appendChild(grp); ctl.appendChild(flt); ctl.appendChild(ord);
     pm.appendChild(ctl);
 
     var list = el("div", "mlist");
@@ -1696,21 +1717,24 @@ li.mrow2 .label{display:flex;flex-direction:column}
       list.innerHTML = "";
       var term = srch.value.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
       var order = []; for (var i=1;i<=114;i++) order.push(i); if (q.memOrder === "end") order.reverse();
-      var shown = 0;
-      order.forEach(function (n) {
+      var shown = 0, byJuz = q.memGroup === "juz";
+      list.classList.toggle("byjuz", byJuz);
+      function mkRow(n, seg, key) {
         var tot = AYAT[n-1], c = q.memA[n] || 0;
-        if (q.memFilter === "prog" && !(c > 0 && c < tot)) return;
-        if (q.memFilter === "done" && c < tot) return;
-        if (q.memFilter === "none" && c > 0) return;
-        if (term && String(n) !== term && SURAH[n-1].toLowerCase().replace(/[^a-z0-9]/g, "").indexOf(term) < 0) return;
+        var sa = seg ? seg.a : 1, sb = seg ? seg.b : tot, sl = sb - sa + 1, sc = Math.max(0, Math.min(c, sb) - sa + 1);
+        if (q.memFilter === "prog" && !(sc > 0 && sc < sl)) return null;
+        if (q.memFilter === "done" && sc < sl) return null;
+        if (q.memFilter === "none" && sc > 0) return null;
+        if (term && String(n) !== term && SURAH[n-1].toLowerCase().replace(/[^a-z0-9]/g, "").indexOf(term) < 0) return null;
         shown++;
-        var row = el("div", "mrow" + (c >= tot ? " full" : c ? " part" : "") + (openSurah === n ? " open" : ""));
+        var row = el("div", "mrow" + (sc >= sl ? " full" : sc ? " part" : "") + (openSurah === key ? " open" : ""));
         var hd = el("button", "mh");
-        hd.appendChild(el("b", null, n)); hd.appendChild(el("span", "mn", SURAH[n-1])); hd.appendChild(el("span", "mc", c + "/" + tot));
-        var mb = el("i", "mb"); var mf = el("i"); mf.style.width = (c/tot*100) + "%"; mb.appendChild(mf); hd.appendChild(mb);
-        hd.onclick = function () { openSurah = openSurah === n ? null : n; drawList(); };
+        var nm = el("span", "mn", SURAH[n-1]); if (seg && sl < tot) nm.appendChild(el("small", "mseg", " · ayāt " + sa + "–" + sb));
+        hd.appendChild(el("b", null, n)); hd.appendChild(nm); hd.appendChild(el("span", "mc", sc + "/" + sl));
+        var mb = el("i", "mb"); var mf = el("i"); mf.style.width = (sc/sl*100) + "%"; mb.appendChild(mf); hd.appendChild(mb);
+        hd.onclick = function () { openSurah = openSurah === key ? null : key; drawList(); };
         row.appendChild(hd);
-        if (openSurah === n) {
+        if (openSurah === key) {
           var ed = el("div", "med");
           var rg = el("input"); rg.type = "range"; rg.min = 0; rg.max = tot; rg.value = c; rg.setAttribute("aria-label", "Ayat memorised");
           var num = el("input"); num.type = "number"; num.min = 0; num.max = tot; num.value = c; num.setAttribute("aria-label", "Ayat memorised");
@@ -1732,13 +1756,33 @@ li.mrow2 .label{display:flex;flex-direction:column}
           ed.appendChild(rg); ed.appendChild(r1);
           row.appendChild(ed);
         }
-        list.appendChild(row);
-      });
+        return row;
+      }
+      if (!byJuz) order.forEach(function (n) { var r = mkRow(n, null, n); if (r) list.appendChild(r); });
+      else {
+        q.juzClosed = q.juzClosed || {};
+        var jo = []; for (var j = 1; j <= 30; j++) jo.push(j); if (q.memOrder === "end") jo.reverse();
+        jo.forEach(function (j) {
+          var segs = juzSegs(j); if (q.memOrder === "end") segs.reverse();
+          var jt = 0, jc = 0; segs.forEach(function (g) { var c = q.memA[g.n] || 0; jt += g.b - g.a + 1; jc += Math.max(0, Math.min(c, g.b) - g.a + 1); });
+          var rows = segs.map(function (g) { return mkRow(g.n, g, g.n + "@" + j); }).filter(Boolean);
+          if (!rows.length) return;
+          var closed = !!q.juzClosed[j] && !term;
+          var jh = el("button", "mjuz" + (jc >= jt ? " full" : "") + (closed ? " closed" : ""));
+          jh.setAttribute("aria-expanded", closed ? "false" : "true");
+          jh.appendChild(el("b", null, "Juz’ " + j)); jh.appendChild(el("span", "mc", jc + "/" + jt + " ayāt · " + Math.round(jc / jt * 100) + "%"));
+          var jb = el("i", "mb"); var jf = el("i"); jf.style.width = (jc / jt * 100) + "%"; jb.appendChild(jf); jh.appendChild(jb);
+          jh.onclick = function () { if (q.juzClosed[j]) delete q.juzClosed[j]; else q.juzClosed[j] = 1; save(); drawList(); };
+          list.appendChild(jh);
+          if (!closed) { var box = el("div", "mjbox"); rows.forEach(function (r) { box.appendChild(r); }); list.appendChild(box); }
+        });
+      }
       if (!shown) list.appendChild(el("p", "empty", "No surahs match."));
     }
     srch.oninput = drawList;
     flt.onchange = function () { q.memFilter = flt.value; save(); drawList(); };
     ord.onchange = function () { q.memOrder = ord.value; save(); drawList(); };
+    grp.onchange = function () { q.memGroup = grp.value; openSurah = null; save(); drawList(); };
     drawList();
     pm.appendChild(list);
     app.appendChild(pm);
