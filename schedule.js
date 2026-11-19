@@ -108,8 +108,12 @@
     s.fired = s.fired || {};
     if (!s.seeded) {
       s.seeded = true;
-      s.items.push({ id: uid(), title: "Rise and Shine", icon: "alarm", color: "#f28b82", date: today(), start: "05:00", dur: 0, repeat: { type: "daily" }, remind: 0, subtasks: [], notes: "", done: {} });
-      s.items.push({ id: uid(), title: "Wind Down", icon: "moon", color: "#6c9bd2", date: today(), start: "21:30", dur: 0, repeat: { type: "daily" }, remind: 0, subtasks: [], notes: "", done: {} });
+      s.items.push({ id: uid(), title: "Rise and Shine", icon: "alarm", color: "#f28b82", date: today(), start: "05:00", dur: 0, repeat: { type: "daily" }, remind: 0, fixed: true, subtasks: [], notes: "", done: {} });
+      s.items.push({ id: uid(), title: "Wind Down", icon: "moon", color: "#6c9bd2", date: today(), start: "21:30", dur: 0, repeat: { type: "daily" }, remind: 0, fixed: true, subtasks: [], notes: "", done: {} });
+    }
+    if (!s.sleepFixed) {
+      s.sleepFixed = true;
+      s.items.forEach(function (it) { if (!it.source && /^(rise and shine|wind down)$/i.test((it.title || "").trim())) it.fixed = true; });
     }
     return s;
   }
