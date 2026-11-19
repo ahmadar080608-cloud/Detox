@@ -800,6 +800,22 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
 .sch-hkind{font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;opacity:.85;margin-bottom:4px}
 .sch-cols.multi .sch-citem .cname{white-space:normal;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
+
+/* university modules */
+.modcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:4px 0 12px}
+.modcard{border:1.5px solid var(--line);background:var(--bg);border-radius:16px;padding:12px 14px;text-align:left;display:flex;flex-direction:column;gap:6px;border-top:4px solid var(--mc);color:var(--ink)}
+.modcard.on{border-color:var(--mc);box-shadow:0 0 0 2px color-mix(in srgb,var(--mc) 35%,transparent)}
+.modcard b{font-size:14px;line-height:1.3}
+.modcard .stack{margin:0;height:8px}
+.modcard span{font-size:12px;color:var(--muted);font-weight:600}
+li.tmod{border:0;padding:20px 0 4px;font-weight:800;font-size:15px;color:var(--mc)}
+li.tmod span{border-left:4px solid var(--mc);padding-left:10px}
+li.ttopic{padding-top:10px}
+li.ttopic small{margin-left:auto}
+select.topsel{font-size:13px;padding:7px 10px;max-width:260px}
+select.topsel.add{max-width:240px}
+select.topsel.row{font-size:12px;padding:3px 8px;border-radius:8px;background:transparent;max-width:220px}
+
 [hidden]{display:none!important}
 
 /* ===== mobile: sidebar becomes a bottom bar ===== */
@@ -2262,15 +2278,30 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
   state.money = Array.isArray(state.money) ? state.money : [];
   var UNI_STATUS = [["none","Not started","#9aa0a6"],["started","Started","#d9a33a"],["cards","Flashcards complete","#6c9bd2"],["teach","Can teach the topic","#3f9a78"]];
   var TRK = {
-    lectures:  { noun:"lecture",  list:"Lectures",  statuses:UNI_STATUS, ph:"e.g. Lecture 4 · Tooth morphology: canines", bulk:true },
-    tutorials: { noun:"tutorial", list:"Tutorials", statuses:UNI_STATUS, ph:"e.g. Tutorial 2 · Waxing an incisor", bulk:true },
-    seminars:  { noun:"seminar",  list:"Seminars",  statuses:UNI_STATUS, ph:"e.g. Seminar · Infection control", bulk:true },
+    lectures:  { noun:"lecture",  list:"Lectures",  statuses:UNI_STATUS, ph:"Lecture title, e.g. Canines", bulk:true },
+    tutorials: { noun:"tutorial", list:"Tutorials", statuses:UNI_STATUS, ph:"Tutorial title, e.g. Waxing an incisor", bulk:true },
+    seminars:  { noun:"seminar",  list:"Seminars",  statuses:UNI_STATUS, ph:"Seminar title, e.g. Infection control", bulk:true },
     business:  { noun:"idea",     list:"Ideas",     statuses:[["idea","Idea","#9aa0a6"],["research","Researching","#d9a33a"],["test","Testing","#6c9bd2"],["live","Running","#3f9a78"],["park","Parked","#b5482f"]], ph:"e.g. Gardening service in North London" },
     isoc:      { noun:"event or idea", list:"Events & ideas", statuses:[["idea","Idea","#9aa0a6"],["plan","Planning","#d9a33a"],["ready","Booked / ready","#6c9bd2"],["done","Done","#3f9a78"]], ph:"e.g. Weekly halaqah, Islamic trivia night, reminder video" },
     ambitions: { noun:"ambition", list:"My ambitions", statuses:[["dream","Dream","#c58af9"],["plan","Planning","#d9a33a"],["doing","In progress","#6c9bd2"],["done","Achieved","#3f9a78"]], ph:"e.g. Memorise the whole Qur'an, perform Hajj, open my own dental practice", cats:true },
     tutoring:  { noun:"session",  list:"Sessions",  statuses:[["plan","Planned","#9aa0a6"],["done","Taught","#6c9bd2"],["paid","Paid","#3f9a78"]], ph:"e.g. GCSE Biology · Cell transport", dated:true }
   };
-  var trkFilter = {}, trkNote = null, trkBulk = {};
+  var trkFilter = {}, trkNote = null, trkBulk = {}, trkMod = {}, trkTopicOpen = {};
+  // University modules and their topics (Lectures, Tutorials, Seminars)
+  var UNI_MODULES = [
+    { id:"bs", name:"Body Systems", color:"#e0603f", topics:["Molecules and Cells","Nerve Signalling","Metabolism","Genetics","Histology of Main Tissue Types","Thorax Anatomy Dissections","Cardiovascular System","Respiratory System","Renal System","Gastrointestinal Tract","Endocrine System"] },
+    { id:"ob", name:"Oral Biology and Craniofacial Anatomy", color:"#6c9bd2", topics:["Anatomy of Head and Neck","Embryology and Development","Dental Hard and Soft Tissues","Oral Biology","Virtual Labs","Feedback on Virtual Histology"] },
+    { id:"fc", name:"Foundations of Clinical Practice and the Relevance of Biological Science", short:"Foundations of Clinical Practice", color:"#3f9a78", topics:["First Steps","Tooth Morphology","Basic Life Support","Interprofessional Education (IPE)"] }
+  ];
+  function topicKey(m, i){ return m.id + ":" + i; }
+  function topicInfo(k){ if (!k) return null; var a = k.split(":"), m = UNI_MODULES.find(function (x) { return x.id === a[0]; }); if (!m || !m.topics[+a[1]]) return null; return { m:m, i:+a[1], name:m.topics[+a[1]] }; }
+  function topicSelect(val, onch, cls){
+    var sel = el("select", cls || "topsel"); sel.setAttribute("aria-label", "Module and topic");
+    var o0 = el("option", null, "Choose module & topic…"); o0.value = ""; sel.appendChild(o0);
+    UNI_MODULES.forEach(function (m) { var g = el("optgroup"); g.label = m.name; m.topics.forEach(function (t, i) { var o = el("option", null, t); o.value = topicKey(m, i); g.appendChild(o); }); sel.appendChild(g); });
+    sel.value = val || ""; sel.onchange = function () { onch(sel.value); };
+    return sel;
+  }
   var AREAS = ["Dīn & ākhirah","Qur'an & knowledge","Family","Career","Health","Wealth","Travel","Community","Personal"];
   function stInfo(cfg, k){ for (var i = 0; i < cfg.statuses.length; i++) if (cfg.statuses[i][0] === k) return cfg.statuses[i]; return cfg.statuses[0]; }
   function statusSelect(cfg, val, onch){
@@ -2298,6 +2329,22 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
       var bar = el("div", "stack");
       cfg.statuses.forEach(function (st) { if (!counts[st[0]]) return; var seg = el("i"); seg.style.background = st[2]; seg.style.width = (counts[st[0]] / L.length * 100) + "%"; seg.title = st[1] + ": " + counts[st[0]]; bar.appendChild(seg); });
       p.appendChild(bar);
+      if (cfg.statuses === UNI_STATUS) {
+        var mc = el("div", "modcards"), cm = trkMod[sec] || "all";
+        UNI_MODULES.concat([{ id:"none", name:"Not sorted yet", color:"#9aa0a6" }]).forEach(function (m) {
+          var its = L.filter(function (x) { var ti0 = topicInfo(x.topic); return m.id === "none" ? !ti0 : ti0 && ti0.m.id === m.id; });
+          if (m.id === "none" && !its.length) return;
+          var teach = its.filter(function (x) { return x.status === "teach"; }).length;
+          var c = el("button", "modcard" + (cm === m.id ? " on" : "")); c.style.setProperty("--mc", m.color);
+          c.appendChild(el("b", null, m.short || m.name));
+          var sb = el("div", "stack"); UNI_STATUS.forEach(function (st) { var n = its.filter(function (x) { return x.status === st[0]; }).length; if (!n) return; var seg = el("i"); seg.style.background = st[2]; seg.style.width = (n / its.length * 100) + "%"; sb.appendChild(seg); });
+          c.appendChild(sb);
+          c.appendChild(el("span", null, its.length ? teach + "/" + its.length + " can teach" : "Nothing added yet"));
+          c.onclick = function () { trkMod[sec] = cm === m.id ? "all" : m.id; render(); };
+          mc.appendChild(c);
+        });
+        p.appendChild(mc);
+      }
       // filter pills
       var fl = el("div", "stfilter"), cur = trkFilter[sec] || "all";
       var all = el("button", cur === "all" ? "on" : null, "All " + L.length); all.onclick = function () { trkFilter[sec] = "all"; render(); }; fl.appendChild(all);
@@ -2311,11 +2358,14 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
     var dt = el("input"); dt.type = "date"; dt.className = "dateinp"; dt.setAttribute("aria-label", "Date"); if (cfg.dated) dt.value = tk;
     var ss = statusSelect(cfg, cfg.statuses[0][0], function (v) { ss.value = v; var c = stInfo(cfg, v)[2]; ss.style.color = c; ss.style.borderColor = c; ss.style.background = "color-mix(in srgb," + c + " 14%,var(--bg))"; });
     var ab = el("button", "cta"); ab.appendChild(icon("plus")); ab.appendChild(document.createTextNode("Add"));
-    var addOne = function () { var t = ti.value.trim(); if (!t) return; L.push({ id:uid(), title:t, date:dt.value || "", status:ss.value, notes:"", added:Date.now(), area:ar ? ar.value : undefined }); save(); render();
+    var addOne = function () { var t = ti.value.trim(); if (!t) return; L.push({ id:uid(), title:t, date:dt.value || "", status:ss.value, notes:"", added:Date.now(), area:ar ? ar.value : undefined, topic:tp ? (tp.value || undefined) : undefined }); save(); render();
       var x = document.querySelector("#t-" + sec + " .row input[type=text]"); if (x) x.focus(); };
     ab.onclick = addOne; ti.onkeydown = function (e) { if (e.key === "Enter") addOne(); };
     var ar = null;
+    var tp = null;
+    if (cfg.statuses === UNI_STATUS) { state.uniLastTopic = state.uniLastTopic || {}; tp = topicSelect(state.uniLastTopic[sec] || "", function (v) { state.uniLastTopic[sec] = v; save(); }, "topsel add"); }
     if (cfg.cats) { ar = el("select"); ar.setAttribute("aria-label", "Life area"); AREAS.forEach(function (a) { var o = el("option", null, a); o.value = a; ar.appendChild(o); }); dt.title = "Target date (optional)"; }
+    if (tp) r.appendChild(tp);
     r.appendChild(ti); if (ar) r.appendChild(ar); r.appendChild(dt); r.appendChild(ss); r.appendChild(ab);
     p.appendChild(r);
     // paste a whole list
@@ -2327,9 +2377,11 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
         var ta = el("textarea"); ta.placeholder = "One " + cfg.noun + " per line, e.g.\nLecture 1 · Introduction to dental anatomy\nLecture 2 · Tooth morphology: incisors\nLecture 3 · Tooth morphology: canines";
         var br = el("div", "row"); br.appendChild(el("span", "meta", "Mark them all as"));
         var bs = statusSelect(cfg, "none", function (v) { bs.value = v; var c = stInfo(cfg, v)[2]; bs.style.color = c; bs.style.borderColor = c; });
+        var btp = cfg.statuses === UNI_STATUS ? topicSelect((state.uniLastTopic || {})[sec] || "", function () {}, "topsel") : null;
+        if (btp) { var br0 = el("div", "row"); br0.style.marginBottom = "8px"; br0.appendChild(el("span", "meta", "All in")); br0.appendChild(btp); box.appendChild(br0); }
         var bb = el("button", "cta", "Add all");
         bb.onclick = function () { var lines = ta.value.split(/\r?\n/).map(function (x) { return x.replace(/^\s*[-•*]\s*/, "").trim(); }).filter(Boolean);
-          if (!lines.length) return; lines.forEach(function (t, i) { L.push({ id:uid(), title:t.slice(0, 160), date:"", status:bs.value, notes:"", added:Date.now() + i }); });
+          if (!lines.length) return; lines.forEach(function (t, i) { L.push({ id:uid(), title:t.slice(0, 160), date:"", status:bs.value, notes:"", added:Date.now() + i, topic:btp && btp.value ? btp.value : undefined }); });
           trkBulk[sec] = false; save(); render(); };
         br.appendChild(bs); br.appendChild(bb);
         box.appendChild(ta); box.appendChild(br); p.appendChild(box);
@@ -2344,10 +2396,24 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
     var shown = L.filter(function (x) { return (!trkFilter[sec] || trkFilter[sec] === "all" || x.status === trkFilter[sec]) && !(sec === "business" && state.bizActiveOnly && !x.active); });
     if (cfg.dated) shown = shown.slice().sort(function (a, b) { return (b.date || "").localeCompare(a.date || "") || b.added - a.added; });
     if (!L.length) p.appendChild(el("p", "empty", "Nothing here yet. Add your first " + cfg.noun + " above."));
+    var uni = cfg.statuses === UNI_STATUS, lastMod = null, lastTopic = null;
+    if (uni) {
+      var cm2 = trkMod[sec] || "all";
+      shown = shown.filter(function (x) { var t0 = topicInfo(x.topic); return cm2 === "all" || (cm2 === "none" ? !t0 : t0 && t0.m.id === cm2); });
+      var ord = function (x) { var t0 = topicInfo(x.topic); return t0 ? UNI_MODULES.indexOf(t0.m) * 100 + t0.i : 9999; };
+      shown = shown.slice().sort(function (a, b) { return ord(a) - ord(b) || a.added - b.added; });
+    }
     var ul = el("ul", "trklist"), lastArea = null;
     if (cfg.cats) shown = shown.slice().sort(function (a, b) { return AREAS.indexOf(a.area) - AREAS.indexOf(b.area) || a.added - b.added; });
     shown.forEach(function (x) {
       if (cfg.cats && x.area !== lastArea) { lastArea = x.area; var gh = el("li", "tgroup"); gh.appendChild(el("span", null, x.area || "Other")); ul.appendChild(gh); }
+      if (uni) {
+        var t1 = topicInfo(x.topic), mid = t1 ? t1.m.id : "none", tkey = x.topic && t1 ? x.topic : "none";
+        if (mid !== lastMod) { lastMod = mid; lastTopic = null; var mh = el("li", "tmod"); mh.style.setProperty("--mc", t1 ? t1.m.color : "#9aa0a6"); mh.appendChild(el("span", null, t1 ? t1.m.name : "Not sorted yet: choose a topic for each")); ul.appendChild(mh); }
+        if (t1 && tkey !== lastTopic) { lastTopic = tkey;
+          var inT = L.filter(function (y) { return y.topic === tkey; }), tch = inT.filter(function (y) { return y.status === "teach"; }).length;
+          var th = el("li", "tgroup ttopic"); th.appendChild(el("span", null, t1.name)); th.appendChild(el("small", null, tch + "/" + inT.length + " can teach")); ul.appendChild(th); }
+      }
       var li = el("li", "trow2");
       li.style.setProperty("--sc", stInfo(cfg, x.status)[2]);
       li.appendChild(statusSelect(cfg, x.status, function (v) { x.status = v; save(); render(); }));
@@ -2358,6 +2424,7 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
       var meta = el("div", "fmeta");
       var d2 = el("input"); d2.type = "date"; d2.value = x.date || ""; d2.setAttribute("aria-label", "Date"); d2.onchange = function () { x.date = d2.value; save(); };
       meta.appendChild(d2);
+      if (uni) meta.appendChild(topicSelect(x.topic || "", function (v) { x.topic = v || undefined; save(); render(); }, "topsel row"));
       var nb = el("button", "linkbtn", x.notes ? "Notes ✓" : "Add notes"); nb.onclick = function () { trkNote = trkNote === x.id ? null : x.id; render(); };
       meta.appendChild(nb); tb.appendChild(meta);
       li.appendChild(tb);
