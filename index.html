@@ -816,6 +816,20 @@ select.topsel{font-size:13px;padding:7px 10px;max-width:260px}
 select.topsel.add{max-width:240px}
 select.topsel.row{font-size:12px;padding:3px 8px;border-radius:8px;background:transparent;max-width:220px}
 
+
+/* university years */
+.subtabs.yeartabs{margin:0 0 10px}
+.subtabs.yeartabs button.on{background:var(--accent);color:#fff}
+.modedit{margin:6px 0 4px;display:flex;flex-direction:column;gap:6px}
+.modedit .linkbtn{align-self:flex-start}
+.modedit .bulkbox textarea{min-height:90px}
+.modrow{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600}
+.modrow i{width:10px;height:10px;border-radius:50%}
+.modrow span{flex:1}
+
+.mtgrid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))!important}
+.mtgrid .hch{justify-content:flex-start;align-items:flex-start}
+.mtgrid .hch span{font-size:13px;line-height:1.35}
 [hidden]{display:none!important}
 
 /* ===== mobile: sidebar becomes a bottom bar ===== */
@@ -1240,6 +1254,7 @@ select.topsel.row{font-size:12px;padding:3px 8px;border-radius:8px;background:tr
       if ((state.arTab || "goals") === "practice") return;
       renderArabicGoals();
     }
+    if (sec === "university" || p0.parent === "university") app.appendChild(yearTabs());
     if (NAV_GROUPS[sec]) { app.appendChild(groupTabs(sec, NAV_GROUPS[sec])); renderGroupHome(sec, NAV_GROUPS[sec]); }
     if (NAV_GROUPS[p0.parent]) app.appendChild(groupTabs(p0.parent, NAV_GROUPS[p0.parent]));
     if (TRK[sec]) renderTracker(sec);
@@ -1248,7 +1263,7 @@ select.topsel.row{font-size:12px;padding:3px 8px;border-radius:8px;background:tr
     if (sec === "studies") renderSciencesHome();
     if (sec === "quran") renderQuranTrackers();
     if (sec === "hadith") renderHadithTrackers();
-    if (SCIENCES.indexOf(sec) >= 0) { if (sec !== "hadith") renderSciGoals(sec); renderPdfs(sec); }
+    if (SCIENCES.indexOf(sec) >= 0) { if (sec !== "hadith") renderSciGoals(sec); renderMutoon(sec); renderPdfs(sec); }
     if (sec === "isoc" || sec === "ambitions") renderSciGoals(sec);
 
     renderNotes(sec);
@@ -2293,12 +2308,55 @@ select.topsel.row{font-size:12px;padding:3px 8px;border-radius:8px;background:tr
     { id:"ob", name:"Oral Biology and Craniofacial Anatomy", color:"#6c9bd2", topics:["Anatomy of Head and Neck","Embryology and Development","Dental Hard and Soft Tissues","Oral Biology","Virtual Labs","Feedback on Virtual Histology"] },
     { id:"fc", name:"Foundations of Clinical Practice and the Relevance of Biological Science", short:"Foundations of Clinical Practice", color:"#3f9a78", topics:["First Steps","Tooth Morphology","Basic Life Support","Interprofessional Education (IPE)"] }
   ];
+  state.uniYear = state.uniYear || 1;
+  state.uniMods = state.uniMods || {};      // year -> [{ id, name, color, topics[] }]
+  var MOD_COLORS = ["#e0603f","#6c9bd2","#3f9a78","#c58af9","#d9a33a","#5ec4d6"];
+  function modsFor(y){ return (y === 1 ? UNI_MODULES : []).concat(state.uniMods[y] || []); }
+  function mods(){ return modsFor(state.uniYear); }
+  function trkKey(sec){ return UNI_SUBS.indexOf(sec) >= 0 && state.uniYear !== 1 ? sec + "@y" + state.uniYear : sec; }
+  function yearTabs(){
+    var bar = el("div", "subtabs yeartabs");
+    [1,2,3,4,5].forEach(function (y) {
+      var b = el("button", state.uniYear === y ? "on" : null, "Year " + y);
+      b.onclick = function () { state.uniYear = y; trkMod = {}; save(); render(); };
+      bar.appendChild(b);
+    });
+    return bar;
+  }
+  var addingMod = false, addingTopic = null;
+  function moduleEditor(){
+    var box = el("div", "modedit"), y = state.uniYear, mine = state.uniMods[y] || [];
+    var tg = el("button", "linkbtn", addingMod ? "Close" : "+ Add a module to Year " + y);
+    tg.onclick = function () { addingMod = !addingMod; render(); };
+    box.appendChild(tg);
+    if (addingMod) {
+      var f = el("div", "bulkbox");
+      var nm = el("input"); nm.type = "text"; nm.maxLength = 120; nm.placeholder = "Module name, e.g. Clinical Dentistry 1"; nm.setAttribute("aria-label", "Module name");
+      var tp = el("textarea"); tp.placeholder = "Topics, one per line, e.g.\nPeriodontology\nRestorative dentistry\nRadiography"; tp.setAttribute("aria-label", "Topics");
+      var ok = el("button", "cta", "Save module");
+      ok.onclick = function () { var n = nm.value.trim(), ts = tp.value.split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean); if (!n || !ts.length) return;
+        (state.uniMods[y] = state.uniMods[y] || []).push({ id:"c" + uid(), name:n, color:MOD_COLORS[modsFor(y).length % MOD_COLORS.length], topics:ts }); addingMod = false; save(); render(); };
+      nm.style.marginBottom = "8px"; f.appendChild(nm); f.appendChild(tp); f.appendChild(ok); box.appendChild(f);
+    }
+    mine.forEach(function (m) {
+      var r = el("div", "modrow"); var dot = el("i"); dot.style.background = m.color; r.appendChild(dot);
+      r.appendChild(el("span", null, m.name + " · " + m.topics.length + " topics"));
+      var add = el("button", "linkbtn", addingTopic === m.id ? "Cancel" : "+ topic"); add.onclick = function () { addingTopic = addingTopic === m.id ? null : m.id; render(); };
+      var del = el("button", "iconbtn"), armed = false; del.title = "Remove module"; del.appendChild(icon("trash"));
+      del.onclick = function () { if (!armed) { armed = true; del.classList.add("armed"); del.title = "Press again: its items move to Not sorted yet"; return; } state.uniMods[y] = mine.filter(function (x) { return x !== m; }); save(); render(); };
+      r.appendChild(add); r.appendChild(del); box.appendChild(r);
+      if (addingTopic === m.id) { var tr = el("div", "row"); var ti = el("input"); ti.type = "text"; ti.placeholder = "New topic for " + m.name; var tb = el("button", "cta", "Add");
+        tb.onclick = function () { if (!ti.value.trim()) return; m.topics.push(ti.value.trim()); addingTopic = null; save(); render(); }; ti.onkeydown = function (e) { if (e.key === "Enter") tb.click(); };
+        tr.appendChild(ti); tr.appendChild(tb); box.appendChild(tr); }
+    });
+    return box;
+  }
   function topicKey(m, i){ return m.id + ":" + i; }
-  function topicInfo(k){ if (!k) return null; var a = k.split(":"), m = UNI_MODULES.find(function (x) { return x.id === a[0]; }); if (!m || !m.topics[+a[1]]) return null; return { m:m, i:+a[1], name:m.topics[+a[1]] }; }
+  function topicInfo(k){ if (!k) return null; var a = k.split(":"), m = mods().find(function (x) { return x.id === a[0]; }); if (!m || !m.topics[+a[1]]) return null; return { m:m, i:+a[1], name:m.topics[+a[1]] }; }
   function topicSelect(val, onch, cls){
     var sel = el("select", cls || "topsel"); sel.setAttribute("aria-label", "Module and topic");
     var o0 = el("option", null, "Choose module & topic…"); o0.value = ""; sel.appendChild(o0);
-    UNI_MODULES.forEach(function (m) { var g = el("optgroup"); g.label = m.name; m.topics.forEach(function (t, i) { var o = el("option", null, t); o.value = topicKey(m, i); g.appendChild(o); }); sel.appendChild(g); });
+    mods().forEach(function (m) { var g = el("optgroup"); g.label = m.name; m.topics.forEach(function (t, i) { var o = el("option", null, t); o.value = topicKey(m, i); g.appendChild(o); }); sel.appendChild(g); });
     sel.value = val || ""; sel.onchange = function () { onch(sel.value); };
     return sel;
   }
@@ -2313,9 +2371,10 @@ select.topsel.row{font-size:12px;padding:3px 8px;border-radius:8px;background:tr
     return sel;
   }
   function renderTracker(sec){
-    var cfg = TRK[sec], L = state.trk[sec] = state.trk[sec] || [], tk = dkey(new Date());
+    var cfg = TRK[sec], tkey0 = trkKey(sec), L = state.trk[tkey0] = state.trk[tkey0] || [], tk = dkey(new Date());
     var p = el("div", "panel"); p.id = "t-" + sec;
-    p.appendChild(el("h2", null, cfg.list));
+    p.appendChild(el("h2", null, cfg.statuses === UNI_STATUS ? cfg.list + " · Year " + state.uniYear : cfg.list));
+    if (cfg.statuses === UNI_STATUS && !mods().length) p.appendChild(el("p", "meta", "No modules for Year " + state.uniYear + " yet. Add your modules and their topics below, then add your " + cfg.list.toLowerCase() + "."));
     // summary: stacked bar + counts
     var counts = {}; cfg.statuses.forEach(function (st) { counts[st[0]] = 0; }); L.forEach(function (x) { counts[x.status] = (counts[x.status] || 0) + 1; });
     if (L.length) {
@@ -2331,7 +2390,7 @@ select.topsel.row{font-size:12px;padding:3px 8px;border-radius:8px;background:tr
       p.appendChild(bar);
       if (cfg.statuses === UNI_STATUS) {
         var mc = el("div", "modcards"), cm = trkMod[sec] || "all";
-        UNI_MODULES.concat([{ id:"none", name:"Not sorted yet", color:"#9aa0a6" }]).forEach(function (m) {
+        mods().concat([{ id:"none", name:"Not sorted yet", color:"#9aa0a6" }]).forEach(function (m) {
           var its = L.filter(function (x) { var ti0 = topicInfo(x.topic); return m.id === "none" ? !ti0 : ti0 && ti0.m.id === m.id; });
           if (m.id === "none" && !its.length) return;
           var teach = its.filter(function (x) { return x.status === "teach"; }).length;
@@ -2352,6 +2411,7 @@ select.topsel.row{font-size:12px;padding:3px 8px;border-radius:8px;background:tr
         b.onclick = function () { trkFilter[sec] = cur === st[0] ? "all" : st[0]; render(); }; fl.appendChild(b); });
       p.appendChild(fl);
     }
+    if (cfg.statuses === UNI_STATUS) p.appendChild(moduleEditor());
     // add one
     var r = el("div", "row"); r.style.margin = "12px 0 4px";
     var ti = el("input"); ti.type = "text"; ti.maxLength = 160; ti.placeholder = cfg.ph; ti.setAttribute("aria-label", "New " + cfg.noun);
@@ -2400,7 +2460,7 @@ select.topsel.row{font-size:12px;padding:3px 8px;border-radius:8px;background:tr
     if (uni) {
       var cm2 = trkMod[sec] || "all";
       shown = shown.filter(function (x) { var t0 = topicInfo(x.topic); return cm2 === "all" || (cm2 === "none" ? !t0 : t0 && t0.m.id === cm2); });
-      var ord = function (x) { var t0 = topicInfo(x.topic); return t0 ? UNI_MODULES.indexOf(t0.m) * 100 + t0.i : 9999; };
+      var ord = function (x) { var t0 = topicInfo(x.topic); return t0 ? mods().indexOf(t0.m) * 100 + t0.i : 9999; };
       shown = shown.slice().sort(function (a, b) { return ord(a) - ord(b) || a.added - b.added; });
     }
     var ul = el("ul", "trklist"), lastArea = null;
@@ -2437,7 +2497,7 @@ select.topsel.row{font-size:12px;padding:3px 8px;border-radius:8px;background:tr
       }
       var del = el("button", "iconbtn"), armed = false; del.title = "Delete"; del.appendChild(icon("trash"));
       del.onclick = function () { if (!armed) { armed = true; del.classList.add("armed"); del.title = "Press again to delete"; return; }
-        state.trk[sec] = L.filter(function (y) { return y.id !== x.id; }); save(); render(); };
+        state.trk[tkey0] = L.filter(function (y) { return y.id !== x.id; }); save(); render(); };
       li.appendChild(del);
       if (trkNote === x.id) { var nt = el("textarea"); nt.placeholder = "Notes"; nt.value = x.notes || ""; nt.onchange = function () { x.notes = nt.value; save(); };
         var w = el("div"); w.style.flexBasis = "100%"; w.appendChild(nt); li.appendChild(w); }
@@ -2547,7 +2607,7 @@ select.topsel.row{font-size:12px;padding:3px 8px;border-radius:8px;background:tr
     var grid = el("div", "grid");
     subs.forEach(function (id) {
       var n = 0, lbl = byId[id].name;
-      if (TRK[id]) { var L = state.trk[id] || [], cfg = TRK[id], last = cfg.statuses[cfg.statuses.length - 1][0];
+      if (TRK[id]) { var L = state.trk[trkKey(id)] || [], cfg = TRK[id], last = cfg.statuses[cfg.statuses.length - 1][0];
         if (cfg.statuses === UNI_STATUS) { n = L.filter(function (x) { return x.status === "teach"; }).length; lbl += " · " + n + "/" + L.length + " can teach"; }
         else if (id === "business") { n = L.length; lbl += " · " + L.filter(function (x) { return x.active; }).length + " in progress"; }
         else { n = L.filter(function (x) { return x.status === "plan"; }).length; lbl += " · planned"; } }
@@ -2839,6 +2899,117 @@ select.topsel.row{font-size:12px;padding:3px 8px;border-radius:8px;background:tr
     p.appendChild(list);
     app.appendChild(p);
     makeCollapsible("n-" + sec);
+  }
+
+
+  // ---------- Mutūn memorisation (each Islamic science) ----------
+  state.mutoon = state.mutoon || {};
+  state.mutoonSel = state.mutoonSel || {};
+  var MT_ADD = {}, MT_REVALL = {};
+  var USOOL_OUTLINE = ["Basmalah and the four issues: knowledge, action, calling to it, patience","Sūrat al-ʿAṣr, and the sayings of ash-Shāfiʿī and al-Bukhārī","The three issues: why we were created, no shirk, al-walāʾ wal-barāʾ","Al-Ḥanīfiyyah, the religion of Ibrāhīm","The three principles (the question in the grave)","First principle: knowing your Lord","Types of worship and their evidences","Second principle: knowing the religion of Islam","Level one: Islam and its five pillars","Level two: Īmān and its six pillars","Level three: Iḥsān, and the hadith of Jibrīl","Third principle: knowing the Prophet ﷺ, his lineage and life","His call, the Hijrah and the completion of the religion","Resurrection and recompense","The Messengers, from Nūḥ to Muḥammad ﷺ","Ṭāghūt: disbelieving in it, and its heads"];
+  function mtStats(m){ var d = 0, l = 0; m.units.forEach(function (u) { if (u.s === 2) d++; else if (u.s === 1) l++; }); return { done:d, learning:l, total:m.units.length }; }
+  function renderMutoon(sec){
+    var M = state.mutoon[sec] = state.mutoon[sec] || [], tk = dkey(new Date()), wsk = dkey(weekStart(new Date()));
+    var p = el("div", "panel"); p.id = "mt-" + sec;
+    p.appendChild(el("h2", null, "Mutūn memorisation"));
+    var cur = M.find(function (m) { return m.id === state.mutoonSel[sec]; }) || M[0];
+    // pick / add a matn
+    var bar = el("div", "row"); bar.style.marginBottom = "10px";
+    if (M.length) {
+      var sel = el("select"); sel.setAttribute("aria-label", "Matn");
+      M.forEach(function (m) { var o = el("option", null, m.name + " (" + mtStats(m).done + "/" + m.units.length + ")"); o.value = m.id; sel.appendChild(o); });
+      sel.value = cur.id; sel.onchange = function () { state.mutoonSel[sec] = sel.value; save(); render(); };
+      bar.appendChild(sel);
+    }
+    var nb = el("button", "newbtn"); nb.appendChild(icon(MT_ADD[sec] ? "x" : "plus")); nb.appendChild(document.createTextNode(MT_ADD[sec] ? "Close" : "Add a matn"));
+    nb.onclick = function () { MT_ADD[sec] = !MT_ADD[sec]; render(); };
+    bar.appendChild(nb);
+    if (sec === "aqeedah" && !M.some(function (m) { return m.preset === "usool"; })) {
+      var ps = el("button", "ghost", "Add Thalāthat al-Uṣūl (starter outline)");
+      ps.onclick = function () { var m = { id:uid(), name:"Thalāthat al-Uṣūl", kind:"prose", preset:"usool", units:USOOL_OUTLINE.map(function (n) { return { n:n, s:0 }; }) };
+        M.push(m); state.mutoonSel[sec] = m.id; save(); render(); };
+      bar.appendChild(ps);
+    }
+    p.appendChild(bar);
+
+    if (MT_ADD[sec] || !M.length) {
+      var f = el("div", "bulkbox");
+      if (!M.length) f.appendChild(el("p", "meta", "Track a prose matn by its sections (its own headings), and a poem by its lines (abyāt). Each part goes from Learning to Memorised, and you tick it when you revise."));
+      var nm = el("input"); nm.type = "text"; nm.maxLength = 100; nm.placeholder = "Name, e.g. al-Uṣūl as-Sittah, al-Manẓūmah al-Bayqūniyyah"; nm.setAttribute("aria-label", "Matn name");
+      var kd = el("select"); kd.setAttribute("aria-label", "Type"); [["prose","Prose: track by sections"],["poem","Poem: track by lines (abyāt)"]].forEach(function (o) { var x = el("option", null, o[1]); x.value = o[0]; kd.appendChild(x); });
+      var secs = el("textarea"); secs.placeholder = "Section names, one per line (or leave empty and give a number below)";
+      var num = el("input"); num.type = "number"; num.min = 1; num.max = 2000; num.placeholder = "How many sections"; num.style.width = "190px";
+      kd.onchange = function () { var poem = kd.value === "poem"; secs.hidden = poem; num.placeholder = poem ? "How many lines" : "How many sections"; };
+      var ok = el("button", "cta", "Add matn");
+      ok.onclick = function () {
+        var n = nm.value.trim(); if (!n) { nm.focus(); return; }
+        var names = kd.value === "prose" ? secs.value.split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean) : [];
+        var count = names.length || Math.min(2000, parseInt(num.value, 10) || 0); if (!count) { num.focus(); return; }
+        var units = []; for (var i = 0; i < count; i++) units.push({ n:names[i] || "", s:0 });
+        var m = { id:uid(), name:n, kind:kd.value, units:units }; M.push(m); state.mutoonSel[sec] = m.id; MT_ADD[sec] = false; save(); render(); };
+      var r1 = el("div", "row"); r1.appendChild(nm); r1.appendChild(kd); f.appendChild(r1);
+      secs.style.margin = "8px 0"; f.appendChild(secs);
+      var r2 = el("div", "row"); r2.appendChild(num); r2.appendChild(ok); f.appendChild(r2);
+      p.appendChild(f);
+    }
+
+    if (cur) {
+      var st = mtStats(cur), unit = cur.kind === "poem" ? "lines" : "sections";
+      var big = el("div", "bignum", String(st.done)); big.appendChild(el("small", null, "of " + st.total + " " + unit + " memorised · " + st.learning + " learning"));
+      p.appendChild(big); p.appendChild(barEl(st.total ? st.done / st.total : 0));
+      var lg = el("div", "legend");
+      [["Not started","var(--bg)"],["Learning","var(--accent-soft)"],["Memorised","var(--accent)"]].forEach(function (x) { var sp = el("span"); var i = el("i"); i.style.background = x[1]; sp.appendChild(i); sp.appendChild(document.createTextNode(x[0])); lg.appendChild(sp); });
+      lg.appendChild(el("span", null, "· Tap a " + (cur.kind === "poem" ? "line" : "section") + " to change it"));
+      p.appendChild(lg);
+      var grid = el("div", "hgrid" + (cur.kind === "prose" && cur.units.some(function (u) { return u.n; }) ? " titled mtgrid" : ""));
+      cur.units.forEach(function (u, i) {
+        var b = el("button", "hch" + (u.s ? " s" + u.s : "")); b.title = (u.n ? (i + 1) + ". " + u.n : (cur.kind === "poem" ? "Line " : "Section ") + (i + 1));
+        b.appendChild(el("b", null, i + 1)); if (u.n && cur.kind === "prose") b.appendChild(el("span", null, u.n));
+        b.onclick = function () { u.s = ((u.s || 0) + 1) % 3; if (u.s === 2 && !u.rev) u.rev = tk; var y = window.scrollY, gs = grid.scrollTop; save(); render(); window.scrollTo(0, y); var g2 = document.querySelector("#mt-" + sec + " .hgrid"); if (g2) g2.scrollTop = gs; };
+        grid.appendChild(b);
+      });
+      p.appendChild(grid);
+      // revision
+      var mem = cur.units.map(function (u, i) { return { u:u, i:i }; }).filter(function (x) { return x.u.s === 2; });
+      var revW = mem.filter(function (x) { return x.u.rev && x.u.rev >= wsk && x.u.revTick; }).length;
+      p.appendChild(el("h3", null, "Revision · " + revW + "/" + mem.length + " revised this week"));
+      if (!mem.length) p.appendChild(el("p", "empty", "Memorised " + unit + " show here for revision, oldest first."));
+      mem.sort(function (a, b) { return (a.u.rev || "").localeCompare(b.u.rev || "") || a.i - b.i; });
+      var ul = el("ul");
+      (MT_REVALL[sec] ? mem : mem.slice(0, 6)).forEach(function (x) {
+        var wk = x.u.rev && x.u.rev >= wsk && x.u.revTick, li = el("li" + "", wk ? "done" : null);
+        var lab = el("span", "label"); lab.appendChild(el("b", null, (x.i + 1) + ". ")); lab.appendChild(document.createTextNode(x.u.n || (cur.kind === "poem" ? "Line " : "Section ") + (x.i + 1)));
+        li.appendChild(lab);
+        var ds = x.u.rev ? Math.round((new Date(tk + "T12:00") - new Date(x.u.rev + "T12:00")) / 864e5) : null;
+        var ago = ds === 0 ? "today" : ds + (ds === 1 ? " day ago" : " days ago");
+        li.appendChild(el("span", "meta", wk ? (ds === 0 ? "Revised today" : "Revised this week") : ds == null ? "Not revised yet" : (x.u.revTick ? "Last revised " : "Memorised ") + ago));
+        var rb = el("button", wk ? "ghost" : "newbtn", wk ? "Done" : "Revised"); rb.disabled = !!wk;
+        rb.onclick = function () { x.u.rev = tk; x.u.revTick = true; var y = window.scrollY; save(); render(); window.scrollTo(0, y); };
+        li.appendChild(rb); ul.appendChild(li);
+      });
+      p.appendChild(ul);
+      if (mem.length > 6) { var more = el("button", "ghost", MT_REVALL[sec] ? "Show fewer" : "Show all " + mem.length); more.style.marginTop = "8px"; more.onclick = function () { MT_REVALL[sec] = !MT_REVALL[sec]; render(); }; p.appendChild(more); }
+      // manage
+      var mg = el("details", "prset"); mg.appendChild(el("summary", null, "Edit this matn"));
+      var mr = el("div", "row");
+      var rn = el("input"); rn.type = "text"; rn.value = cur.name; rn.setAttribute("aria-label", "Rename"); rn.onchange = function () { cur.name = rn.value.trim() || cur.name; save(); render(); };
+      var addU = el("button", "ghost", "+ Add a " + (cur.kind === "poem" ? "line" : "section"));
+      addU.onclick = function () { cur.units.push({ n:"", s:0 }); save(); render(); };
+      var del = el("button", "ghost danger", "Delete matn"), armed = false;
+      del.onclick = function () { if (!armed) { armed = true; del.textContent = "Press again to delete"; return; } state.mutoon[sec] = M.filter(function (m) { return m !== cur; }); delete state.mutoonSel[sec]; save(); render(); };
+      mr.appendChild(rn); mr.appendChild(addU); mr.appendChild(del); mg.appendChild(mr);
+      if (cur.kind === "prose") {
+        var ren = el("textarea"); ren.value = cur.units.map(function (u) { return u.n; }).join("\n"); ren.placeholder = "Section names, one per line"; ren.style.marginTop = "8px";
+        var rs = el("button", "cta", "Save section names"); rs.style.marginTop = "6px";
+        rs.onclick = function () { var names = ren.value.split(/\r?\n/).map(function (x) { return x.trim(); });
+          while (names.length && !names[names.length - 1]) names.pop();
+          names.forEach(function (n, i) { if (cur.units[i]) cur.units[i].n = n; else cur.units.push({ n:n, s:0 }); }); save(); render(); };
+        mg.appendChild(ren); mg.appendChild(rs);
+      }
+      p.appendChild(mg);
+    }
+    app.appendChild(p);
+    makeCollapsible("mt-" + sec);
   }
 
   function render(){
