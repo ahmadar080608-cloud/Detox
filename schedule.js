@@ -332,7 +332,9 @@
   var GSCOPE = "https://www.googleapis.com/auth/calendar.events";
   try { var tk0 = JSON.parse(sessionStorage.getItem("detoxGToken") || "null"); if (tk0 && tk0.exp > Date.now()) { G.token = tk0.t; G.exp = tk0.exp; } } catch (e) {}
   function gc() { var s = S(); s.gcal = s.gcal || {}; return s.gcal; }
-  function gOK() { return !!(G.token && Date.now() < G.exp); }
+  function gOK() {
+    if (window.DetoxSync && DetoxSync.user) { if (DetoxSync.hasToken()) { G.token = DetoxSync.gtoken.t; G.exp = DetoxSync.gtoken.exp; return true; } return false; }
+    return !!(G.token && Date.now() < G.exp); }
   function gLoad(cb) {
     if (window.google && google.accounts && google.accounts.oauth2) return cb && cb();
     var ex = document.getElementById("gsi-js");
@@ -343,8 +345,20 @@
     document.head.appendChild(sc);
   }
   var tokenClient = null, pendingFns = [];
+  function viaAccount() { return !!(window.DetoxSync && DetoxSync.user); }
   function gAuth(fn) {
-    var g0 = gc(); if (!g0.clientId) { V.toast = "Add your Google Client ID first (see Google Calendar below)."; C.rerender(); return; }
+    var g0 = gc();
+    if (viaAccount()) {
+      DetoxSync.googleToken(true).then(function (t) {
+        G.token = t; G.exp = (DetoxSync.gtoken && DetoxSync.gtoken.exp) || (Date.now() + 50 * 60000);
+        var first = !gc().connected; gc().connected = true; C.save();
+        var fns = fn ? [fn] : []; fns.forEach(function (f) { try { f(); } catch (e) {} });
+        if (first && !fns.length) gPull();
+        C.rerender();
+      }).catch(function (e) { G.busy = false; V.toast = "Google Calendar: " + ((e && e.message) || "couldn't connect"); C.rerender(); });
+      return;
+    }
+    if (!g0.clientId) { V.toast = "Sign in with Google in Settings first."; C.rerender(); return; }
     if (fn) pendingFns.push(fn);
     gLoad(function () {
       if (!tokenClient || tokenClient._cid !== g0.clientId) {
@@ -368,7 +382,8 @@
       method: method, headers: { "Authorization": "Bearer " + G.token, "Content-Type": "application/json" },
       body: body ? JSON.stringify(body) : undefined
     }).then(function (r) {
-      if (r.status === 401) { G.token = null; try { sessionStorage.removeItem("detoxGToken"); } catch (e) {} throw new Error("Google sign-in expired. Press Sync now to reconnect."); }
+      if (r.status === 401) { G.token = null; try { sessionStorage.removeItem("detoxGToken"); } catch (e) {} if (window.DetoxSync && DetoxSync.dropToken) DetoxSync.dropToken(); throw new Error("Google access expired. Press Sync now to reconnect."); }
+      if (r.status === 403) return r.json().then(function (j) { var m = (j.error && j.error.message) || ""; throw new Error(/not been used|disabled/i.test(m) ? "the Google Calendar API isn't switched on for your Firebase project yet (see Settings)." : m || "Google said no (403)."); });
       if (r.status === 204 || r.status === 410) return null;
       return r.json().then(function (j) { if (!r.ok) throw new Error((j.error && j.error.message) || ("Google said " + r.status)); return j; });
     });
@@ -440,7 +455,7 @@
   }
   // send one task's changes to Google
   function gPush(it) {
-    var g0 = gc(); if (!g0.connected || !g0.clientId) return;
+    var g0 = gc(); if (!g0.connected || (!g0.clientId && !viaAccount())) return;
     if (it.source !== "gcal" && !it.gsync) return;
     withToken(function () {
       var p;
@@ -466,13 +481,14 @@
     var g0 = gc(), r = el("div", "setrow gcal"), l = el("div", "sl");
     var name = el("b"); name.appendChild(svg("calendar", "gic")); name.appendChild(document.createTextNode(" Google Calendar")); l.appendChild(name);
     var right = el("div", "row");
-    if (!g0.clientId) {
-      l.appendChild(el("span", null, "Link your Google account: your Google events appear in your calendar and daily timeline, and fixed events you add here go into Google Calendar with their reminders."));
-      var su = el("button", "cta", V.gSetup ? "Hide setup" : "Set up"); su.onclick = function () { V.gSetup = !V.gSetup; C.rerender(); }; right.appendChild(su);
+    var acc = viaAccount();
+    if (!g0.clientId && !acc) {
+      l.appendChild(el("span", null, "Sign in with Google in Settings to link your calendar: your Google events appear in your calendar and daily timeline, and fixed events you add here go into Google Calendar with their reminders."));
+      var su = el("button", "cta", "Go to Settings"); su.onclick = function () { C.go("settings"); }; right.appendChild(su);
     } else if (!g0.connected) {
-      l.appendChild(el("span", null, "Ready to connect. You'll be asked to sign in with Google and allow access to your calendar."));
+      l.appendChild(el("span", null, acc ? "Ready to connect with your Google account." : "Ready to connect. You'll be asked to sign in with Google and allow access to your calendar."));
       var cn = el("button", "cta", "Connect Google Calendar"); cn.onclick = function () { gAuth(null); }; right.appendChild(cn);
-      var ch = el("button", "ghost", "Change Client ID"); ch.onclick = function () { V.gSetup = true; g0.clientId = ""; C.save(); C.rerender(); }; right.appendChild(ch);
+      if (!acc) { var ch = el("button", "ghost", "Change Client ID"); ch.onclick = function () { V.gSetup = true; g0.clientId = ""; C.save(); C.rerender(); }; right.appendChild(ch); }
     } else {
       var ago = g0.lastSync ? Math.round((Date.now() - g0.lastSync) / 60000) : null;
       l.appendChild(el("span", null, "Connected · " + (ago == null ? "not synced yet" : ago < 1 ? "synced just now" : "synced " + (ago < 60 ? ago + " min" : Math.round(ago / 60) + " h") + " ago") +
@@ -481,7 +497,7 @@
       var dc = el("button", "ghost", "Disconnect"); dc.onclick = gDisconnect; right.appendChild(dc);
     }
     r.appendChild(l); r.appendChild(right); tp.appendChild(r);
-    if (!g0.clientId && V.gSetup) {
+    if (!g0.clientId && V.gSetup && !viaAccount()) {
       var box = el("div", "gsetup");
       box.appendChild(el("p", null, "One-time setup, about 10 minutes. Google needs every website that reads a calendar to have its own Client ID:"));
       var ol = el("ol"), origin = location.origin;
@@ -1114,6 +1130,7 @@
     init: function (ctx) { C = ctx; S(); setInterval(checkReminders, 20000); setTimeout(checkReminders, 1500);
       var g0 = gc();
       if (g0.clientId && g0.connected) { gLoad(); if (gOK() && (!g0.lastSync || Date.now() - g0.lastSync > 5 * 60000)) setTimeout(function () { gPull(true); }, 800); }
+      setInterval(function () { var g1 = gc(); if (viaAccount() && g1.connected && !G.busy && gOK() && (!g1.lastSync || Date.now() - g1.lastSync > 10 * 60000)) gPull(true); }, 15000);
     },
     render: function (app, page) { render(app, page); },
     today: function () { var k = today(), its = itemsOn(k), now = nowMin();

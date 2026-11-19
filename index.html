@@ -730,6 +730,21 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
 .prset .row{margin-top:10px}
 .prset input[type=text]{min-width:120px}
 /* tools: countdowns */
+.syncdot{display:inline-block;width:8px;height:8px;border-radius:50%;vertical-align:middle;margin-left:4px;background:transparent}
+.syncdot.synced{background:#3f9a78}.syncdot.syncing{background:#d9a33a}.syncdot.error{background:#d93c3c}.syncdot.out{background:rgba(255,255,255,.25)}
+.gbtn{display:inline-flex;align-items:center;gap:10px}
+.glogo{display:inline-flex;background:#fff;border-radius:50%;padding:3px}
+.accwho{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.accwho img{width:40px;height:40px;border-radius:50%}
+.accwho div{display:flex;flex-direction:column}
+.accrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.accrow > div{display:flex;flex-direction:column;gap:2px}
+.accask,.accrules{background:color-mix(in srgb,var(--accent) 10%,var(--bg));border-radius:14px;padding:14px 16px;margin:10px 0;display:flex;flex-direction:column;gap:8px}
+.accrules ol{margin:0;padding-left:20px;font-size:14px;line-height:1.6}
+.rulescode{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:12px;overflow:auto;white-space:pre;margin:0}
+.accapi{margin:4px 0 8px;font-size:14px}.accapi summary{cursor:pointer;color:var(--muted);font-weight:600}.accapi ol{line-height:1.7;padding-left:20px}
+.drivechip{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:color-mix(in srgb,#4285f4 15%,var(--bg));color:#4285f4;text-decoration:none}
+.drivechip.off{background:var(--bg);color:var(--muted)}
 .fitweek{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:12px 0 4px}
 .fitday{background:var(--bg);border-radius:12px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:58px;border:1.5px solid transparent}
 .fitday span{font-size:12px;color:var(--muted);font-weight:600}
@@ -1014,7 +1029,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
 </head>
 <body>
 <header>
-  <div class="brand" id="brand"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="var(--accent)"/><path d="M28 24l-4-4a7 7 0 0 0-10 10l4 4M36 40l4 4a7 7 0 0 0 10-10l-4-4" fill="none" stroke="#f4f1ec" stroke-width="3.6" stroke-linecap="round"/><path d="M27 37l-3 3M37 27l3-3M31 18v-4M33 50v-4" stroke="#131816" stroke-width="3" stroke-linecap="round"/></svg><div><div class="t1">Detox</div><div class="t2">Focus Hub</div></div></div>
+  <div class="brand" id="brand"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="var(--accent)"/><path d="M28 24l-4-4a7 7 0 0 0-10 10l4 4M36 40l4 4a7 7 0 0 0 10-10l-4-4" fill="none" stroke="#f4f1ec" stroke-width="3.6" stroke-linecap="round"/><path d="M27 37l-3 3M37 27l3-3M31 18v-4M33 50v-4" stroke="#131816" stroke-width="3" stroke-linecap="round"/></svg><div><div class="t1">Detox <span id="syncdot" class="syncdot"></span></div><div class="t2">Focus Hub</div></div></div>
   <nav id="nav"></nav>
   <div id="memSide"></div>
   <div class="side-one" id="sideOne"></div>
@@ -1026,8 +1041,9 @@ li.mrow2 .label{display:flex;flex-direction:column}
   <div id="arFrameHost"></div>
 </section>
 
-<script src="schedule.js?v=20261119e"></script>
+<script src="schedule.js?v=20261119f"></script>
 <script src="adhkar.js?v=20261119b"></script>
+<script type="module" src="sync.js?v=2"></script>
 <script>
 (function () {
   // ---------- icons (line icons, Lucide-style) ----------
@@ -1132,7 +1148,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
   // ---------- storage (this browser only; fails safely) ----------
   var KEY = "focusHub.v1";
   function load(){ try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
-  function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} if (window.DetoxSync) DetoxSync.changed(); }
   var state = load();
   state.tasks = Array.isArray(state.tasks) ? state.tasks : [];
   state.tasks.forEach(function (t) {
@@ -2114,13 +2130,39 @@ li.mrow2 .label{display:flex;flex-direction:column}
     rn.appendChild(swn); p3.appendChild(rn);
     app.appendChild(p3);
 
+    // account & sync
+    renderAccount();
     // data
     var p4 = el("div", "panel"); p4.appendChild(el("h2", null, "Your data"));
-    p4.appendChild(el("p", "meta", "Tasks are saved in this browser only. They won't appear on your other devices."));
+    p4.appendChild(el("p", "meta", window.DetoxSync && DetoxSync.user ? "Everything is backed up to your Google account. You can also keep a copy as a file." : "Not signed in: your data is only in this browser. Download a backup now and then, or sign in with Google above."));
+    var br = el("div", "row");
+    var dl = el("button", "cta"); dl.appendChild(icon("download")); dl.appendChild(document.createTextNode("Download backup"));
+    dl.onclick = function () { var blob = new Blob([JSON.stringify(state)], { type:"application/json" }), a = document.createElement("a");
+      a.href = URL.createObjectURL(blob); a.download = "detox-backup-" + dkey(new Date()) + ".json"; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500); };
+    var rf = el("input"); rf.type = "file"; rf.accept = ".json,application/json"; rf.style.display = "none";
+    var rb = el("button", "ghost"); rb.appendChild(icon("upload")); rb.appendChild(document.createTextNode("Restore from file"));
+    rb.onclick = function () { rf.click(); };
+    rf.onchange = function () { var f = rf.files && rf.files[0]; if (!f) return; var r = new FileReader();
+      r.onload = function () { try { var o = JSON.parse(r.result); if (!o || typeof o !== "object" || !("tasks" in o || "sched" in o || "quran" in o)) throw 0;
+          if (!confirm("Replace everything on this device with the backup from this file?")) return;
+          restoreState(o, "Restored from your backup file."); } catch (e) { alertMsg("That file isn't a Detox backup."); } };
+      r.readAsText(f); };
+    br.appendChild(dl); br.appendChild(rb); br.appendChild(rf); p4.appendChild(br);
+    var bk = []; try { bk = JSON.parse(localStorage.getItem("detox.backups") || "[]"); } catch (e) {}
+    if (bk.length) {
+      p4.appendChild(el("h3", null, "Automatic backups"));
+      var bu = el("ul", "slrec");
+      bk.forEach(function (x) { var li = el("li"); li.appendChild(el("span", "slrd", new Date(x.at).toLocaleString(undefined, { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" })));
+        li.appendChild(el("span", "meta", x.label)); var b2 = el("button", "ghost sm", "Restore"); b2.style.marginLeft = "auto";
+        b2.onclick = function () { if (!confirm("Replace what's on this device with this backup?")) return; try { restoreState(JSON.parse(x.s), "Backup restored."); } catch (e) { alertMsg("That backup couldn't be read."); } };
+        li.appendChild(b2); bu.appendChild(li); });
+      p4.appendChild(bu);
+    }
+    p4.appendChild(el("h3", null, "Tidy up"));
     var rr = el("div", "row");
     var done = el("button", "ghost", "Remove all completed tasks");
     done.onclick = function () { state.tasks = state.tasks.filter(function (t) { return !t.done; }); save(); render(); };
-    var wipe = el("button", "ghost danger", "Delete everything"), armed = false, msg = el("span", "toast");
+    var wipe = el("button", "ghost danger", "Delete all tasks"), armed = false, msg = el("span", "toast");
     wipe.onclick = function () {
       if (!armed) { armed = true; wipe.textContent = "Press again to delete all tasks"; msg.textContent = ""; return; }
       state.tasks = []; state.oneThingId = null; save(); render();
@@ -2128,10 +2170,89 @@ li.mrow2 .label{display:flex;flex-direction:column}
     rr.appendChild(done); rr.appendChild(wipe); rr.appendChild(msg); p4.appendChild(rr);
     app.appendChild(p4);
   }
+  function restoreState(o, msg){
+    var keep = state._sync; if (keep) o._sync = keep;
+    try { localStorage.setItem(KEY, JSON.stringify(o)); sessionStorage.setItem("detox.syncMsg", msg); } catch (e) { alertMsg("Couldn't save: this browser's storage is full."); return; }
+    setTimeout(function () { location.reload(); }, 1200);
+    alertMsg(msg + " Reloading…");
+  }
+  var RULES = "    match /detox/{uid} {\n      allow read, write: if request.auth != null && request.auth.uid == uid;\n    }";
+  function renderAccount(){
+    var Y = window.DetoxSync, p = el("div", "panel"); p.id = "set-acc";
+    p.appendChild(el("h2", null, "Google account"));
+    if (!Y) { p.appendChild(el("p", "meta", "Loading sign-in… If this doesn't change, check your internet connection.")); app.appendChild(p); return; }
+    if (!Y.user) {
+      p.appendChild(el("p", null, "Sign in with Google to back up everything, keep your phone and laptop in sync, link Google Calendar, and save your PDFs to Google Drive."));
+      var si = el("button", "cta gbtn"); si.appendChild(gLogo()); si.appendChild(document.createTextNode(Y.status === "signing" ? "Signing in…" : "Sign in with Google"));
+      si.onclick = function () { Y.signIn(); };
+      p.appendChild(si);
+      p.appendChild(el("p", "meta", "Google will ask to see your calendar and to add files to Drive. Detox can only see the Drive files it creates itself. If Google says the app isn't verified, press Advanced → Continue: it's your own private app."));
+      if (Y.err) p.appendChild(el("p", "toast", Y.err));
+      app.appendChild(p); return;
+    }
+    var who = el("div", "accwho");
+    if (Y.user.photoURL) { var im = el("img"); im.src = Y.user.photoURL; im.alt = ""; im.referrerPolicy = "no-referrer"; who.appendChild(im); }
+    var wt = el("div"); wt.appendChild(el("b", null, Y.user.displayName || "Signed in")); wt.appendChild(el("span", "meta", Y.user.email || "")); who.appendChild(wt);
+    var so = el("button", "ghost sm", "Sign out"); so.style.marginLeft = "auto"; so.onclick = function () { if (confirm("Sign out? Your data stays on this device and in your account.")) Y.signOut(); }; who.appendChild(so);
+    p.appendChild(who);
+    // ask: account already has data
+    if (Y.status === "ask" && Y.ask) {
+      var ab = el("div", "accask");
+      ab.appendChild(el("b", null, "Your account already has Detox data from another device"));
+      ab.appendChild(el("p", "meta", "Last saved " + new Date(Y.ask.t).toLocaleString(undefined, { weekday:"short", day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" }) + ". Which should Detox keep?"));
+      var r0 = el("div", "row");
+      var c1 = el("button", "cta", "Use my account's data"); c1.onclick = function () { Y.choose("cloud"); };
+      var c2 = el("button", "ghost", "Use this device's data"); c2.onclick = function () { if (confirm("This replaces the data in your account with what's on this device. Continue?")) Y.choose("local"); };
+      r0.appendChild(c1); r0.appendChild(c2); ab.appendChild(r0);
+      ab.appendChild(el("p", "meta", "Whichever you don't pick is kept: this device's data as a backup below, or your account's data until the next save."));
+      p.appendChild(ab);
+    }
+    var stx = Y.status === "synced" ? "Synced " + new Date(Y.last).toLocaleTimeString(undefined, { hour:"2-digit", minute:"2-digit" }) : Y.status === "syncing" ? "Syncing…" : Y.status === "error" ? "Not synced" : Y.status === "ask" ? "Waiting for your choice" : "Connecting…";
+    var sr = el("div", "accrow"); var sl = el("div"); sl.appendChild(el("b", null, "Sync")); sl.appendChild(el("span", "meta", stx + (Y.status === "synced" ? " · changes save to your account within a few seconds" : ""))); sr.appendChild(sl);
+    var sn = el("button", "ghost sm", "Sync now"); sn.onclick = function () { Y.syncNow(); }; sr.appendChild(sn); p.appendChild(sr);
+    if (Y.err) p.appendChild(el("p", "toast", Y.err));
+    if (Y.rules) {
+      var rb0 = el("div", "accrules");
+      rb0.appendChild(el("b", null, "One-time setup in Firebase"));
+      var ol = el("ol");
+      ["Open console.firebase.google.com and choose your Arabic website project (arabic-website-2674b).", "Go to Firestore Database → Rules. Don't delete anything that's there: your Arabic website needs it.", "Find the line that starts with match /users/ and paste the block below just above it, then press Publish.", "Come back here and press Sync now."]
+        .forEach(function (t) { ol.appendChild(el("li", null, t)); });
+      rb0.appendChild(ol);
+      var pre = el("pre", "rulescode", RULES); rb0.appendChild(pre);
+      var cp = el("button", "ghost sm", "Copy rules"); cp.onclick = function () { try { navigator.clipboard.writeText(RULES); cp.textContent = "Copied"; } catch (e) {} }; rb0.appendChild(cp);
+      p.appendChild(rb0);
+    }
+    // Google services
+    var gr = el("div", "accrow"); var gl = el("div"); gl.appendChild(el("b", null, "Calendar & Drive access"));
+    gl.appendChild(el("span", "meta", Y.hasToken() ? "Connected until " + new Date(Y.gtoken.exp).toLocaleTimeString(undefined, { hour:"2-digit", minute:"2-digit" }) + ". Google only allows an hour at a time; tap Reconnect when it runs out." : "Not connected right now. Tap Reconnect to use Google Calendar and Drive.")); gr.appendChild(gl);
+    var rc = el("button", Y.hasToken() ? "ghost sm" : "cta", "Reconnect"); rc.onclick = function () { Y.googleToken(true).then(function () { render(); }).catch(function (e) { alertMsg(e.message || "Couldn't connect to Google."); }); }; gr.appendChild(rc);
+    p.appendChild(gr);
+    var api = el("details", "accapi"); api.appendChild(el("summary", null, "Calendar or Drive not working? One-time switch-on"));
+    var al = el("ol");
+    [["Switch on the ", "Google Calendar API", "https://console.cloud.google.com/apis/library/calendar-json.googleapis.com?project=arabic-website-2674b", " (press Enable)."],
+     ["Switch on the ", "Google Drive API", "https://console.cloud.google.com/apis/library/drive.googleapis.com?project=arabic-website-2674b", " (press Enable)."],
+     ["If Google says the app is in testing or blocks you, open ", "Google Auth Platform → Audience", "https://console.cloud.google.com/auth/audience?project=arabic-website-2674b", " and add your Gmail as a test user."]]
+      .forEach(function (x) { var li = el("li"); li.appendChild(document.createTextNode(x[0])); var a = el("a", null, x[1]); a.href = x[2]; a.target = "_blank"; a.rel = "noopener"; li.appendChild(a); li.appendChild(document.createTextNode(x[3])); al.appendChild(li); });
+    api.appendChild(al); api.appendChild(el("p", "meta", "Then tap Reconnect.")); p.appendChild(api);
+    // PDFs only on this device
+    var only = []; Object.keys(state.sciFiles || {}).forEach(function (sec) { (state.sciFiles[sec] || []).forEach(function (x) { if (!x.drive && localFiles[x.id]) only.push({ sec:sec, x:x }); }); });
+    var pr = el("div", "accrow"); var pl = el("div"); pl.appendChild(el("b", null, "PDFs in Google Drive"));
+    pl.appendChild(el("span", "meta", driveMove ? driveMove : only.length ? only.length + (only.length === 1 ? " PDF is" : " PDFs are") + " only on this device. Copy them to the Detox folder in your Drive so they open everywhere." : "New PDFs you upload go to a Detox folder in your Google Drive.")); pr.appendChild(pl);
+    if (only.length && !driveMove) { var mv = el("button", "cta", "Copy to Drive"); mv.onclick = function () { moveToDrive(only); }; pr.appendChild(mv); }
+    p.appendChild(pr);
+    app.appendChild(p);
+  }
+  function gLogo(){ var w = el("span", "glogo"); w.innerHTML = '<svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.1C12.5 13.6 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.7c4.3-4 6.9-9.9 6.9-17.1z"/><path fill="#FBBC05" d="M10.6 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C1 16.6 0 20.2 0 24s1 7.4 2.7 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2.1 1.4-4.8 2.2-8.5 2.2-6.2 0-11.5-4.1-13.4-9.8l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg>'; return w; }
 
 
   // ---------- Schedule (module in schedule.js) ----------
   if (window.DetoxSchedule) DetoxSchedule.init({ state:state, save:save, rerender:function () { render(); }, go:go });
+  window.DETOX = { KEY:KEY, getState:function () { return state; },
+    onSync:function () { if (state.tab === "settings" && !document.activeElement.matches("input,textarea,select")) render(); paintSyncDot(); } };
+  function paintSyncDot(){ var b = document.getElementById("syncdot"); if (!b) return; var Y = window.DetoxSync;
+    var st = !Y ? "" : Y.user ? Y.status : "out"; b.className = "syncdot " + st;
+    b.title = !Y ? "" : !Y.user ? "Not signed in: data is only on this device" : st === "synced" ? "Synced with your Google account" : st === "syncing" ? "Syncing…" : st === "error" ? "Sync problem: open Settings" : "Signed in"; }
+  (function () { try { var m = sessionStorage.getItem("detox.syncMsg"); if (m) { sessionStorage.removeItem("detox.syncMsg"); setTimeout(function () { alertMsg(m); }, 600); } } catch (e) {} })();
   function renderSchedule(){
     if (!window.DetoxSchedule) { app.appendChild(el("p", "empty", "The schedule didn't load. Refresh the page.")); return; }
     DetoxSchedule.render(app, "schedule");
@@ -2376,6 +2497,47 @@ li.mrow2 .label{display:flex;flex-direction:column}
   }
   function fPut(rec){ return fdb().then(function (db) { return new Promise(function (res, rej) { var tx = db.transaction("files", "readwrite"); tx.objectStore("files").put(rec); tx.oncomplete = function () { res(); }; tx.onerror = function () { rej(tx.error); }; tx.onabort = function () { rej(tx.error || new Error("Storage is full.")); }; }); }); }
   function fGet(id){ return fdb().then(function (db) { return new Promise(function (res, rej) { var rq = db.transaction("files").objectStore("files").get(id); rq.onsuccess = function () { res(rq.result); }; rq.onerror = function () { rej(rq.error); }; }); }); }
+  // ---------- Google Drive (PDFs) ----------
+  var localFiles = {}, driveMove = "";
+  function scanLocal(){ fdb().then(function (db) { var rq = db.transaction("files").objectStore("files").getAllKeys();
+    rq.onsuccess = function () { localFiles = {}; (rq.result || []).forEach(function (k) { localFiles[k] = 1; }); }; }).catch(function () {}); }
+  scanLocal();
+  function driveOn(){ return !!(window.DetoxSync && DetoxSync.user); }
+  function dFetch(url, opt){ return DetoxSync.googleToken(true).then(function (t) {
+    opt = opt || {}; opt.headers = Object.assign({ Authorization:"Bearer " + t }, opt.headers || {});
+    return fetch(url, opt).then(function (r) { if (r.status === 401) { DetoxSync.dropToken(); throw { message:"Google access expired. Tap Reconnect in Settings and try again." }; }
+      if (r.status === 403) return r.json().then(function (j) { throw { message:(j.error && j.error.message && /not been used|disabled/i.test(j.error.message)) ? "The Google Drive API isn't switched on for your Firebase project yet (see the setup steps)." : "Google Drive said no: " + ((j.error && j.error.message) || 403) }; });
+      if (!r.ok) throw { message:"Google Drive error " + r.status };
+      return r; }); }); }
+  function driveFolder(name, parent){
+    var q = "name='" + name.replace(/'/g, "\\'") + "' and mimeType='application/vnd.google-apps.folder' and trashed=false" + (parent ? " and '" + parent + "' in parents" : "");
+    return dFetch("https://www.googleapis.com/drive/v3/files?fields=files(id)&q=" + encodeURIComponent(q)).then(function (r) { return r.json(); }).then(function (j) {
+      if (j.files && j.files.length) return j.files[0].id;
+      return dFetch("https://www.googleapis.com/drive/v3/files?fields=id", { method:"POST", headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({ name:name, mimeType:"application/vnd.google-apps.folder", parents:parent ? [parent] : undefined }) }).then(function (r) { return r.json(); }).then(function (j2) { return j2.id; }); }); }
+  function driveSecFolder(sec){
+    state.drive = state.drive || { sub:{} };
+    var root = state.drive.root ? Promise.resolve(state.drive.root) : driveFolder("Detox").then(function (id) { state.drive.root = id; save(); return id; });
+    return root.then(function (rid) { if (state.drive.sub[sec]) return state.drive.sub[sec];
+      return driveFolder(byId[sec] ? byId[sec].name.replace(/[‘’]/g, "'") : sec, rid).then(function (id) { state.drive.sub[sec] = id; save(); return id; }); }); }
+  function driveUpload(sec, file, name){
+    return driveSecFolder(sec).then(function (fid) {
+      var fd = new FormData();
+      fd.append("metadata", new Blob([JSON.stringify({ name:name, mimeType:"application/pdf", parents:[fid] })], { type:"application/json" }));
+      fd.append("file", file);
+      return dFetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink", { method:"POST", body:fd }).then(function (r) { return r.json(); });
+    }).then(function (j) { return { id:j.id, link:j.webViewLink || ("https://drive.google.com/file/d/" + j.id + "/view") }; }); }
+  function driveBlob(x){ return dFetch("https://www.googleapis.com/drive/v3/files/" + x.drive.id + "?alt=media").then(function (r) { return r.blob(); }).then(function (b) {
+    var blob = new Blob([b], { type:"application/pdf" });
+    fPut({ id:x.id, sec:"", name:x.name, type:"application/pdf", blob:blob }).then(function () { localFiles[x.id] = 1; }).catch(function () {});
+    return blob; }); }
+  function moveToDrive(list){
+    var n = 0, bad = 0; driveMove = "Copying 0 of " + list.length + "…"; render();
+    DetoxSync.googleToken(true).then(function () {
+      return list.reduce(function (ch, o) { return ch.then(function () { return fGet(o.x.id).then(function (r) { if (!r) throw 0; return driveUpload(o.sec, r.blob, o.x.name || (o.x.title + ".pdf")); })
+        .then(function (d) { o.x.drive = d; save(); n++; }).catch(function () { bad++; }).then(function () { driveMove = "Copying " + (n + bad) + " of " + list.length + "…"; if (state.tab === "settings") render(); }); }); }, Promise.resolve());
+    }).then(function () { driveMove = ""; alertMsg("Copied " + n + (n === 1 ? " PDF" : " PDFs") + " to Google Drive" + (bad ? " (" + bad + " couldn't be copied)." : ".")); render(); })
+      .catch(function (e) { driveMove = ""; alertMsg((e && e.message) || "Couldn't reach Google Drive."); render(); }); }
   function fDel(id){ return fdb().then(function (db) { return new Promise(function (res) { var tx = db.transaction("files", "readwrite"); tx.objectStore("files").delete(id); tx.oncomplete = function () { res(); }; tx.onerror = function () { res(); }; }); }); }
   function fmtSize(b){ return b > 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(b / 1024)) + " KB"; }
   var pdfMsg = {}, openPdfNote = null, viewer = null;
@@ -2394,18 +2556,18 @@ li.mrow2 .label{display:flex;flex-direction:column}
       var files = Array.prototype.slice.call(fi.files || []); if (!files.length) return;
       try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
       pdfMsg[sec] = "Saving " + files.length + (files.length === 1 ? " file…" : " files…"); render();
-      var done = 0, failed = [];
+      var done = 0, failed = [], driveErr = "";
       files.reduce(function (chain, f) {
         return chain.then(function () {
           if (!/\.pdf$/i.test(f.name) && f.type !== "application/pdf") { failed.push(f.name + " (not a PDF)"); return; }
-          var id = uid();
+          var id = uid(), rec = { id:id, title:f.name.replace(/\.pdf$/i, "").replace(/[_-]+/g, " ").trim(), name:f.name, size:f.size, date:tk, added:Date.now(), notes:"" };
           return fPut({ id:id, sec:sec, name:f.name, type:"application/pdf", blob:f }).then(function () {
-            L.unshift({ id:id, title:f.name.replace(/\.pdf$/i, "").replace(/[_-]+/g, " ").trim(), name:f.name, size:f.size, date:tk, added:Date.now(), notes:"" });
-            done++; save();
+            localFiles[id] = 1; L.unshift(rec); done++; save();
+            if (driveOn()) return driveUpload(sec, f, f.name).then(function (d) { rec.drive = d; save(); }).catch(function (e) { driveErr = (e && e.message) || "Couldn't reach Google Drive."; });
           }).catch(function (e) { failed.push(f.name + (e && /quota|full/i.test(String(e.name || e.message)) ? " (storage full)" : "")); });
         });
       }, Promise.resolve()).then(function () {
-        pdfMsg[sec] = (done ? "Saved " + done + (done === 1 ? " PDF." : " PDFs.") : "") + (failed.length ? " Couldn't save: " + failed.join(", ") + "." : "");
+        pdfMsg[sec] = (done ? "Saved " + done + (done === 1 ? " PDF" : " PDFs") + (driveOn() && !driveErr ? " to this device and Google Drive." : ".") : "") + (failed.length ? " Couldn't save: " + failed.join(", ") + "." : "") + (driveErr ? " Not copied to Drive: " + driveErr : "");
         render();
       });
     };
@@ -2420,7 +2582,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     if (!L.length) {
       var em = el("button", "dropzone");
       em.appendChild(icon("pdf")); em.appendChild(el("b", null, opt.empty || ("Upload the PDFs from your " + byId[sec].name + " lessons")));
-      em.appendChild(el("span", null, "They're saved on this device in this browser, and you can open them here any time."));
+      em.appendChild(el("span", null, driveOn() ? "They're saved to your Google Drive, so you can open them on any device." : "They're saved in this browser. Sign in with Google in Settings to keep them in Drive."));
       em.onclick = function () { fi.click(); };
       p.appendChild(em);
     }
@@ -2436,6 +2598,8 @@ li.mrow2 .label{display:flex;flex-direction:column}
       var dt = el("input"); dt.type = "date"; dt.value = x.date || tk; dt.setAttribute("aria-label", "Lesson date");
       dt.onchange = function () { x.date = dt.value || x.date; save(); render(); };
       meta.appendChild(dt); meta.appendChild(el("span", null, fmtSize(x.size || 0)));
+      if (x.drive) { var dv = el("a", "drivechip", "In Drive"); dv.href = x.drive.link; dv.target = "_blank"; dv.rel = "noopener"; dv.title = "Open in Google Drive"; meta.appendChild(dv); }
+      else if (!localFiles[x.id]) meta.appendChild(el("span", "drivechip off", "On another device"));
       var nb = el("button", "linkbtn", x.notes ? "Notes ✓" : "Add notes"); nb.onclick = function () { openPdfNote = openPdfNote === x.id ? null : x.id; render(); };
       meta.appendChild(nb);
       tb.appendChild(meta);
@@ -2452,11 +2616,16 @@ li.mrow2 .label{display:flex;flex-direction:column}
       var ob = el("button", "newbtn"); ob.appendChild(icon("open")); ob.appendChild(document.createTextNode("Open"));
       ob.onclick = function () { openPdf(x); };
       var db0 = el("button", "iconbtn"); db0.title = "Download"; db0.appendChild(icon("download"));
-      db0.onclick = function () { fGet(x.id).then(function (r) { if (!r) throw 0; var a = document.createElement("a"); a.href = URL.createObjectURL(r.blob); a.download = x.name || (x.title + ".pdf"); document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 2000); })
-        .catch(function () { pdfMsg[sec] = "That file isn't on this device any more."; render(); }); };
+      db0.onclick = function () {
+        if (!localFiles[x.id] && x.drive && !(window.DetoxSync && DetoxSync.hasToken())) { window.open(x.drive.link, "_blank", "noopener"); return; }
+        (localFiles[x.id] ? fGet(x.id).then(function (r) { if (!r) throw 0; return r.blob; }) : x.drive ? driveBlob(x) : Promise.reject(0)).then(function (blob) { var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = x.name || (x.title + ".pdf"); document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 2000); })
+        .catch(function (e) { pdfMsg[sec] = (e && e.message) || "That file isn't on this device."; render(); }); };
       var del = el("button", "iconbtn"), armed = false; del.title = "Delete"; del.appendChild(icon("trash"));
       del.onclick = function () { if (!armed) { armed = true; del.classList.add("armed"); del.title = "Press again to delete"; pdfMsg[sec] = "Press the bin again to delete “" + x.title + "”."; var m = p.querySelector(".toast"); if (m) m.textContent = pdfMsg[sec]; else { var t = el("p", "toast", pdfMsg[sec]); top.after(t); } return; }
-        fDel(x.id); state.sciFiles[sec] = L.filter(function (y) { return y.id !== x.id; }); pdfMsg[sec] = "Deleted “" + x.title + "”."; save(); render(); };
+        fDel(x.id); delete localFiles[x.id]; state.sciFiles[sec] = L.filter(function (y) { return y.id !== x.id; });
+        var inDrive = x.drive && window.DetoxSync && DetoxSync.hasToken();
+        if (inDrive) dFetch("https://www.googleapis.com/drive/v3/files/" + x.drive.id, { method:"PATCH", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ trashed:true }) }).catch(function () {});
+        pdfMsg[sec] = "Deleted “" + x.title + "”." + (inDrive ? " It's in your Google Drive bin for 30 days." : x.drive ? " The copy in your Google Drive is still there." : ""); save(); render(); };
       li.appendChild(ob); li.appendChild(db0); li.appendChild(del);
       if (openPdfNote === x.id) {
         var nt = el("textarea"); nt.placeholder = "Key points, benefits, questions…"; nt.value = x.notes || "";
@@ -2466,15 +2635,15 @@ li.mrow2 .label{display:flex;flex-direction:column}
       ul.appendChild(li);
     });
     p.appendChild(ul);
-    if (L.length) p.appendChild(el("p", "meta", "PDFs are kept in this browser on this device only. Keep your originals too: clearing browsing data removes them."));
+    if (L.length) p.appendChild(el("p", "meta", driveOn() ? "PDFs are saved to the Detox folder in your Google Drive and kept on this device for quick opening." : "PDFs are kept in this browser on this device only. Sign in with Google in Settings to save them to Drive."));
     app.appendChild(p);
     makeCollapsible("f-" + sec);
   }
 
   function openPdf(x){
-    fGet(x.id).then(function (r) {
-      if (!r) throw 0;
-      var url = URL.createObjectURL(r.blob);
+    if (!localFiles[x.id] && x.drive && !(window.DetoxSync && DetoxSync.hasToken())) { window.open(x.drive.link, "_blank", "noopener"); return; }
+    (localFiles[x.id] ? fGet(x.id).then(function (r) { if (!r) throw 0; return r.blob; }) : x.drive ? driveBlob(x) : Promise.reject(0)).then(function (blob) {
+      var url = URL.createObjectURL(blob);
       if (viewer) viewer.remove();
       var ov = el("div", "pdfov"); viewer = ov;
       var bar = el("div", "pdfbar");
@@ -2489,7 +2658,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
       var fr = el("iframe", "pdfframe"); fr.src = url; fr.title = x.title;
       ov.appendChild(fr);
       document.body.appendChild(ov);
-    }).catch(function () { alertMsg("That file isn't on this device any more. It may have been uploaded on another device or browser."); });
+    }).catch(function (e) { alertMsg((e && e.message) || "That file isn't on this device. It was uploaded on another device before Google Drive was linked: copy it to Drive from Settings on that device."); });
   }
   function alertMsg(m){ var t = el("div", "floatmsg", m); document.body.appendChild(t); setTimeout(function () { t.remove(); }, 4500); }
 
