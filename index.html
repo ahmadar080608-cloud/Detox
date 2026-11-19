@@ -730,6 +730,55 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
 .prset .row{margin-top:10px}
 .prset input[type=text]{min-width:120px}
 /* tools: countdowns */
+.fitweek{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:12px 0 4px}
+.fitday{background:var(--bg);border-radius:12px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:58px;border:1.5px solid transparent}
+.fitday span{font-size:12px;color:var(--muted);font-weight:600}
+.fitday.today{border-color:var(--accent)}
+.fitday.on{background:color-mix(in srgb,#3f9a78 14%,var(--bg))}
+.fitdots{display:flex;gap:3px;flex-wrap:wrap;justify-content:center}
+.fitdots i{width:12px;height:12px;border-radius:50%}
+.fittype{font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;color:var(--k);border:1.5px solid var(--k)}
+.fitline{width:100%;height:auto;max-height:200px;margin:8px 0}
+.fitline polyline{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linejoin:round}
+.fitline circle{fill:var(--card);stroke:var(--accent);stroke-width:2}
+.fitline text{font-size:11px;fill:var(--muted);text-anchor:middle}
+.urges{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.urge{flex:1;min-width:150px;display:flex;align-items:center;gap:10px;border-radius:14px;padding:12px 14px;border:1.5px solid;background:var(--bg);color:var(--ink);cursor:pointer;font:inherit;text-align:left}
+.urge b{font-size:26px;font-family:var(--serif,inherit)}
+.urge span{font-size:13px;font-weight:600}
+.urge.ok{border-color:#3f9a78}.urge.ok b{color:#3f9a78}
+.urge.bad{border-color:#d93c3c}.urge.bad b{color:#d93c3c}
+.fvsbar{display:flex;height:14px;border-radius:999px;overflow:hidden;background:var(--line)}
+.fvsbar i.f{background:#3f9a78}.fvsbar i.s{background:#d93c3c}
+.fvsl{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-top:6px}
+.fvsl .f{color:#3f9a78}.fvsl .s{color:#d93c3c}
+.fowed{display:flex;justify-content:space-between;align-items:center;background:var(--bg);border-radius:14px;padding:12px 16px;margin-bottom:12px}
+.fowed b{display:block;font-size:28px}
+.fcalhead{display:flex;justify-content:space-between;align-items:center;margin:16px 0 8px}
+.fcal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.fdow{font-size:11px;color:var(--muted);text-align:center;font-weight:700}
+.fday{position:relative;aspect-ratio:1/1;border-radius:12px;border:1.5px solid transparent;background:var(--bg);color:var(--ink);font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:0;max-height:64px}
+.fday b{font-size:15px}
+.fday small{font-size:10px;color:var(--muted)}
+.fday.sunnah{border-color:#d9a33a}
+.fday.ramadan{border-color:#6c9bd2;background:color-mix(in srgb,#6c9bd2 12%,var(--bg))}
+.fday.eid{opacity:.45;border-style:dashed;border-color:var(--muted)}
+.fday.fast{background:#3f9a78;color:#fff;border-color:#3f9a78}
+.fday.qada{background:#7a5cc4;color:#fff;border-color:#7a5cc4}
+.fday.fast small,.fday.qada small{color:rgba(255,255,255,.8)}
+.fday.today{box-shadow:0 0 0 2px var(--accent)}
+.fday.future{opacity:.85}
+.fkey{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--muted);margin:10px 0 4px}
+.fkey span{display:flex;align-items:center;gap:5px}
+.fk{width:12px;height:12px;border-radius:4px;display:inline-block;border:1.5px solid transparent}
+.fk.fast{background:#3f9a78}.fk.qada{background:#7a5cc4}.fk.sunnah{border-color:#d9a33a}.fk.ramadan{border-color:#6c9bd2;background:color-mix(in srgb,#6c9bd2 20%,transparent)}.fk.eid{border:1.5px dashed var(--muted)}
+.muhq{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.muhq b{font-size:14px}
+.muhlast{background:color-mix(in srgb,var(--accent) 12%,var(--bg));border-radius:12px;padding:10px 14px;display:flex;flex-direction:column;gap:2px;margin:8px 0}
+.muhpast{background:var(--bg);border-radius:12px;padding:10px 14px;margin-top:8px}
+.muhpast summary{cursor:pointer;font-weight:700}
+.muhpast .slmore div{background:var(--card)}
+.muhpq{display:block;font-size:13px;margin-top:10px}
 .slform{align-items:flex-end;flex-wrap:wrap;gap:10px;margin-bottom:14px}
 .sllab{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:600}
 .sllab select{min-width:130px}
@@ -1015,6 +1064,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     finance:'<rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><circle cx="16" cy="15" r="1.5"/><path d="M6 3h12"/>',
     dawah:'<path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15 9a4 4 0 0 1 0 6"/><path d="M18 6a8 8 0 0 1 0 12"/>',
     isoc:'<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M20 4.5A4 4 0 1 0 20 11a3.2 3.2 0 0 1 0-6.5z"/>',
+    fitness:'<path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/>',
     ambitions:'<path d="M2.5 20l7-12 4 6 2.5-3.5L21.5 20z"/><path d="M9.5 8V3l4 2-4 2"/>',
     adhkar:'<circle cx="12" cy="5" r="2"/><circle cx="17.5" cy="8.5" r="1.6"/><circle cx="19" cy="14.5" r="1.6"/><circle cx="15.5" cy="19.5" r="1.6"/><circle cx="8.5" cy="19.5" r="1.6"/><circle cx="5" cy="14.5" r="1.6"/><circle cx="6.5" cy="8.5" r="1.6"/>',
     dawah:'<path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15 9a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12"/>',
@@ -1054,8 +1104,9 @@ li.mrow2 .label{display:flex;flex-direction:column}
     { id:"business",   name:"Business ideas",  icon:"business",   group:"work", parent:"work", sub:"Ideas, research & tests", bg:"أفكار", color:"--c4" },
     { id:"tutoring",   name:"Tutoring",        icon:"tutoring",   group:"work", parent:"work", sub:"Students & sessions", bg:"تدريس", color:"--c1" },
     { id:"finance",    name:"Finance",         icon:"finance",    group:"work", parent:"work", sub:"Money in & out", bg:"مال", color:"--c5" },
+    { id:"fitness",    name:"Fitness",         icon:"fitness",    group:null,      ar:"اللِّيَاقَةُ البَدَنِيَّةُ", sub:"Train the body that carries you", bg:"قوة", color:"--c5" },
     { id:"ambitions",  name:"Life ambitions",  icon:"ambitions",  group:null,      ar:"طُمُوحَاتُ الحَيَاةِ", sub:"This life and the next", bg:"طموح", color:"--c1" },
-    { id:"tools",      name:"Tools",           icon:"tools",      group:null,      sub:"Focus & stats", bg:"تركيز", color:"--c4" },
+    { id:"tools",      name:"Tools",           icon:"tools",      group:null,      sub:"Focus, sleep, phone, fasting & review", bg:"تركيز", color:"--c4" },
     { id:"settings",   name:"Settings",        icon:"settings",   group:null,      bg:"إعدادات" }
   ];
 
@@ -1065,7 +1116,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
   var STUDY_SUBS = SCIENCES;
   var UNI_SUBS = ["lectures","tutorials","seminars"], WORK_SUBS = ["business","tutoring","finance"];
   var NAV_GROUPS = { university:UNI_SUBS, work:WORK_SUBS };
-  var TASK_SECTIONS = ["quran","studies"].concat(SCIENCES, ["adhkar","arabic","isoc","dawah","university"], UNI_SUBS, ["work"], WORK_SUBS, ["ambitions"]);
+  var TASK_SECTIONS = ["quran","studies"].concat(SCIENCES, ["adhkar","arabic","isoc","dawah","university"], UNI_SUBS, ["work"], WORK_SUBS, ["fitness","ambitions"]);
   function isUnder(id, anc){ var p = byId[id]; while (p) { if (p.id === anc) return true; p = p.parent ? byId[p.parent] : null; } return false; }
   var THEMES = [
     { id:"auto",    name:"Auto",    note:"Follows your device", sw:["#f4f1ec","#131816","#e0603f","#1f4f4a"] },
@@ -1280,7 +1331,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
   function taskRow(t, showSection){
     var li = el("li"); if (t.done) li.classList.add("done"); if (t.id === state.oneThingId) li.classList.add("isone");
     var cb = el("input"); cb.type = "checkbox"; cb.checked = t.done; cb.setAttribute("aria-label", "Mark done");
-    cb.onchange = function () { t.done = cb.checked; if (t.done && state.oneThingId === t.id) state.oneThingId = null; save(); render(); };
+    cb.onchange = function () { t.done = cb.checked; t.doneAt = t.done ? Date.now() : null; if (t.done && state.oneThingId === t.id) state.oneThingId = null; save(); render(); };
     li.appendChild(cb);
     li.appendChild(el("span", "label", t.text));
     if (showSection) li.appendChild(el("span", "tag", byId[t.section].name));
@@ -1408,7 +1459,8 @@ li.mrow2 .label{display:flex;flex-direction:column}
     if (SCIENCES.indexOf(sec) >= 0) { if (sec !== "hadith") renderSciGoals(sec); renderMutoon(sec); renderPdfs(sec);
       if (sec === "hadith") { var hr = document.getElementById("h-rev"), mt = document.getElementById("mt-hadith"); if (hr && mt) hr.parentNode.insertBefore(mt, hr); } }
     if (sec === "isoc" || sec === "dawah") app.appendChild(isocTabs());
-    if (sec === "isoc" || sec === "dawah" || sec === "ambitions") renderSciGoals(sec);
+    if (sec === "fitness") renderFitness();
+    if (sec === "isoc" || sec === "dawah" || sec === "ambitions" || sec === "fitness") renderSciGoals(sec);
     if (sec === "dawah") renderPdfs("dawah", { title:"Da‘wah files", empty:"Upload your da‘wah PDFs: talks, leaflets, reminders and resources", unit:["file","files"], noTicks:true });
     if (sec === "adhkar") renderAdhkar();
 
@@ -2004,6 +2056,9 @@ li.mrow2 .label{display:flex;flex-direction:column}
     app.appendChild(p);
     renderFocusStats();
     renderSleep();
+    renderScreen();
+    renderFasting();
+    renderMuhasabah();
 
     paintTimer();
   }
@@ -2288,6 +2343,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     seerah:{ week:"e.g. The Makkan period, part 1", month:"e.g. Finish the Battle of Badr", year:"e.g. Complete ar-Raḥīq al-Makhtūm" },
     dawah:{ week:"e.g. Hand out 20 leaflets", month:"e.g. Run a da‘wah stall", year:"e.g. Give a talk on campus" },
     isoc:{ week:"e.g. Post the event poster", month:"e.g. Run two halaqahs", year:"e.g. Organise a charity week" },
+    fitness:{ week:"e.g. Three gym sessions", month:"e.g. Run 5k without stopping", year:"e.g. Bench my bodyweight" },
     ambitions:{ week:"e.g. One step towards a big ambition", month:"e.g. Research Hajj packages", year:"e.g. Finish memorising Juz 29 and 30" },
     logic:{ week:"e.g. Learn the signs of the ism", month:"e.g. Finish al-Ājurrūmiyyah", year:"e.g. Start an intro to manṭiq" }
   };
@@ -2893,6 +2949,318 @@ li.mrow2 .label{display:flex;flex-direction:column}
     e.n += 1; e.m += mins; e.s[sec] = (e.s[sec] || 0) + mins;
   }
   function fmtMins(m){ var h = Math.floor(m / 60), r = m % 60; return h ? h + "h" + (r ? " " + r + "m" : "") : r + "m"; }
+  // ---------- Tools: screen-time detox ----------
+  state.screen = state.screen || {}; state.screen.log = state.screen.log || {}; state.screen.limit = state.screen.limit || 120;
+  function mfmt(m){ m = Math.round(m); return m >= 60 ? Math.floor(m / 60) + "h" + (m % 60 ? " " + (m % 60) + "m" : "") : m + "m"; }
+  function scrollTo_(id){ var x = document.getElementById(id); if (x) x.scrollIntoView({ block:"start" }); }
+  function renderScreen(){
+    var S = state.screen, L = S.log, now = new Date(), tk = dkey(now), lim = S.limit;
+    var p = el("div", "panel"); p.id = "tl-screen";
+    p.appendChild(el("h2", null, "Phone detox"));
+    p.appendChild(el("p", "meta", "Check your phone's screen time (Settings → Screen Time on iPhone) and log it here. Tap the buttons during the day when you feel the urge to scroll."));
+    var f = el("div", "row slform");
+    var dt = el("input"); dt.type = "date"; dt.className = "dateinp"; dt.value = tk; dt.max = tk; dt.setAttribute("aria-label", "Day");
+    var hh = el("input"); hh.type = "number"; hh.min = 0; hh.max = 24; hh.placeholder = "0"; hh.setAttribute("aria-label", "Hours");
+    var mm = el("input"); mm.type = "number"; mm.min = 0; mm.max = 59; mm.placeholder = "0"; mm.setAttribute("aria-label", "Minutes");
+    var fill = function () { var e = L[dt.value]; if (e && e.m != null) { hh.value = Math.floor(e.m / 60); mm.value = e.m % 60; } else { hh.value = ""; mm.value = ""; } };
+    dt.onchange = fill; fill();
+    var lab = function (t, inp) { var w = el("label", "sllab"); w.appendChild(el("span", null, t)); w.appendChild(inp); return w; };
+    var sv = el("button", "cta"); sv.appendChild(icon("plus")); sv.appendChild(document.createTextNode("Save screen time"));
+    sv.onclick = function () { var m = (parseInt(hh.value, 10) || 0) * 60 + (parseInt(mm.value, 10) || 0); if (!dt.value) return;
+      var e = L[dt.value] = L[dt.value] || {}; e.m = Math.min(1440, m); save(); render(); scrollTo_("tl-screen"); };
+    f.appendChild(lab("Day", dt)); f.appendChild(lab("Hours", hh)); f.appendChild(lab("Minutes", mm));
+    var sw = el("div", "slsave"); sw.appendChild(sv); f.appendChild(sw);
+    p.appendChild(f);
+    // urges today
+    var te = L[tk] || {}, ur = el("div", "urges");
+    var ub = function (k, label, cls) { var b = el("button", "urge " + cls); b.appendChild(el("b", null, String(te[k] || 0))); b.appendChild(el("span", null, label));
+      b.onclick = function () { var e = L[tk] = L[tk] || {}; e[k] = (e[k] || 0) + 1; save(); render(); scrollTo_("tl-screen"); }; return b; };
+    ur.appendChild(ub("r", "Urges resisted today", "ok")); ur.appendChild(ub("g", "Times I gave in today", "bad"));
+    var un = el("button", "ghost sm", "Undo"); un.title = "Take one off the last counter you can";
+    un.onclick = function () { var e = L[tk]; if (!e) return; if (e.g) e.g--; else if (e.r) e.r--; save(); render(); scrollTo_("tl-screen"); };
+    ur.appendChild(un);
+    p.appendChild(ur);
+    // stats
+    var days = []; for (var i = 6; i >= 0; i--) { var d = new Date(now); d.setDate(d.getDate() - i); days.push({ d:d, k:dkey(d), e:L[dkey(d)] }); }
+    var got = days.filter(function (x) { return x.e && x.e.m != null; });
+    var avg = got.length ? got.reduce(function (a, x) { return a + x.e.m; }, 0) / got.length : 0;
+    var under = got.filter(function (x) { return x.e.m <= lim; }).length, streak = 0;
+    for (var j = 0; j < 365; j++) { var dd = new Date(now); dd.setDate(dd.getDate() - j); var e2 = L[dkey(dd)];
+      if (e2 && e2.m != null && e2.m <= lim) streak++; else if (j === 0 && !(e2 && e2.m != null)) continue; else break; }
+    var ws = weekStart(now), wk = dkey(ws), fm = 0, sm = 0, sd = 0;
+    Object.keys(state.focusLog || {}).forEach(function (k) { if (k >= wk) fm += state.focusLog[k].m || 0; });
+    Object.keys(L).forEach(function (k) { if (k >= wk && L[k].m != null) { sm += L[k].m; sd++; } });
+    var stats = el("div", "fstat3");
+    [["Today", te.m != null ? mfmt(te.m) : "Not logged", te.m != null ? (te.m <= lim ? mfmt(lim - te.m) + " under your limit" : mfmt(te.m - lim) + " over your limit") : "Limit " + mfmt(lim)],
+     ["7-day average", got.length ? mfmt(avg) : "–", under + " of " + got.length + " days under " + mfmt(lim)],
+     ["Streak", streak + (streak === 1 ? " day" : " days"), "under your limit"]]
+      .forEach(function (x) { var c = el("div", "fs3"); c.appendChild(el("span", null, x[0])); c.appendChild(el("b", null, x[1])); c.appendChild(el("small", null, x[2])); stats.appendChild(c); });
+    p.appendChild(stats);
+    p.appendChild(el("h3", null, "Last 7 days"));
+    var mx = Math.max(lim * 1.5, 60); got.forEach(function (x) { mx = Math.max(mx, x.e.m); });
+    var bars = el("div", "slbars");
+    var tl = el("div", "sltarget"); tl.style.bottom = (20 + Math.round(lim / mx * 120)) + "px"; tl.appendChild(el("span", null, "limit " + mfmt(lim))); bars.appendChild(tl);
+    days.forEach(function (x) { var c = el("div", "slbar" + (x.k === tk ? " today" : "")), b = el("i");
+      if (x.e && x.e.m != null) { b.style.height = Math.max(4, Math.round(x.e.m / mx * 120)) + "px"; b.className = x.e.m <= lim ? "ok" : x.e.m <= lim * 1.25 ? "mid" : "low";
+        c.title = x.d.toDateString() + ": " + mfmt(x.e.m) + (x.e.r ? " · " + x.e.r + " urges resisted" : ""); }
+      c.appendChild(el("em", null, x.e && x.e.m != null ? mfmt(x.e.m) : "")); c.appendChild(b);
+      c.appendChild(el("span", null, x.d.toLocaleDateString(undefined, { weekday:"short" }))); bars.appendChild(c); });
+    p.appendChild(bars);
+    var vs = el("div", "fvs");
+    var tot = Math.max(1, fm + sm), a = el("div", "fvsbar"), i1 = el("i", "f"), i2 = el("i", "s");
+    i1.style.width = (fm / tot * 100) + "%"; i2.style.width = (sm / tot * 100) + "%"; a.appendChild(i1); a.appendChild(i2);
+    vs.appendChild(el("h3", null, "This week: focus vs scrolling"));
+    var lg = el("div", "fvsl"); lg.appendChild(el("span", "f", "Focused " + mfmt(fm))); lg.appendChild(el("span", "s", "Phone " + mfmt(sm) + (sd < 7 ? " (" + sd + " days logged)" : "")));
+    vs.appendChild(a); vs.appendChild(lg); p.appendChild(vs);
+    var tr = el("div", "row"); tr.style.marginTop = "14px"; tr.appendChild(el("span", "meta", "Daily limit"));
+    var ts = el("select"); ts.setAttribute("aria-label", "Daily screen-time limit");
+    [30, 60, 90, 120, 150, 180, 240].forEach(function (m) { var o = el("option", null, mfmt(m)); o.value = m; if (m === lim) o.selected = true; ts.appendChild(o); });
+    ts.onchange = function () { S.limit = +ts.value; save(); render(); scrollTo_("tl-screen"); };
+    tr.appendChild(ts); p.appendChild(tr);
+    app.appendChild(p); makeCollapsible("tl-screen");
+  }
+
+  // ---------- Tools: fasting ----------
+  state.fast = state.fast || {}; state.fast.log = state.fast.log || {}; state.fast.owed = state.fast.owed || 0;
+  var fastMonth = null;
+  var HIJ = null; try { HIJ = new Intl.DateTimeFormat("en-u-ca-islamic-umalqura", { day:"numeric", month:"numeric", year:"numeric" }); } catch (e) {}
+  var HIJM = null; try { HIJM = new Intl.DateTimeFormat("en-u-ca-islamic-umalqura", { month:"long", year:"numeric" }); } catch (e) {}
+  function hijri(d){ if (!HIJ) return null; var o = {}; HIJ.formatToParts(d).forEach(function (x) { o[x.type] = x.value; }); return { d:+o.day, m:+o.month, y:parseInt(o.year, 10) }; }
+  function fastTag(d){ var h = hijri(d), wd = d.getDay(), t = [];
+    if (h) {
+      if (h.m === 9) return { k:"ramadan", n:"Ramaḍān" };
+      if (h.m === 10 && h.d === 1) return { k:"eid", n:"‘Īd — no fasting" };
+      if (h.m === 12 && h.d >= 10 && h.d <= 13) return { k:"eid", n:h.d === 10 ? "‘Īd al-Aḍḥā — no fasting" : "Tashrīq — no fasting" };
+      if (h.m === 12 && h.d === 9) t.push("‘Arafah");
+      if (h.m === 1 && (h.d === 9 || h.d === 10)) t.push("‘Āshūrā’" + (h.d === 9 ? " (9th)" : ""));
+      if (h.m === 10 && h.d >= 2) t.push("Shawwāl");
+      if (h.d >= 13 && h.d <= 15) t.push("White day");
+    }
+    if (wd === 1) t.push("Monday"); if (wd === 4) t.push("Thursday");
+    return t.length ? { k:"sunnah", n:t.join(" · ") } : null; }
+  function renderFasting(){
+    var F = state.fast, L = F.log, now = new Date(), tk = dkey(now);
+    if (!fastMonth) fastMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    var p = el("div", "panel"); p.id = "tl-fast";
+    p.appendChild(el("h2", null, "Fasting"));
+    // owed
+    var ow = el("div", "fowed");
+    var ol = el("div"); ol.appendChild(el("span", "meta", "Make-up fasts (qaḍā’) still owed")); ol.appendChild(el("b", null, String(F.owed))); ow.appendChild(ol);
+    var orow = el("div", "row");
+    var mn = el("button", "ghost sm", "−"); mn.setAttribute("aria-label", "One fewer owed"); mn.onclick = function () { F.owed = Math.max(0, F.owed - 1); save(); render(); scrollTo_("tl-fast"); };
+    var pl = el("button", "ghost sm", "+"); pl.setAttribute("aria-label", "One more owed"); pl.onclick = function () { F.owed++; save(); render(); scrollTo_("tl-fast"); };
+    orow.appendChild(mn); orow.appendChild(pl); ow.appendChild(orow);
+    p.appendChild(ow);
+    // stats
+    var y = String(now.getFullYear()), mk = tk.slice(0, 7), cm = 0, cy = 0, cq = 0;
+    Object.keys(L).forEach(function (k) { if (k.slice(0, 7) === mk) cm++; if (k.slice(0, 4) === y) { cy++; if (L[k] === "qada") cq++; } });
+    var nx = []; for (var i = 1; i <= 21 && nx.length < 3; i++) { var d = new Date(now); d.setDate(d.getDate() + i); var tg = fastTag(d); if (tg && tg.k === "sunnah") nx.push({ d:d, t:tg }); }
+    var stats = el("div", "fstat3");
+    [["This month", cm + (cm === 1 ? " fast" : " fasts"), now.toLocaleDateString(undefined, { month:"long" })],
+     ["This year", cy + (cy === 1 ? " fast" : " fasts"), cq + " of them make-up"],
+     ["Next Sunnah fast", nx.length ? nx[0].d.toLocaleDateString(undefined, { weekday:"short", day:"numeric", month:"short" }) : "–", nx.length ? nx[0].t.n : ""]]
+      .forEach(function (x) { var c = el("div", "fs3"); c.appendChild(el("span", null, x[0])); c.appendChild(el("b", null, x[1])); c.appendChild(el("small", null, x[2])); stats.appendChild(c); });
+    p.appendChild(stats);
+    // calendar
+    var hd = el("div", "fcalhead");
+    var pv = el("button", "ghost sm", "‹"); pv.setAttribute("aria-label", "Previous month"); pv.onclick = function () { fastMonth = new Date(fastMonth.getFullYear(), fastMonth.getMonth() - 1, 1); render(); scrollTo_("tl-fast"); };
+    var nxb = el("button", "ghost sm", "›"); nxb.setAttribute("aria-label", "Next month"); nxb.onclick = function () { fastMonth = new Date(fastMonth.getFullYear(), fastMonth.getMonth() + 1, 1); render(); scrollTo_("tl-fast"); };
+    var tt = el("div"); tt.appendChild(el("b", null, fastMonth.toLocaleDateString(undefined, { month:"long", year:"numeric" })));
+    if (HIJM) { var a1 = HIJM.format(fastMonth), a2 = HIJM.format(new Date(fastMonth.getFullYear(), fastMonth.getMonth() + 1, 0)); tt.appendChild(el("span", "meta", " · " + (a1 === a2 ? a1 : a1.replace(/ \d+ AH$/, "") + " – " + a2))); }
+    hd.appendChild(pv); hd.appendChild(tt); hd.appendChild(nxb); p.appendChild(hd);
+    var g = el("div", "fcal");
+    ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].forEach(function (w) { g.appendChild(el("span", "fdow", w)); });
+    var first = new Date(fastMonth), off = (first.getDay() + 6) % 7, dim = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+    for (var b = 0; b < off; b++) g.appendChild(el("span"));
+    for (var dn = 1; dn <= dim; dn++) (function (dn) {
+      var d = new Date(first.getFullYear(), first.getMonth(), dn), k = dkey(d), tg = fastTag(d), v = L[k], h = hijri(d);
+      var c = el("button", "fday" + (tg ? " " + tg.k : "") + (v ? " " + v : "") + (k === tk ? " today" : "") + (k > tk ? " future" : ""));
+      c.appendChild(el("b", null, String(dn))); if (h) c.appendChild(el("small", null, String(h.d)));
+      c.title = d.toDateString() + (tg ? " · " + tg.n : "") + (v ? " · fasted" + (v === "qada" ? " (make-up)" : "") : "");
+      c.onclick = function () {
+        if (tg && tg.k === "eid") { alertMsg("Fasting isn't allowed on " + tg.n.split(" —")[0] + "."); return; }
+        var cur = L[k], nxt = !cur ? "fast" : cur === "fast" ? "qada" : null;
+        if (cur === "qada") F.owed++; if (nxt === "qada") F.owed = Math.max(0, F.owed - 1);
+        if (nxt) L[k] = nxt; else delete L[k]; save(); render(); scrollTo_("tl-fast"); };
+      g.appendChild(c); })(dn);
+    p.appendChild(g);
+    var key = el("div", "fkey");
+    [["fast", "Fasted"], ["qada", "Make-up fast"], ["sunnah", "Sunnah day"], ["ramadan", "Ramaḍān"], ["eid", "No fasting"]].forEach(function (x) { var s2 = el("span"); s2.appendChild(el("i", "fk " + x[0])); s2.appendChild(document.createTextNode(x[1])); key.appendChild(s2); });
+    p.appendChild(key);
+    p.appendChild(el("p", "meta", "Tap a day once for a fast, twice for a make-up fast (it takes one off what you owe), three times to clear it. Small numbers are the Hijri date (Umm al-Qurā); it can differ by a day from your local moon-sighting."));
+    if (nx.length > 1) { p.appendChild(el("h3", null, "Coming up"));
+      var ul = el("ul", "slrec"); nx.forEach(function (x) { var li = el("li"); li.appendChild(el("span", "slrd", x.d.toLocaleDateString(undefined, { weekday:"short", day:"numeric", month:"short" }))); li.appendChild(el("span", null, x.t.n)); ul.appendChild(li); }); p.appendChild(ul); }
+    app.appendChild(p); makeCollapsible("tl-fast");
+  }
+
+  // ---------- Tools: weekly muḥāsabah ----------
+  state.muhasabah = state.muhasabah || {};
+  var MQ = [["good", "What went well this week?", "Alḥamdulillāh for…"], ["bad", "What didn't go well?", "Be honest, not harsh"], ["change", "One thing to change next week", "Small and specific"]];
+  function weekNumbers(ws){
+    var a = dkey(ws), e0 = new Date(ws); e0.setDate(e0.getDate() + 7); var b = dkey(e0), ds = a, de = b;
+    var inW = function (k) { return k >= ds && k < de; };
+    var fm = 0, fb = 0; Object.keys(state.focusLog || {}).forEach(function (k) { if (inW(k)) { fm += state.focusLog[k].m || 0; fb += state.focusLog[k].n || 0; } });
+    var sl = Object.keys((state.sleep || {}).log || {}).filter(inW).map(function (k) { return state.sleep.log[k].h; });
+    var ad = 0; Object.keys(state.adhkarLog || {}).forEach(function (k) { var l = state.adhkarLog[k]; if (inW(k) && l.morning && l.evening) ad++; });
+    var rl = (state.quran && state.quran.readLog) || {}, qr = 0; Object.keys(rl).forEach(function (k) { if (inW(k)) qr += rl[k] || 0; });
+    var td = state.tasks.filter(function (t) { return t.done && t.doneAt && dkey(new Date(t.doneAt)) >= ds && dkey(new Date(t.doneAt)) < de; }).length;
+    var sc = Object.keys((state.screen || {}).log || {}).filter(function (k) { return inW(k) && state.screen.log[k].m != null; }).map(function (k) { return state.screen.log[k].m; });
+    var fa = Object.keys((state.fast || {}).log || {}).filter(inW).length;
+    var wo = ((state.fit || {}).log || []).filter(function (w) { return inW(w.date); });
+    return [["Focus", fb + " blocks · " + mfmt(fm)], ["Tasks done", String(td)], ["Sleep average", sl.length ? hm(sl.reduce(function (x, y) { return x + y; }, 0) / sl.length) : "not logged"],
+      ["Phone average", sc.length ? mfmt(sc.reduce(function (x, y) { return x + y; }, 0) / sc.length) + " a day" : "not logged"],
+      ["Morning & evening adhkār", ad + " of 7 days"], ["Qur’an read", qr + (qr === 1 ? " page" : " pages")], ["Fasts", String(fa)], ["Workouts", wo.length + " · " + mfmt(wo.reduce(function (x, w) { return x + (w.min || 0); }, 0))]];
+  }
+  function renderMuhasabah(){
+    var now = new Date(), ws = weekStart(now), wk = dkey(ws), M = state.muhasabah;
+    var p = el("div", "panel"); p.id = "tl-muh";
+    p.appendChild(el("h2", null, "Weekly muḥāsabah"));
+    var day = now.getDay();
+    p.appendChild(el("p", "meta", (day === 0 || day === 5 ? "It's " + (day === 0 ? "Sunday" : "Friday") + ", a good time to look back on your week. " : "") + "Take stock of yourself before you are taken to account."));
+    var we = new Date(ws); we.setDate(we.getDate() + 6);
+    p.appendChild(el("h3", null, "This week · " + ws.toLocaleDateString(undefined, { day:"numeric", month:"short" }) + " – " + we.toLocaleDateString(undefined, { day:"numeric", month:"short" })));
+    var g = el("div", "slmore"); weekNumbers(ws).forEach(function (x) { var c = el("div"); c.appendChild(el("span", null, x[0])); c.appendChild(el("b", null, x[1])); g.appendChild(c); }); p.appendChild(g);
+    var e = M[wk] = M[wk] || {}, saved = el("span", "meta");
+    MQ.forEach(function (q0) {
+      var w = el("label", "muhq"); w.appendChild(el("b", null, q0[1]));
+      var ta = el("textarea"); ta.placeholder = q0[2]; ta.value = e[q0[0]] || ""; ta.setAttribute("aria-label", q0[1]);
+      var t0 = null; ta.oninput = function () { e[q0[0]] = ta.value; clearTimeout(t0); t0 = setTimeout(function () { e.at = Date.now(); save(); saved.textContent = "Saved"; }, 400); };
+      w.appendChild(ta); p.appendChild(w);
+    });
+    if (e.at) saved.textContent = "Saved " + new Date(e.at).toLocaleDateString(undefined, { weekday:"short", day:"numeric", month:"short" });
+    p.appendChild(saved);
+    var lastK = dkey(new Date(ws.getTime() - 7 * 864e5)), last = M[lastK];
+    if (last && last.change) { var lc = el("div", "muhlast"); lc.appendChild(el("span", "meta", "Last week you said you'd change:")); lc.appendChild(el("b", null, last.change)); p.insertBefore(lc, p.children[2]); }
+    var past = Object.keys(M).filter(function (k) { return k < wk && (M[k].good || M[k].bad || M[k].change); }).sort().reverse();
+    if (past.length) {
+      p.appendChild(el("h3", null, "Past weeks"));
+      past.slice(0, 12).forEach(function (k) {
+        var d = el("details", "muhpast"), sm = el("summary"); var s0 = new Date(k + "T12:00"), s1 = new Date(s0); s1.setDate(s1.getDate() + 6);
+        sm.textContent = s0.toLocaleDateString(undefined, { day:"numeric", month:"short" }) + " – " + s1.toLocaleDateString(undefined, { day:"numeric", month:"short", year:"numeric" }); d.appendChild(sm);
+        var g2 = el("div", "slmore"); weekNumbers(s0).forEach(function (x) { var c = el("div"); c.appendChild(el("span", null, x[0])); c.appendChild(el("b", null, x[1])); g2.appendChild(c); }); d.appendChild(g2);
+        MQ.forEach(function (q0) { if (M[k][q0[0]]) { d.appendChild(el("b", "muhpq", q0[1])); d.appendChild(el("p", "duaen", M[k][q0[0]])); } });
+        p.appendChild(d); });
+    }
+    app.appendChild(p); makeCollapsible("tl-muh");
+  }
+
+  // ---------- Fitness ----------
+  state.fit = state.fit || {}; state.fit.log = state.fit.log || []; state.fit.weight = state.fit.weight || []; state.fit.target = state.fit.target || 3;
+  var FIT_T = [["gym","Gym","#e0603f"],["run","Run","#3f9a78"],["walk","Walk","#8fb573"],["football","Football","#6c9bd2"],["swim","Swim","#4fb3c9"],["cycle","Cycle","#d9a33a"],["home","Home workout","#c58af9"],["sport","Other sport","#9a7b5c"],["stretch","Stretch / mobility","#9aa0a6"]];
+  var FIT = {}; FIT_T.forEach(function (t) { FIT[t[0]] = { n:t[1], c:t[2] }; });
+  function renderFitness(){
+    var F = state.fit, now = new Date(), tk = dkey(now), ws = weekStart(now), wk = dkey(ws);
+    var p = el("div", "panel"); p.id = "fit-log";
+    p.appendChild(el("h2", null, "Workouts"));
+    var f = el("div", "row slform");
+    var lab = function (t, inp) { var w = el("label", "sllab"); w.appendChild(el("span", null, t)); w.appendChild(inp); return w; };
+    var dt = el("input"); dt.type = "date"; dt.className = "dateinp"; dt.value = tk; dt.max = tk; dt.setAttribute("aria-label", "Date");
+    var ty = el("select"); ty.setAttribute("aria-label", "Type"); FIT_T.forEach(function (t) { var o = el("option", null, t[1]); o.value = t[0]; ty.appendChild(o); });
+    var lastW = F.log[F.log.length - 1]; if (lastW) ty.value = lastW.type;
+    var mn = el("input"); mn.type = "number"; mn.min = 1; mn.max = 600; mn.value = lastW ? lastW.min : 45; mn.setAttribute("aria-label", "Minutes");
+    var nt = el("input"); nt.type = "text"; nt.maxLength = 200; nt.placeholder = "Notes, e.g. Push day: bench 3×8 60kg"; nt.setAttribute("aria-label", "Notes");
+    var add = el("button", "cta"); add.appendChild(icon("plus")); add.appendChild(document.createTextNode("Log workout"));
+    add.onclick = function () { if (!dt.value) return; F.log.push({ id:uid(), date:dt.value, type:ty.value, min:Math.max(1, parseInt(mn.value, 10) || 0), note:nt.value.trim() });
+      F.log.sort(function (a, b) { return a.date.localeCompare(b.date); }); save(); render(); scrollTo_("fit-log"); };
+    nt.onkeydown = function (e) { if (e.key === "Enter") add.onclick(); };
+    f.appendChild(lab("Date", dt)); f.appendChild(lab("Type", ty)); f.appendChild(lab("Minutes", mn));
+    var nl = lab("Notes", nt); nl.style.flex = "1"; nl.style.minWidth = "220px"; f.appendChild(nl);
+    var sw = el("div", "slsave"); sw.appendChild(add); f.appendChild(sw);
+    p.appendChild(f);
+    // stats
+    var thisW = F.log.filter(function (w) { return w.date >= wk; }), tgt = F.target;
+    var mins = thisW.reduce(function (a, w) { return a + w.min; }, 0);
+    var wkStart = function (i) { var d = new Date(ws); d.setDate(d.getDate() - 7 * i); return d; };
+    var perWeek = []; for (var i = 7; i >= 0; i--) { var a = dkey(wkStart(i)), b = dkey(wkStart(i - 1)); perWeek.push({ s:wkStart(i), n:F.log.filter(function (w) { return w.date >= a && w.date < b; }).length }); }
+    var streak = 0; for (var j = perWeek.length - 1; j >= 0; j--) { if (perWeek[j].n >= tgt) streak++; else if (j === perWeek.length - 1) continue; else break; }
+    var days = {}; F.log.forEach(function (w) { days[w.date] = 1; });
+    var stats = el("div", "fstat3");
+    [["This week", thisW.length + " / " + tgt + " sessions", thisW.length >= tgt ? "Target hit ✓" : (tgt - thisW.length) + " to go"],
+     ["Time this week", mfmt(mins), thisW.length ? Object.keys(days).filter(function (k) { return k >= wk; }).length + " active days" : "Nothing logged yet"],
+     ["Streak", streak + (streak === 1 ? " week" : " weeks"), "hitting your target"]]
+      .forEach(function (x) { var c = el("div", "fs3"); c.appendChild(el("span", null, x[0])); c.appendChild(el("b", null, x[1])); c.appendChild(el("small", null, x[2])); stats.appendChild(c); });
+    p.appendChild(stats);
+    // this week's days
+    var wd = el("div", "fitweek");
+    weekDays(ws).forEach(function (d) { var k = dkey(d), ws2 = F.log.filter(function (w) { return w.date === k; });
+      var c = el("div", "fitday" + (k === tk ? " today" : "") + (ws2.length ? " on" : ""));
+      c.appendChild(el("span", null, d.toLocaleDateString(undefined, { weekday:"short" })));
+      var dots = el("div", "fitdots"); ws2.forEach(function (w) { var dt2 = el("i"); dt2.style.background = (FIT[w.type] || FIT.sport).c; dt2.title = (FIT[w.type] || FIT.sport).n + " · " + w.min + " min"; dots.appendChild(dt2); });
+      c.appendChild(dots); wd.appendChild(c); });
+    p.appendChild(wd);
+    p.appendChild(el("h3", null, "Last 8 weeks"));
+    var mx = Math.max(tgt + 1, 4); perWeek.forEach(function (x) { mx = Math.max(mx, x.n); });
+    var bars = el("div", "slbars");
+    var tl = el("div", "sltarget"); tl.style.bottom = (20 + Math.round(tgt / mx * 120)) + "px"; tl.appendChild(el("span", null, "target " + tgt)); bars.appendChild(tl);
+    perWeek.forEach(function (x, i) { var c = el("div", "slbar" + (i === perWeek.length - 1 ? " today" : "")), b = el("i");
+      if (x.n) { b.style.height = Math.round(x.n / mx * 120) + "px"; b.className = x.n >= tgt ? "ok" : x.n >= tgt - 1 ? "mid" : "low"; }
+      c.title = "Week of " + x.s.toDateString() + ": " + x.n + " sessions";
+      c.appendChild(el("em", null, x.n ? String(x.n) : "")); c.appendChild(b);
+      c.appendChild(el("span", null, x.s.toLocaleDateString(undefined, { day:"numeric", month:"short" }))); bars.appendChild(c); });
+    p.appendChild(bars);
+    // by type (last 30 days)
+    var cut = new Date(now); cut.setDate(cut.getDate() - 29); var ck = dkey(cut), byT = {}, tot = 0;
+    F.log.forEach(function (w) { if (w.date >= ck) { byT[w.type] = (byT[w.type] || 0) + w.min; tot += w.min; } });
+    if (tot) { p.appendChild(el("h3", null, "Last 30 days by type"));
+      Object.keys(byT).sort(function (a, b) { return byT[b] - byT[a]; }).forEach(function (t) {
+        var r = el("div", "fsec"); r.appendChild(el("span", "fsn", (FIT[t] || FIT.sport).n));
+        var bb = el("div", "bar"), ii = el("i"); ii.style.width = Math.round(byT[t] / tot * 100) + "%"; ii.style.background = (FIT[t] || FIT.sport).c; bb.appendChild(ii); r.appendChild(bb);
+        r.appendChild(el("b", null, mfmt(byT[t]))); p.appendChild(r); }); }
+    var tr = el("div", "row"); tr.style.marginTop = "14px"; tr.appendChild(el("span", "meta", "Weekly target"));
+    var ts = el("select"); ts.setAttribute("aria-label", "Weekly sessions target");
+    [1, 2, 3, 4, 5, 6, 7].forEach(function (n) { var o = el("option", null, n + (n === 1 ? " session" : " sessions")); o.value = n; if (n === tgt) o.selected = true; ts.appendChild(o); });
+    ts.onchange = function () { F.target = +ts.value; save(); render(); scrollTo_("fit-log"); };
+    tr.appendChild(ts); p.appendChild(tr);
+    var rec = F.log.slice().sort(function (a, b) { return b.date.localeCompare(a.date); }).slice(0, 10);
+    if (rec.length) { p.appendChild(el("h3", null, "Recent workouts"));
+      var ul = el("ul", "slrec");
+      rec.forEach(function (w) { var li = el("li");
+        li.appendChild(el("span", "slrd", new Date(w.date + "T12:00").toLocaleDateString(undefined, { weekday:"short", day:"numeric", month:"short" })));
+        var tg = el("span", "fittype", (FIT[w.type] || FIT.sport).n); tg.style.setProperty("--k", (FIT[w.type] || FIT.sport).c); li.appendChild(tg);
+        if (w.note) li.appendChild(el("span", "meta", w.note));
+        li.appendChild(el("b", null, w.min + " min"));
+        var del = el("button", "iconbtn"), armed = false; del.title = "Remove"; del.appendChild(icon("trash"));
+        del.onclick = function () { if (!armed) { armed = true; del.classList.add("armed"); return; } F.log = F.log.filter(function (x) { return x.id !== w.id; }); save(); render(); scrollTo_("fit-log"); };
+        li.appendChild(del); ul.appendChild(li); });
+      p.appendChild(ul); }
+    else p.appendChild(el("p", "empty", "Log your first workout above."));
+    app.appendChild(p); makeCollapsible("fit-log");
+    // body weight
+    var q2 = el("div", "panel"); q2.id = "fit-weight";
+    q2.appendChild(el("h2", null, "Body weight"));
+    var W = F.weight, f2 = el("div", "row slform");
+    var d2 = el("input"); d2.type = "date"; d2.className = "dateinp"; d2.value = tk; d2.max = tk; d2.setAttribute("aria-label", "Date");
+    var kg = el("input"); kg.type = "number"; kg.step = "0.1"; kg.min = 20; kg.max = 300; kg.placeholder = "kg"; kg.setAttribute("aria-label", "Weight in kg");
+    var ab = el("button", "cta"); ab.appendChild(icon("plus")); ab.appendChild(document.createTextNode("Save"));
+    ab.onclick = function () { var v = parseFloat(kg.value); if (!d2.value || !(v > 0)) return;
+      F.weight = W.filter(function (x) { return x.date !== d2.value; }).concat([{ date:d2.value, kg:Math.round(v * 10) / 10 }]).sort(function (a, b) { return a.date.localeCompare(b.date); });
+      save(); render(); scrollTo_("fit-weight"); };
+    f2.appendChild(lab("Date", d2)); f2.appendChild(lab("Weight (kg)", kg)); var sw2 = el("div", "slsave"); sw2.appendChild(ab); f2.appendChild(sw2);
+    q2.appendChild(f2);
+    if (W.length) {
+      var lw = W[W.length - 1], m30 = new Date(now); m30.setDate(m30.getDate() - 30); var old = W.filter(function (x) { return x.date <= dkey(m30); }).pop() || W[0];
+      var ch = Math.round((lw.kg - old.kg) * 10) / 10;
+      var st2 = el("div", "fstat3");
+      [["Latest", lw.kg + " kg", new Date(lw.date + "T12:00").toLocaleDateString(undefined, { day:"numeric", month:"short" })],
+       ["Change", (ch > 0 ? "+" : "") + ch + " kg", "since " + new Date(old.date + "T12:00").toLocaleDateString(undefined, { day:"numeric", month:"short" })],
+       ["Entries", String(W.length), "keep it to once a week"]]
+        .forEach(function (x) { var c = el("div", "fs3"); c.appendChild(el("span", null, x[0])); c.appendChild(el("b", null, x[1])); c.appendChild(el("small", null, x[2])); st2.appendChild(c); });
+      q2.appendChild(st2);
+      var pts = W.slice(-12);
+      if (pts.length > 1) {
+        var lo = Math.min.apply(null, pts.map(function (x) { return x.kg; })) - 1, hi = Math.max.apply(null, pts.map(function (x) { return x.kg; })) + 1;
+        var wv = 600, hv = 140, ns = "http://www.w3.org/2000/svg", svg = document.createElementNS(ns, "svg"); svg.setAttribute("viewBox", "0 0 " + wv + " " + (hv + 24)); svg.setAttribute("class", "fitline");
+        var xy = pts.map(function (x, i) { return [20 + i * (wv - 40) / (pts.length - 1), 10 + (hi - x.kg) / (hi - lo) * (hv - 20)]; });
+        var pl = document.createElementNS(ns, "polyline"); pl.setAttribute("points", xy.map(function (a) { return a.join(","); }).join(" ")); svg.appendChild(pl);
+        xy.forEach(function (a, i) { var c = document.createElementNS(ns, "circle"); c.setAttribute("cx", a[0]); c.setAttribute("cy", a[1]); c.setAttribute("r", 4); var t = document.createElementNS(ns, "title"); t.textContent = pts[i].date + ": " + pts[i].kg + " kg"; c.appendChild(t); svg.appendChild(c);
+          var tx = document.createElementNS(ns, "text"); tx.setAttribute("x", a[0]); tx.setAttribute("y", hv + 20); tx.textContent = new Date(pts[i].date + "T12:00").toLocaleDateString(undefined, { day:"numeric", month:"short" }); svg.appendChild(tx); });
+        q2.appendChild(svg);
+      }
+      var rb = el("button", "ghost sm", "Remove latest entry"); rb.onclick = function () { W.pop(); save(); render(); scrollTo_("fit-weight"); }; q2.appendChild(rb);
+    } else q2.appendChild(el("p", "empty", "Optional: log your weight now and then to see the trend."));
+    app.appendChild(q2); makeCollapsible("fit-weight");
+  }
+
   // ---------- Tools: sleep logger ----------
   state.sleep = state.sleep || {}; state.sleep.log = state.sleep.log || {}; state.sleep.target = state.sleep.target || 8;
   function hm(h){ var m = Math.round(h * 60); return Math.floor(m / 60) + "h " + (m % 60 ? (m % 60) + "m" : ""); }
