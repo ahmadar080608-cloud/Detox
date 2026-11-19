@@ -476,7 +476,7 @@
     } else {
       var ago = g0.lastSync ? Math.round((Date.now() - g0.lastSync) / 60000) : null;
       l.appendChild(el("span", null, "Connected · " + (ago == null ? "not synced yet" : ago < 1 ? "synced just now" : "synced " + (ago < 60 ? ago + " min" : Math.round(ago / 60) + " h") + " ago") +
-        ". Google events show in blue as fixed events. Fixed tasks you add here also go to Google; routine tasks stay here unless you tick “Also save to Google Calendar”."));
+        ". Google events show in blue on your calendar. Events you add to the calendar also go to Google; routine tasks stay here unless you tick “Also save to Google Calendar”."));
       var sy = el("button", "cta", "Sync now"); sy.onclick = function () { gPull(); }; right.appendChild(sy);
       var dc = el("button", "ghost", "Disconnect"); dc.onclick = gDisconnect; right.appendChild(dc);
     }
@@ -557,7 +557,7 @@
       if (V.toast) { var t0 = el("div", "sch-toast", V.toast); var tx0 = el("button", "sch-ib"); tx0.appendChild(svg("x")); tx0.onclick = function () { V.toast = ""; C.rerender(); }; t0.appendChild(tx0); root.appendChild(t0); }
       if (view === "month") root.appendChild(monthView(k, tk));
       else root.appendChild(columnsView(view === "multi" ? [k, addDays(k, 1), addDays(k, 2)] : weekDaysOf(k), tk, view));
-      if (view === "week" || view === "month") root.appendChild(el("p", "meta sch-fixnote", "The calendar shows fixed tasks only, like lectures, appointments and events. Turn on “Fixed task” when adding one. Your full daily plan is in Day and Multi-Day."));
+      if (view === "week" || view === "month") root.appendChild(el("p", "meta sch-fixnote", "Week and Month show your calendar: everything you add from the calendar, plus waking up and sleeping. Your full daily plan, routine included, is in Day and Multi-Day."));
     } else {
 
     // day heading
@@ -690,7 +690,8 @@
 
     // add button
     var fab = el("button", "sch-fab"); fab.title = "Add to schedule"; fab.appendChild(svg("plus"));
-    fab.onclick = function () { openEditor(null, k, isToday ? Math.ceil((now + 1) / 15) * 15 : 9 * 60); };
+    fab.onclick = function () { openEditor(null, k, isToday ? Math.ceil((now + 1) / 15) * 15 : 9 * 60);
+      if (view === "week" || view === "month") { V.edit.draft.fixed = true; V.edit.draft.icon = "calendar"; V.edit.fromCal = true; C.rerender(); } };
     root.appendChild(fab);
 
     app.appendChild(root);
@@ -712,7 +713,8 @@
       hb.onclick = function () { openDay(dk); };
       hd.appendChild(hb);
       var ad = el("button", "sch-ib sm"); ad.title = "Add to this day"; ad.appendChild(svg("plus"));
-      ad.onclick = function () { openEditor(null, dk, dk === tk ? Math.ceil((nowMin() + 1) / 15) * 15 : 9 * 60); };
+      ad.onclick = function () { openEditor(null, dk, dk === tk ? Math.ceil((nowMin() + 1) / 15) * 15 : 9 * 60);
+        if (view === "week") { V.edit.draft.fixed = true; V.edit.draft.icon = "calendar"; V.edit.fromCal = true; C.rerender(); } };
       hd.appendChild(ad);
       col.appendChild(hd);
       var its = view === "week" ? fixedOn(dk) : itemsOn(dk), list = el("div", "sch-clist"), placedNow = dk !== tk, nm = nowMin();
@@ -864,7 +866,6 @@
     meta.appendChild(document.createTextNode(fmtT(st) + (it.dur ? " – " + fmtT(en) + " (" + fmtDur(it.dur) + ")" : "")));
     if (it.repeat && it.repeat.type !== "none") meta.appendChild(svg("repeat", "sm"));
     if (it.remind != null && it.remind >= 0) meta.appendChild(svg("bell", "sm"));
-    if (isFixed(it)) { var fb = el("span", "sch-fixtag", "Fixed"); meta.appendChild(fb); }
     body.appendChild(meta);
     body.appendChild(el("div", "sch-name", it.title));
     var subs = it.subtasks || [];
@@ -919,6 +920,7 @@
     hd.appendChild(pill);
     var hm0 = el("div", "sch-hmain");
     var st = hm(dr.start) || 0;
+    if (E.isNew && dr.fixed) hm0.appendChild(el("div", "sch-hkind", "New calendar event"));
     hm0.appendChild(el("div", "sch-hmeta", dr.allDay ? "All day" : fmtT(st) + (dr.dur ? " – " + fmtT(st + dr.dur) + " (" + fmtDur(dr.dur) + ")" : "")));
     var ti = el("input", "sch-htitle"); ti.type = "text"; ti.placeholder = "Structure your day"; ti.value = dr.title; ti.maxLength = 120; ti.setAttribute("aria-label", "Title");
     ti.oninput = function () {
@@ -1030,16 +1032,6 @@
       });
       c2.appendChild(wd);
     }
-    var rF = el("div", "sch-line2");
-    rF.appendChild(svg("calendar", "acc"));
-    var fx = el("span"); fx.style.flex = "1"; fx.appendChild(document.createTextNode("Fixed task"));
-    fx.appendChild(el("small", "sch-fixhint", dr.source === "gcal" || dr.source === "ics" ? " · from your calendar, always shown" : " · shows on the calendar (lectures, appointments, events)"));
-    rF.appendChild(fx);
-    var fsw = el("button", "switch" + (isFixed(dr) ? " on" : "")); fsw.setAttribute("role", "switch"); fsw.setAttribute("aria-label", "Fixed task");
-    fsw.disabled = dr.source === "gcal" || dr.source === "ics";
-    fsw.onclick = function () { dr.fixed = !dr.fixed; dr.title = ti.value; C.rerender(); };
-    rF.appendChild(fsw);
-    c2.appendChild(rF);
     var rM = el("div", "sch-line2"); rM.appendChild(svg("bell", "acc"));
     var ms = el("select"); ms.setAttribute("aria-label", "Reminder");
     [["-1","No reminder"],["0","At start time"],["5","5 min before"],["10","10 min before"],["15","15 min before"],["30","30 min before"],["60","1 hour before"]].forEach(function (o) { var x = el("option", null, o[1]); x.value = o[0]; ms.appendChild(x); });
