@@ -205,6 +205,18 @@ button.tag{cursor:pointer}
 .mjuz.closed::after{transform:rotate(-45deg)}
 .mjuz .mc{margin-right:22px}
 .mjbox{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px 14px;align-items:start}
+.revhd{display:flex;flex-direction:column;gap:2px;margin-bottom:6px}
+.revgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:10px}
+.revit{display:flex;align-items:center;gap:10px;text-align:left;background:var(--bg);border:1.5px solid transparent;border-radius:12px;padding:10px 12px;color:var(--ink);font:inherit;cursor:pointer}
+.revit .bx{width:20px;height:20px;border-radius:6px;border:2px solid var(--muted);flex:none;display:flex;align-items:center;justify-content:center}
+.revit.on .bx{background:#3f9a78;border-color:#3f9a78}
+.revit.on .bx::after{content:"";width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.revit .rt{display:flex;flex-direction:column;min-width:0}
+.revit .rt b{font-size:14px}
+.revit .rt small{font-size:12px;color:var(--muted)}
+.revit.juz{border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+.revit.on{background:color-mix(in srgb,#3f9a78 14%,var(--bg));border-color:color-mix(in srgb,#3f9a78 45%,transparent)}
+.revit .rd{margin-left:auto;font-size:11px;font-weight:700;color:#3f9a78}
 .mjact{grid-column:1/-1;display:flex;justify-content:flex-end;margin:-2px 0 2px}
 .mseg{font-size:11px;color:var(--muted);font-weight:500}
 .med input[type=range]{width:100%;accent-color:var(--accent);margin:4px 0 10px}
@@ -1629,6 +1641,48 @@ li.mrow2 .label{display:flex;flex-direction:column}
     pnl.appendChild(hist);
     return got;
   }
+  // what you've memorised, as a weekly revision checklist: whole juz' where complete, otherwise sūrahs and parts of sūrahs
+  function revItems(){
+    var out = [];
+    for (var j = 1; j <= 30; j++) {
+      var segs = juzSegs(j), full = segs.every(function (g) { return (q.memA[g.n] || 0) >= g.b; });
+      if (full) { out.push({ key:"j" + j, name:"Juz’ " + j, sub:SURAH[segs[0].n-1] + " – " + SURAH[segs[segs.length-1].n-1], p:j === 1 ? 21 : j === 30 ? 23 : 20, juz:j }); continue; }
+      segs.forEach(function (g) { var c = q.memA[g.n] || 0; if (c < g.a) return; var b = Math.min(c, g.b), last = out[out.length - 1];
+        if (last && last.n === g.n && last.b === g.a - 1) { last.b = b; } else out.push({ n:g.n, a:g.a, b:b }); });
+    }
+    out.forEach(function (x) { if (x.juz) return; var tot = AYAT[x.n-1];
+      x.key = "s" + x.n + ":" + x.a + "-" + x.b; x.name = SURAH[x.n-1]; x.sub = x.a === 1 && x.b === tot ? "Whole sūrah · " + tot + " āyāt" : "Āyāt " + x.a + "–" + x.b;
+      x.p = pagesFor(x.n, x.b - x.a + 1); });
+    if (q.memOrder === "end") out.reverse();
+    return out;
+  }
+  function revChecklist(pnl, ws){
+    var items = revItems(), wk = dkey(ws);
+    q.revTicks = q.revTicks || {}; Object.keys(q.revTicks).forEach(function (k) { if (k < dkey(new Date(ws.getTime() - 35 * 864e5))) delete q.revTicks[k]; });
+    var T = q.revTicks[wk] = q.revTicks[wk] || {};
+    pnl.appendChild(el("h3", null, "Revise this week"));
+    if (!items.length) { pnl.appendChild(el("p", "empty", "Mark what you've memorised in Memorisation above, and it will appear here to revise each week.")); return; }
+    var nd = items.filter(function (x) { return T[x.key]; }).length;
+    var pt = items.reduce(function (a, x) { return a + x.p; }, 0);
+    var hd = el("div", "revhd"); hd.appendChild(el("b", null, nd + " of " + items.length + " revised"));
+    hd.appendChild(el("span", "meta", nd === items.length ? "All your memorisation revised this week, mā shāʾ Allāh." : "About " + fmtP(pt) + " pages in total. Tick each one when you've revised it; its pages are added to today."));
+    pnl.appendChild(hd); pnl.appendChild(barEl(nd / items.length));
+    var g = el("div", "revgrid");
+    items.forEach(function (x) {
+      var on = !!T[x.key], b = el("button", "revit" + (on ? " on" : "") + (x.juz ? " juz" : ""));
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+      b.appendChild(el("span", "bx"));
+      var t = el("span", "rt"); t.appendChild(el("b", null, x.name)); t.appendChild(el("small", null, x.sub + " · ~" + fmtP(x.p) + " pp")); b.appendChild(t);
+      if (on) b.appendChild(el("span", "rd", new Date(T[x.key].d + "T12:00").toLocaleDateString(undefined, { weekday:"short" })));
+      b.onclick = function () {
+        if (T[x.key]) { var o = T[x.key]; q.rev[o.d] = Math.max(0, (q.rev[o.d] || 0) - o.p); if (!q.rev[o.d]) delete q.rev[o.d]; delete T[x.key]; }
+        else { var dk = dkey(new Date()), add = Math.max(1, Math.round(x.p)); q.rev[dk] = (q.rev[dk] || 0) + add; T[x.key] = { d:dk, p:add }; }
+        var y = window.scrollY; save(); render(); window.scrollTo(0, y);
+      };
+      g.appendChild(b);
+    });
+    pnl.appendChild(g);
+  }
   var openSurah = null;
   function renderQuranTrackers(){
     var ms = memStats(), ws = weekStart(new Date()), rw = revWeek(ws), tw = tadWeek();
@@ -1807,6 +1861,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     var pr = el("div", "panel"); pr.id = "q-rev";
     pr.appendChild(el("h2", null, "Weekly revision"));
     weeklyBlock(pr, q.rev, q.revTarget, function (v) { q.revTarget = v; }, "pages", 604, "Target reached this week, mā shāʾ Allāh.", "1 juz is about 20 pages.");
+    revChecklist(pr, ws);
     app.appendChild(pr);
 
     // ---- weekly reading ----
