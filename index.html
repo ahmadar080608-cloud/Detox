@@ -730,6 +730,28 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
 .prset .row{margin-top:10px}
 .prset input[type=text]{min-width:120px}
 /* tools: countdowns */
+.slform{align-items:flex-end;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.sllab{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:600}
+.sllab select{min-width:130px}
+.slsave{display:flex;align-items:center;gap:10px;margin-left:auto}
+.slprev{font-weight:700;font-size:14px}
+.slbars{position:relative;display:flex;align-items:flex-end;gap:10px;height:170px;padding-top:10px;margin:6px 0 10px}
+.slbar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%}
+.slbar i{display:block;width:100%;max-width:46px;border-radius:10px 10px 4px 4px;background:var(--line);min-height:4px}
+.slbar i.ok{background:#3f9a78}.slbar i.mid{background:#d9a33a}.slbar i.low{background:#d93c3c}
+.slbar em{font-style:normal;font-size:12px;font-weight:700}
+.slbar span{font-size:12px;color:var(--muted)}
+.slbar.today span{color:var(--accent);font-weight:700}
+.sltarget{position:absolute;left:0;right:0;border-top:1.5px dashed color-mix(in srgb,var(--muted) 60%,transparent);pointer-events:none}
+.sltarget span{position:absolute;right:0;top:-18px;font-size:11px;color:var(--muted);font-weight:700}
+.slmore{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.slmore div{background:var(--bg);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.slmore span{font-size:12px;color:var(--muted)}
+.slmore b{font-size:15px}
+.slrec li{gap:14px}
+.slrec .slrd{min-width:110px;font-weight:600}
+.slrec li b{margin-left:auto}
+@media (max-width:640px){.slmore{grid-template-columns:repeat(2,1fr)}.slsave{margin-left:0}}
 .cdnote{font-size:11.5px;color:var(--muted);line-height:1.35;margin-top:2px}
 .cdgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-top:8px}
 .cd{position:relative;background:var(--bg);border-radius:16px;padding:14px;border-top:4px solid var(--k);display:flex;flex-direction:column;gap:2px}
@@ -1981,6 +2003,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     p.appendChild(oneThingPicker());
     app.appendChild(p);
     renderFocusStats();
+    renderSleep();
 
     paintTimer();
   }
@@ -2870,6 +2893,101 @@ li.mrow2 .label{display:flex;flex-direction:column}
     e.n += 1; e.m += mins; e.s[sec] = (e.s[sec] || 0) + mins;
   }
   function fmtMins(m){ var h = Math.floor(m / 60), r = m % 60; return h ? h + "h" + (r ? " " + r + "m" : "") : r + "m"; }
+  // ---------- Tools: sleep logger ----------
+  state.sleep = state.sleep || {}; state.sleep.log = state.sleep.log || {}; state.sleep.target = state.sleep.target || 8;
+  function hm(h){ var m = Math.round(h * 60); return Math.floor(m / 60) + "h " + (m % 60 ? (m % 60) + "m" : ""); }
+  function tmin(t){ var a = t.split(":"); return +a[0] * 60 + +a[1]; }
+  function sleepHours(bed, wake){ var d = tmin(wake) - tmin(bed); if (d <= 0) d += 1440; return d / 60; }
+  function clockAvg(list, isBed){ if (!list.length) return null;
+    var v = list.map(function (t) { var m = tmin(t); if (isBed && m < 720) m += 1440; return m; });
+    var a = Math.round(v.reduce(function (x, y) { return x + y; }, 0) / v.length) % 1440;
+    return ("0" + Math.floor(a / 60)).slice(-2) + ":" + ("0" + a % 60).slice(-2); }
+  function renderSleep(){
+    var S = state.sleep, L = S.log, now = new Date(), tk = dkey(now);
+    var p = el("div", "panel"); p.id = "tl-sleep";
+    p.appendChild(el("h2", null, "Sleep"));
+    // log form
+    var f = el("div", "row slform");
+    var dt = el("input"); dt.type = "date"; dt.className = "dateinp"; dt.value = tk; dt.max = tk; dt.setAttribute("aria-label", "Morning you woke up");
+    var last = L[Object.keys(L).sort().pop()] || {};
+    var bd = el("input"); bd.type = "time"; bd.className = "dateinp"; bd.value = last.bed || "23:00"; bd.setAttribute("aria-label", "Went to sleep");
+    var wk = el("input"); wk.type = "time"; wk.className = "dateinp"; wk.value = last.wake || "07:00"; wk.setAttribute("aria-label", "Woke up");
+    var qs = el("select"); qs.setAttribute("aria-label", "How did you sleep?");
+    [["", "How was it?"], ["5", "Great"], ["4", "Good"], ["3", "OK"], ["2", "Poor"], ["1", "Awful"]].forEach(function (o) { var op = el("option", null, o[1]); op.value = o[0]; qs.appendChild(op); });
+    var prev = el("span", "slprev");
+    var upd = function () { var e = L[dt.value]; prev.textContent = (bd.value && wk.value ? "= " + hm(sleepHours(bd.value, wk.value)) : "") + (e ? " · replaces " + hm(e.h) : ""); };
+    dt.onchange = function () { var e = L[dt.value]; if (e) { bd.value = e.bed; wk.value = e.wake; qs.value = e.q || ""; } upd(); };
+    bd.oninput = wk.oninput = upd;
+    var sv = el("button", "cta"); sv.appendChild(icon("plus")); sv.appendChild(document.createTextNode("Log sleep"));
+    sv.onclick = function () { if (!dt.value || !bd.value || !wk.value) return;
+      L[dt.value] = { bed:bd.value, wake:wk.value, h:Math.round(sleepHours(bd.value, wk.value) * 100) / 100, q:qs.value ? +qs.value : 0 }; save(); render();
+      var x = document.getElementById("tl-sleep"); if (x) x.scrollIntoView({ block:"start" }); };
+    var lab = function (t, inp) { var w = el("label", "sllab"); w.appendChild(el("span", null, t)); w.appendChild(inp); return w; };
+    f.appendChild(lab("Morning of", dt)); f.appendChild(lab("Slept at", bd)); f.appendChild(lab("Woke at", wk)); f.appendChild(lab("Quality", qs));
+    var sw = el("div", "slsave"); sw.appendChild(prev); sw.appendChild(sv); f.appendChild(sw);
+    p.appendChild(f); upd();
+    // last 7 nights
+    var days = [];
+    for (var i = 6; i >= 0; i--) { var d = new Date(now); d.setDate(d.getDate() - i); days.push({ d:d, k:dkey(d), e:L[dkey(d)] }); }
+    var got = days.filter(function (x) { return x.e; }), tgt = S.target;
+    var avg = got.length ? got.reduce(function (a, x) { return a + x.e.h; }, 0) / got.length : 0;
+    var debt = got.reduce(function (a, x) { return a + (tgt - x.e.h); }, 0);
+    var tonight = L[tk];
+    var stats = el("div", "fstat3");
+    [["Last night", tonight ? hm(tonight.h) : "Not logged", tonight ? tonight.bed + " → " + tonight.wake : "Log it above"],
+     ["7-day average", got.length ? hm(avg) : "–", got.length + " of 7 nights logged"],
+     [debt > 0 ? "Sleep debt" : "Ahead of target", got.length ? hm(Math.abs(debt)) : "–", "vs " + tgt + "h a night"]]
+      .forEach(function (x) { var c = el("div", "fs3"); c.appendChild(el("span", null, x[0])); c.appendChild(el("b", null, x[1])); c.appendChild(el("small", null, x[2])); stats.appendChild(c); });
+    p.appendChild(stats);
+    p.appendChild(el("h3", null, "Last 7 nights"));
+    var mx = Math.max(10, tgt + 1), bars = el("div", "slbars");
+    var tl = el("div", "sltarget"); tl.style.bottom = (20 + Math.round(tgt / mx * 120)) + "px"; tl.appendChild(el("span", null, tgt + "h")); bars.appendChild(tl);
+    days.forEach(function (x) {
+      var c = el("div", "slbar" + (x.k === tk ? " today" : "")), b = el("i");
+      if (x.e) { b.style.height = Math.round(x.e.h / mx * 120) + "px"; b.className = x.e.h >= tgt ? "ok" : x.e.h >= tgt - 1 ? "mid" : "low";
+        c.title = x.d.toDateString() + ": " + hm(x.e.h) + " (" + x.e.bed + " → " + x.e.wake + ")"; }
+      else c.title = x.d.toDateString() + ": not logged";
+      c.appendChild(el("em", null, x.e ? (Math.round(x.e.h * 10) / 10) + "" : "")); c.appendChild(b);
+      c.appendChild(el("span", null, x.d.toLocaleDateString(undefined, { weekday:"short" })));
+      bars.appendChild(c);
+    });
+    p.appendChild(bars);
+    if (got.length) {
+      var best = got.slice().sort(function (a, b) { return b.e.h - a.e.h; })[0], worst = got.slice().sort(function (a, b) { return a.e.h - b.e.h; })[0];
+      var qd = got.filter(function (x) { return x.e.q; }), qa = qd.length ? qd.reduce(function (a, x) { return a + x.e.q; }, 0) / qd.length : 0;
+      var g = el("div", "slmore");
+      [["Usual bedtime", clockAvg(got.map(function (x) { return x.e.bed; }), true)],
+       ["Usual wake-up", clockAvg(got.map(function (x) { return x.e.wake; }), false)],
+       ["Longest", hm(best.e.h) + " · " + best.d.toLocaleDateString(undefined, { weekday:"short" })],
+       ["Shortest", hm(worst.e.h) + " · " + worst.d.toLocaleDateString(undefined, { weekday:"short" })],
+       ["Nights on target", got.filter(function (x) { return x.e.h >= tgt; }).length + " of " + got.length],
+       ["Average quality", qa ? ["", "Awful", "Poor", "OK", "Good", "Great"][Math.round(qa)] + " (" + (Math.round(qa * 10) / 10) + "/5)" : "–"]]
+        .forEach(function (x) { var c = el("div"); c.appendChild(el("span", null, x[0])); c.appendChild(el("b", null, x[1])); g.appendChild(c); });
+      p.appendChild(g);
+    } else p.appendChild(el("p", "empty", "Log a night to start seeing your stats."));
+    // target + recent entries
+    var tr = el("div", "row"); tr.style.marginTop = "14px";
+    tr.appendChild(el("span", "meta", "Nightly target"));
+    var ts = el("select"); ts.setAttribute("aria-label", "Nightly sleep target");
+    [6, 6.5, 7, 7.5, 8, 8.5, 9].forEach(function (h) { var o = el("option", null, h + " hours"); o.value = h; if (h === tgt) o.selected = true; ts.appendChild(o); });
+    ts.onchange = function () { S.target = +ts.value; save(); render(); document.getElementById("tl-sleep").scrollIntoView({ block:"start" }); };
+    tr.appendChild(ts); p.appendChild(tr);
+    var rec = Object.keys(L).sort().reverse().slice(0, 7);
+    if (rec.length) {
+      p.appendChild(el("h3", null, "Recent entries"));
+      var ul = el("ul", "slrec");
+      rec.forEach(function (k) { var e = L[k], li = el("li");
+        li.appendChild(el("span", "slrd", new Date(k + "T12:00").toLocaleDateString(undefined, { weekday:"short", day:"numeric", month:"short" })));
+        li.appendChild(el("span", null, e.bed + " → " + e.wake));
+        li.appendChild(el("b", null, hm(e.h)));
+        if (e.q) li.appendChild(el("span", "meta", ["", "Awful", "Poor", "OK", "Good", "Great"][e.q]));
+        var del = el("button", "iconbtn"), armed = false; del.title = "Remove"; del.appendChild(icon("trash"));
+        del.onclick = function () { if (!armed) { armed = true; del.classList.add("armed"); return; } delete L[k]; save(); render(); document.getElementById("tl-sleep").scrollIntoView({ block:"start" }); };
+        li.appendChild(del); ul.appendChild(li); });
+      p.appendChild(ul);
+    }
+    app.appendChild(p); makeCollapsible("tl-sleep");
+  }
   function renderFocusStats(){
     var p = el("div", "panel"); p.id = "tl-focus";
     p.appendChild(el("h2", null, "Focus stats"));
