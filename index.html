@@ -205,6 +205,7 @@ button.tag{cursor:pointer}
 .mjuz.closed::after{transform:rotate(-45deg)}
 .mjuz .mc{margin-right:22px}
 .mjbox{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px 14px;align-items:start}
+.mjact{grid-column:1/-1;display:flex;justify-content:flex-end;margin:-2px 0 2px}
 .mseg{font-size:11px;color:var(--muted);font-weight:500}
 .med input[type=range]{width:100%;accent-color:var(--accent);margin:4px 0 10px}
 .hgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:6px;max-height:440px;overflow-y:auto;padding-right:4px}
@@ -969,7 +970,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
 .duaform select,.duaform input{flex:1;min-width:140px}
 .duacat{margin-left:auto;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .duaen{white-space:pre-wrap;color:var(--ink,inherit)}
-.ghost.sm{padding:6px 10px;font-size:13px}
+.ghost.sm,.cta.sm{padding:6px 12px;font-size:13px}
 .adtabs{margin:6px 0 12px;flex-wrap:wrap}
 .adhead{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:10px}
 .adtitle{font-family:Amiri,serif;font-size:26px;direction:rtl;line-height:1.3}
@@ -1774,7 +1775,22 @@ li.mrow2 .label{display:flex;flex-direction:column}
           var jb = el("i", "mb"); var jf = el("i"); jf.style.width = (jc / jt * 100) + "%"; jb.appendChild(jf); jh.appendChild(jb);
           jh.onclick = function () { if (q.juzClosed[j]) delete q.juzClosed[j]; else q.juzClosed[j] = 1; save(); drawList(); };
           list.appendChild(jh);
-          if (!closed) { var box = el("div", "mjbox"); rows.forEach(function (r) { box.appendChild(r); }); list.appendChild(box); }
+          if (!closed) { var box = el("div", "mjbox");
+            var act = el("div", "mjact"), all = juzSegs(j), done = jc >= jt;
+            var mk = el("button", done ? "ghost sm" : "cta sm", done ? "Clear juz’ " + j : "✓ Mark juz’ " + j + " complete");
+            mk.onclick = function () {
+              var earlier = all[0].a > 1 && (q.memA[all[0].n] || 0) < all[0].a - 1;
+              if (!done && earlier && !confirm("Ticking juz’ " + j + " also marks " + SURAH[all[0].n-1] + " ayāt 1–" + (all[0].a - 1) + " as memorised, because memorisation is counted from ayah 1. Continue?")) return;
+              if (done && !confirm("Clear juz’ " + j + "? Ayāt from this juz’ will be un-ticked.")) return;
+              var dk = dkey(new Date()), dp = 0;
+              all.forEach(function (g) { var old = q.memA[g.n] || 0, v = done ? Math.min(old, g.a - 1) : Math.max(old, g.b);
+                if (v !== old) { dp += pagesFor(g.n, v - old); if (v) q.memA[g.n] = v; else delete q.memA[g.n]; } });
+              if (dp) { q.memLogP[dk] = (q.memLogP[dk] || 0) + dp; if (Math.abs(q.memLogP[dk]) < 1e-6) delete q.memLogP[dk]; }
+              save(); var y = window.scrollY, ls = list.scrollTop; render(); window.scrollTo(0, y); var l2 = document.querySelector(".mlist"); if (l2) l2.scrollTop = ls;
+              if (!done) alertMsg("Juz’ " + j + " marked complete. Mā shāʾ Allāh!");
+            };
+            act.appendChild(mk); box.appendChild(act);
+            rows.forEach(function (r) { box.appendChild(r); }); list.appendChild(box); }
         });
       }
       if (!shown) list.appendChild(el("p", "empty", "No surahs match."));
