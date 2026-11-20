@@ -1051,6 +1051,12 @@ li.mrow2 .label{display:flex;flex-direction:column}
 .adlist.noen .aden{display:none}
 .adfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
 .adsrc{font-size:12px;font-style:italic;color:var(--muted);flex:1;min-width:180px;line-height:1.45}
+.adgrade{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:999px;line-height:1.35;border:1px solid transparent}
+.adgrade.g-s{background:rgba(46,160,90,.14);color:#2e8b57;border-color:rgba(46,160,90,.3)}
+.adgrade.g-h{background:rgba(60,130,200,.13);color:#3a7bbf;border-color:rgba(60,130,200,.3)}
+.adgrade.g-d{background:rgba(220,150,40,.15);color:#b7791f;border-color:rgba(220,150,40,.35)}
+.adgrade.g-m{background:rgba(210,60,60,.14);color:#c53030;border-color:rgba(210,60,60,.35)}
+.adgrade.g-x{background:transparent;color:var(--muted);border-color:var(--line,rgba(128,128,128,.3))}
 .adqtr{font-size:11px;color:var(--muted);margin:4px 0 0}
 .adnote{font-size:13px;margin:6px 0 0;padding-left:10px;border-left:3px solid var(--accent);color:var(--ink,inherit)}
 .adcount{border:1.5px solid var(--accent);background:transparent;color:var(--accent);border-radius:999px;padding:8px 16px;font-weight:700;font-size:14px;min-width:120px;cursor:pointer}
@@ -1119,7 +1125,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
 </section>
 
 <script src="schedule.js?v=20261119k"></script>
-<script src="adhkar.js?v=20261120a"></script>
+<script src="adhkar.js?v=20261120b"></script>
 <script type="module" src="sync.js?v=2"></script>
 <script>
 (function () {
@@ -4304,6 +4310,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
       if (it.links) { var lr = el("div", "row"); it.links.forEach(function (L) { var a = el("a", "ghost", L[0]); a.href = L[1]; a.target = "_blank"; a.rel = "noopener"; lr.appendChild(a); }); li.appendChild(lr); }
       var foot = el("div", "adfoot");
       foot.appendChild(el("span", "adsrc", it.src ? "Source: " + it.src : ""));
+      if (it.g) foot.appendChild(el("span", "adgrade g-" + (it.gk || "x"), it.g));
       var bt = el("button", "adcount" + (done ? " done" : ""));
       var label = function (v) {
         if (v >= n) return "✓ Done";
