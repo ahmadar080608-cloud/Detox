@@ -973,6 +973,13 @@ li.tmod{border:0;padding:20px 0 4px;font-weight:800;font-size:15px;color:var(--m
 li.tmod span{border-left:4px solid var(--mc);padding-left:10px}
 li.ttopic{padding-top:10px}
 li.ttopic small{margin-left:auto}
+li.colh{cursor:pointer;display:flex;align-items:center;gap:8px;user-select:none}
+li.colh .chev{display:inline-flex;transition:transform .2s;opacity:.7}
+li.colh .chev .ic{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2}
+li.colh.shut .chev{transform:rotate(-90deg)}
+li.tmod.colh span{border-left:0;padding-left:0}
+li.tmod.colh small{margin-left:auto;font-size:12px;font-weight:600;color:var(--muted)}
+li.colh:hover span{opacity:.85}
 select.topsel{font-size:13px;padding:7px 10px;max-width:260px}
 select.topsel.add{max-width:240px}
 select.topsel.row{font-size:12px;padding:3px 8px;border-radius:8px;background:transparent;max-width:220px}
@@ -1174,6 +1181,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
     x:'<path d="M6 6l12 12M18 6L6 18"/>'
   };
+  function chevI(){ var c = el("span", "chev"); c.innerHTML = '<svg viewBox="0 0 24 24" class="ic"><path d="M6 9l6 6 6-6"/></svg>'; return c; }
   function icon(name){ var s = document.createElementNS("http://www.w3.org/2000/svg","svg"); s.setAttribute("viewBox","0 0 24 24"); s.setAttribute("class","ic"); s.innerHTML = P[name] || ""; return s; }
 
   // ---------- sections ----------
@@ -1553,7 +1561,10 @@ li.mrow2 .label{display:flex;flex-direction:column}
     }
     if (sec === "university" || p0.parent === "university") app.appendChild(yearTabs());
     if (NAV_GROUPS[sec]) { app.appendChild(groupTabs(sec, NAV_GROUPS[sec])); renderGroupHome(sec, NAV_GROUPS[sec]); }
-    if (sec === "university") renderCountdowns("uni@y" + state.uniYear);
+    if (sec === "university") { renderCountdowns("uni@y" + state.uniYear);
+      var ug = state.sciGoals["uni@y" + state.uniYear] = state.sciGoals["uni@y" + state.uniYear] || {};
+      app.appendChild(writtenGoals("g-uni" + state.uniYear, "Goals · Year " + state.uniYear, ug, { week:"e.g. Revise the cardiovascular lectures", month:"e.g. Make notes for every Body Systems topic", year:"e.g. Pass all Year " + state.uniYear + " assessments" }));
+      makeCollapsible("g-uni" + state.uniYear); }
     if (NAV_GROUPS[p0.parent]) app.appendChild(groupTabs(p0.parent, NAV_GROUPS[p0.parent]));
     if (sec === "isoc" || sec === "dawah") app.appendChild(isocTabs());
     if (TRK[sec]) renderTracker(sec);
@@ -2985,12 +2996,14 @@ li.mrow2 .label{display:flex;flex-direction:column}
   var UNI_MODULES = [
     { id:"bs", name:"Body Systems", color:"#e0603f", topics:["Molecules and Cells","Nerve Signalling","Metabolism","Genetics","Histology of Main Tissue Types","Thorax Anatomy Dissections","Cardiovascular System","Respiratory System","Renal System","Gastrointestinal Tract","Endocrine System"] },
     { id:"ob", name:"Oral Biology and Craniofacial Anatomy", color:"#6c9bd2", topics:["Anatomy of Head and Neck","Embryology and Development","Dental Hard and Soft Tissues","Oral Biology","Virtual Labs","Feedback on Virtual Histology"] },
-    { id:"fc", name:"Foundations of Clinical Practice and the Relevance of Biological Science", short:"Foundations of Clinical Practice", color:"#3f9a78", topics:["First Steps","Tooth Morphology","Basic Life Support","Interprofessional Education (IPE)"] }
+    { id:"fc", name:"Foundations of Clinical Practice and the Relevance of Biological Science", short:"Foundations of Clinical Practice", color:"#3f9a78", topics:["First Steps","Tooth Morphology","Basic Life Support","Interprofessional Education (IPE)"] },
+    { id:"ce", name:"Clinical and Evidence-Based Dentistry", short:"Clinical & Evidence-Based", color:"#c58af9", topics:[] }
   ];
   state.uniYear = state.uniYear || 1;
   state.uniMods = state.uniMods || {};      // year -> [{ id, name, color, topics[] }]
   var MOD_COLORS = ["#e0603f","#6c9bd2","#3f9a78","#c58af9","#d9a33a","#5ec4d6"];
-  function modsFor(y){ return (y === 1 ? UNI_MODULES : []).concat(state.uniMods[y] || []); }
+  state.uniTopicsAdd = state.uniTopicsAdd || {};   // built-in module id -> extra topics
+  function modsFor(y){ return (y === 1 ? UNI_MODULES.map(function (m) { var x = Object.assign({}, m); x.topics = m.topics.concat(state.uniTopicsAdd[m.id] || []); return x; }) : []).concat(state.uniMods[y] || []); }
   function mods(){ return modsFor(state.uniYear); }
   function trkKey(sec){ return UNI_SUBS.indexOf(sec) >= 0 && state.uniYear !== 1 ? sec + "@y" + state.uniYear : sec; }
   function yearTabs(){
@@ -3017,6 +3030,16 @@ li.mrow2 .label{display:flex;flex-direction:column}
         (state.uniMods[y] = state.uniMods[y] || []).push({ id:"c" + uid(), name:n, color:MOD_COLORS[modsFor(y).length % MOD_COLORS.length], topics:ts }); addingMod = false; save(); render(); };
       nm.style.marginBottom = "8px"; f.appendChild(nm); f.appendChild(tp); f.appendChild(ok); box.appendChild(f);
     }
+    if (y === 1) UNI_MODULES.forEach(function (m0) {
+      var m = modsFor(1).find(function (x) { return x.id === m0.id; });
+      var r = el("div", "modrow"); var dot = el("i"); dot.style.background = m.color; r.appendChild(dot);
+      r.appendChild(el("span", null, (m.short || m.name) + " · " + m.topics.length + " topics"));
+      var add = el("button", "linkbtn", addingTopic === m.id ? "Cancel" : "+ topic"); add.onclick = function () { addingTopic = addingTopic === m.id ? null : m.id; render(); };
+      r.appendChild(add); box.appendChild(r);
+      if (addingTopic === m.id) { var tr = el("div", "row"); var ti = el("input"); ti.type = "text"; ti.placeholder = "New topic for " + (m.short || m.name); var tb = el("button", "cta", "Add");
+        tb.onclick = function () { if (!ti.value.trim()) return; (state.uniTopicsAdd[m.id] = state.uniTopicsAdd[m.id] || []).push(ti.value.trim()); addingTopic = null; save(); render(); }; ti.onkeydown = function (e) { if (e.key === "Enter") tb.click(); };
+        tr.appendChild(ti); tr.appendChild(tb); box.appendChild(tr); setTimeout(function () { ti.focus(); }, 0); }
+    });
     mine.forEach(function (m) {
       var r = el("div", "modrow"); var dot = el("i"); dot.style.background = m.color; r.appendChild(dot);
       r.appendChild(el("span", null, m.name + " · " + m.topics.length + " topics"));
@@ -3135,7 +3158,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     var shown = L.filter(function (x) { return (!trkFilter[sec] || trkFilter[sec] === "all" || x.status === trkFilter[sec]) && !(sec === "business" && state.bizActiveOnly && !x.active); });
     if (cfg.dated) shown = shown.slice().sort(function (a, b) { return (b.date || "").localeCompare(a.date || "") || b.added - a.added; });
     if (!L.length) p.appendChild(el("p", "empty", "Nothing here yet. Add your first " + cfg.noun + " above."));
-    var uni = cfg.statuses === UNI_STATUS, lastMod = null, lastTopic = null;
+    var uni = cfg.statuses === UNI_STATUS, lastMod = null, lastTopic = null, uniCol = state.uniCol = state.uniCol || {};
     if (uni) {
       var cm2 = trkMod[sec] || "all";
       shown = shown.filter(function (x) { var t0 = topicInfo(x.topic); return cm2 === "all" || (cm2 === "none" ? !t0 : t0 && t0.m.id === cm2); });
@@ -3148,10 +3171,19 @@ li.mrow2 .label{display:flex;flex-direction:column}
       if (cfg.cats && x.area !== lastArea) { lastArea = x.area; var gh = el("li", "tgroup"); gh.appendChild(el("span", null, x.area || "Other")); ul.appendChild(gh); }
       if (uni) {
         var t1 = topicInfo(x.topic), mid = t1 ? t1.m.id : "none", tkey = x.topic && t1 ? x.topic : "none";
-        if (mid !== lastMod) { lastMod = mid; lastTopic = null; var mh = el("li", "tmod"); mh.style.setProperty("--mc", t1 ? t1.m.color : "#9aa0a6"); mh.appendChild(el("span", null, t1 ? t1.m.name : "Not sorted yet: choose a topic for each")); ul.appendChild(mh); }
+        var cK = tkey0 + "|" + mid, cT = tkey0 + "|" + tkey;
+        if (mid !== lastMod) { lastMod = mid; lastTopic = null; var mh = el("li", "tmod colh" + (uniCol[cK] ? " shut" : "")); mh.style.setProperty("--mc", t1 ? t1.m.color : "#9aa0a6");
+          mh.appendChild(chevI()); mh.appendChild(el("span", null, t1 ? t1.m.name : "Not sorted yet: choose a topic for each"));
+          var nM = shown.filter(function (y) { var a = topicInfo(y.topic); return (a ? a.m.id : "none") === mid; }).length; mh.appendChild(el("small", null, nM + (nM === 1 ? " item" : " items")));
+          mh.setAttribute("role", "button"); mh.tabIndex = 0; mh.onclick = function () { uniCol[cK] = !uniCol[cK]; save(); render(); }; mh.onkeydown = function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); mh.onclick(); } };
+          ul.appendChild(mh); }
+        if (uniCol[cK]) return;
         if (t1 && tkey !== lastTopic) { lastTopic = tkey;
           var inT = L.filter(function (y) { return y.topic === tkey; }), tch = inT.filter(function (y) { return y.status === "teach"; }).length;
-          var th = el("li", "tgroup ttopic"); th.appendChild(el("span", null, t1.name)); th.appendChild(el("small", null, tch + "/" + inT.length + " can teach")); ul.appendChild(th); }
+          var th = el("li", "tgroup ttopic colh" + (uniCol[cT] ? " shut" : "")); th.appendChild(chevI()); th.appendChild(el("span", null, t1.name)); th.appendChild(el("small", null, tch + "/" + inT.length + " can teach"));
+          th.setAttribute("role", "button"); th.tabIndex = 0; th.onclick = function () { uniCol[cT] = !uniCol[cT]; save(); render(); }; th.onkeydown = function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); th.onclick(); } };
+          ul.appendChild(th); }
+        if (t1 && uniCol[cT]) return;
       }
       var li = el("li", "trow2");
       li.style.setProperty("--sc", stInfo(cfg, x.status)[2]);
