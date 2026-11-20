@@ -216,6 +216,8 @@ button.tag{cursor:pointer}
 .rhcol.now i{background:var(--accent)}.rhcol i.ok{background:#3f9a78}
 .rhcol em{font-style:normal;font-size:11px;font-weight:700}
 .rhcol span{font-size:11px;color:var(--muted)}
+.revnote{align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+.revnote .meta{flex:1;min-width:220px}
 .revbox{background:var(--bg);border-radius:16px;padding:14px 16px;margin-top:14px}
 .revbox.short{border:1.5px solid color-mix(in srgb,var(--accent) 50%,transparent)}
 .revboxh{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
@@ -1772,7 +1774,14 @@ li.mrow2 .label{display:flex;flex-direction:column}
       days[d2] = runs;
     }
     short.sort(function (x, y) { return x.n - y.n; });
-    short.forEach(function (x) { var nm = partName(x.n, x.a, x.b); x.name = nm.name; x.sub = nm.sub; });
+    // join neighbouring sūrahs into one range, e.g. "At-Tariq → At-Takathur"
+    var sr = [];
+    short.forEach(function (x) { var l = sr[sr.length - 1];
+      if (l && x.n === l.en + 1 && l.eb === AYAT[l.en - 1] && x.a === 1) { l.en = x.n; l.eb = x.b; l.p += x.p; }
+      else sr.push({ n:x.n, a:x.a, en:x.n, eb:x.b, p:x.p }); });
+    short = sr.map(function (x) {
+      if (x.n === x.en) { var nm = partName(x.n, x.a, x.eb); return { n:x.n, a:x.a, b:x.eb, p:x.p, name:nm.name, sub:nm.sub }; }
+      return { n:x.n, a:x.a, b:x.eb, p:x.p, name:SURAH[x.n-1] + (x.a > 1 ? " " + x.a : "") + " → " + SURAH[x.en-1] + (x.eb < AYAT[x.en-1] ? " " + x.eb : ""), sub:(x.en - x.n + 1) + " sūrahs" }; });
     return { short:short, shortP:short.reduce(function (x, y) { return x + y.p; }, 0), days:days, total:total };
   }
   function revChecklist(pnl, ws, P){
@@ -1828,7 +1837,10 @@ li.mrow2 .label{display:flex;flex-direction:column}
         row.appendChild(b); }
       lb.appendChild(row);
     });
-    lb.appendChild(el("p", "meta", "If you miss a day, tick it when you catch up."));
+    var rp = el("div", "row revnote"); rp.appendChild(el("span", "meta", "This week's plan is fixed. Anything you memorise now goes into short revision straight away and joins long revision next Monday. If you miss a day, tick it when you catch up."));
+    var upd = el("button", "ghost sm", "Re-plan this week now"); upd.title = "Include everything memorised so far in this week's plan";
+    upd.onclick = function () { if (!confirm("Re-split this week's long revision to include everything you've memorised so far? Days you've ticked stay ticked.")) return; q.revLock = null; redraw(); };
+    rp.appendChild(upd); lb.appendChild(rp);
     // last 6 weeks of long revision
     var hist = el("div", "revhist"), wks = [];
     for (var h = 5; h >= 0; h--) { var s0 = new Date(ws.getTime() - h * 7 * 864e5); wks.push({ s:s0, v:revWeek(s0) }); }
@@ -1844,8 +1856,13 @@ li.mrow2 .label{display:flex;flex-direction:column}
   function renderQuranTrackers(){
     q.shortDone = q.shortDone || {};
     Object.keys(q.shortDone).forEach(function (k) { var o = q.shortDone[k]; if (o && o.p && !o.out) { q.rev[o.d] = Math.max(0, (q.rev[o.d] || 0) - o.p); if (!q.rev[o.d]) delete q.rev[o.d]; o.out = 1; } });
-    var plan0 = revPlan(); q.revTarget = Math.max(1, Math.round(plan0.total) || 1);
     var ms = memStats(), ws = weekStart(new Date()), rw = revWeek(ws), tw = tadWeek();
+    // the long-revision plan is fixed for the week (set on Monday, or the first time it's seen that week);
+    // new memorisation joins short revision straight away and long revision from next Monday
+    var plan0 = revPlan(), wk0 = dkey(ws);
+    if (!q.revLock || q.revLock.wk !== wk0) { q.revLock = { wk:wk0, days:plan0.days, total:plan0.total }; save(); }
+    plan0.days = q.revLock.days; plan0.total = q.revLock.total;
+    q.revTarget = Math.max(1, Math.round(plan0.total) || 1);
 
     // ---- memorisation goals ----
     var now = new Date(), d0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
