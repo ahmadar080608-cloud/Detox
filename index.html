@@ -548,6 +548,18 @@ li.frow{align-items:center;gap:12px}
 .panel input.ftitle{border:0;background:transparent;border-radius:6px;padding:2px 4px;margin-left:-4px;font-weight:700;font-size:15px;min-width:0}
 .panel input.ftitle:focus{background:var(--bg);outline:1px solid var(--line)}
 .fmeta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.nsform{display:flex;flex-direction:column;gap:12px;margin-bottom:14px}
+.nsform .nsfull{display:flex;flex-direction:column;width:100%}
+.nsform textarea{width:100%;box-sizing:border-box;resize:vertical;font:inherit;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--field,transparent);color:inherit}
+.nsform input[type=text]{width:100%;box-sizing:border-box}
+ul.nslist li.nsitem{display:block;border:0;border-left:3px solid var(--sc);padding:12px 0 12px 14px;margin:10px 0;border-bottom:1px solid var(--line)}
+.nstop{display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--muted)}
+.nskind{font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:10px;color:var(--sc)}
+.nstopic{display:block;font-size:16px;margin:6px 0 4px}
+.nsq{margin:8px 0;padding:8px 12px;border-left:2px solid var(--line);font-style:italic;white-space:pre-wrap;color:var(--muted)}
+.nsact{margin:6px 0;font-size:14px;white-space:pre-wrap}.nsact span{font-weight:700}
+.nsbot{display:flex;align-items:center;gap:12px;margin-top:8px}
+.nssel{border-radius:999px;padding:5px 10px;border:1px solid var(--sc);color:var(--sc);background:transparent;font:inherit;font-size:13px;font-weight:600}
 .fdate{display:inline-flex;align-items:center;gap:5px}
 .fdate span{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.75}
 .fdate.done span{color:#3f9a78;opacity:1}
@@ -1173,6 +1185,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     tutoring:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M7 20l2-4M17 20l-2-4"/><path d="M8 10l2.5 2.5L16 7"/>',
     finance:'<rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><circle cx="16" cy="15" r="1.5"/><path d="M6 3h12"/>',
     dawah:'<path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15 9a4 4 0 0 1 0 6"/><path d="M18 6a8 8 0 0 1 0 12"/>',
+    naseeha:'<path d="M4 5h16v10H9l-5 4z"/><path d="M8 9h8M8 12h5"/>',
     isoc:'<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M20 4.5A4 4 0 1 0 20 11a3.2 3.2 0 0 1 0-6.5z"/>',
     fitness:'<path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/>',
     ambitions:'<path d="M2.5 20l7-12 4 6 2.5-3.5L21.5 20z"/><path d="M9.5 8V3l4 2-4 2"/>',
@@ -1205,6 +1218,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     { id:"logic",      name:"Language & Logic", icon:"logic",      group:"islamic", parent:"studies", ar:"اللُّغَةُ وَالمَنْطِقُ", sub:"Naḥw, ṣarf, balāghah & manṭiq", bg:"منطق", color:"--c3" },
     { id:"arabic",     name:"Arabic",          icon:"arabic",     group:"islamic", parent:"islamic", ar:"اللُّغَةُ العَرَبِيَّةُ", sub:"Vocabulary & grammar", bg:"عربي", color:"--c4" },
     { id:"adhkar",     name:"Adhkar",          icon:"adhkar",     group:"islamic", parent:"islamic", ar:"الأَذْكَارُ", sub:"Morning, evening, after ṣalāh & before sleep", bg:"ذكر", color:"--c4" },
+    { id:"naseeha",    name:"Naṣīḥah & Khuṭbahs", icon:"naseeha", group:"islamic", parent:"islamic", ar:"النَّصِيحَةُ وَالخُطَبُ", sub:"Reminders you heard, and whether you acted on them", bg:"نصيحة", color:"--c5" },
     { id:"isoc",       name:"ISOC",            icon:"isoc",       group:"islamic", parent:"islamic", ar:"الجَمْعِيَّةُ الإِسْلَامِيَّةُ", sub:"Islamic Society: events & ideas", bg:"جمعية", color:"--c6" },
     { id:"dawah",      name:"Da‘wah",          icon:"dawah",      group:"islamic", parent:"isoc", ar:"الدَّعْوَةُ", sub:"Talks, leaflets & resources", bg:"دعوة", color:"--c3" },
     { id:"university", name:"University",      icon:"university", group:null,      sub:"Dental school", bg:"جامعة", color:"--c2" },
@@ -1223,11 +1237,11 @@ li.mrow2 .label{display:flex;flex-direction:column}
 
   var byId = {}; PAGES.forEach(function (p) { byId[p.id] = p; });
   var SCIENCES = ["aqeedah","fiqh","tazkiyah","tafsir","hadith","seerah","logic"];
-  var ISLAMIC_SUBS = ["quran","adhkar","studies","arabic","isoc"];
+  var ISLAMIC_SUBS = ["quran","adhkar","studies","arabic","naseeha","isoc"];
   var STUDY_SUBS = SCIENCES;
   var UNI_SUBS = ["lectures","tutorials","seminars"], WORK_SUBS = ["business","tutoring","finance"];
   var NAV_GROUPS = { university:UNI_SUBS, work:WORK_SUBS };
-  var TASK_SECTIONS = ["quran","studies"].concat(SCIENCES, ["adhkar","arabic","isoc","dawah","university"], UNI_SUBS, ["work"], WORK_SUBS, ["fitness","ambitions"]);
+  var TASK_SECTIONS = ["quran","studies"].concat(SCIENCES, ["adhkar","arabic","naseeha","isoc","dawah","university"], UNI_SUBS, ["work"], WORK_SUBS, ["fitness","ambitions"]);
   function isUnder(id, anc){ var p = byId[id]; while (p) { if (p.id === anc) return true; p = p.parent ? byId[p.parent] : null; } return false; }
   var THEMES = [
     { id:"auto",    name:"Auto",    note:"Follows your device", sw:["#f4f1ec","#131816","#e0603f","#1f4f4a"] },
@@ -1583,6 +1597,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     if (sec === "isoc" || sec === "dawah" || sec === "ambitions" || sec === "fitness") renderSciGoals(sec);
     if (sec === "dawah") renderPdfs("dawah", { title:"Da‘wah files", empty:"Upload your da‘wah PDFs: talks, leaflets, reminders and resources", unit:["file","files"], noTicks:true });
     if (sec === "adhkar") renderAdhkar();
+    if (sec === "naseeha") renderNaseeha();
 
     renderNotes(sec);
 
@@ -3663,6 +3678,79 @@ li.mrow2 .label{display:flex;flex-direction:column}
   state.fit = state.fit || {}; state.fit.log = state.fit.log || []; state.fit.weight = state.fit.weight || []; state.fit.target = state.fit.target || 3;
   var FIT_T = [["gym","Gym","#e0603f"],["run","Run","#3f9a78"],["walk","Walk","#8fb573"],["football","Football","#6c9bd2"],["swim","Swim","#4fb3c9"],["cycle","Cycle","#d9a33a"],["home","Home workout","#c58af9"],["sport","Other sport","#9a7b5c"],["stretch","Stretch / mobility","#9aa0a6"]];
   var FIT = {}; FIT_T.forEach(function (t) { FIT[t[0]] = { n:t[1], c:t[2] }; });
+  // Naṣīḥah & Khuṭbahs: what you heard, what was quoted, and whether you acted on it
+  var NS_ACT = [["no","Not acted on yet","#9aa0a6"],["trying","Working on it","#d9a33a"],["yes","Acted on","#3f9a78"]];
+  var nsEdit = null, nsFilter = "all";
+  function renderNaseeha(){
+    var L = state.naseeha = state.naseeha || [];
+    var p = el("div", "panel"); p.id = "ns-log";
+    p.appendChild(el("h2", null, "Naṣīḥah & Khuṭbahs"));
+    var lab = function (t, inp) { var w = el("label", "sllab"); w.appendChild(el("span", null, t)); w.appendChild(inp); return w; };
+    function form(x, done) {
+      var f = el("div", "nsform");
+      var r1 = el("div", "row slform");
+      var dt = el("input"); dt.type = "date"; dt.className = "dateinp"; dt.value = x.date || dkey(new Date());
+      var ty = el("select"); [["khutbah","Khuṭbah"],["naseeha","Naṣīḥah / reminder"],["talk","Talk / lecture"]].forEach(function (o) { var op = el("option", null, o[1]); op.value = o[0]; ty.appendChild(op); }); ty.value = x.kind || "khutbah";
+      var by = el("input"); by.type = "text"; by.maxLength = 120; by.placeholder = "e.g. Imam at the masjid"; by.value = x.by || "";
+      r1.appendChild(lab("Date", dt)); r1.appendChild(lab("Type", ty)); var bl = lab("Who / where (optional)", by); bl.style.flex = "1"; bl.style.minWidth = "180px"; r1.appendChild(bl);
+      f.appendChild(r1);
+      var tp = el("input"); tp.type = "text"; tp.maxLength = 200; tp.placeholder = "Topic, e.g. Guarding the tongue"; tp.value = x.topic || "";
+      var tl = lab("Topic", tp); tl.className += " nsfull"; f.appendChild(tl);
+      var qt = el("textarea"); qt.rows = 3; qt.placeholder = "Āyah or ḥadīth quoted, e.g. Whoever believes in Allah and the Last Day, let him speak good or remain silent (al-Bukhārī 6018)"; qt.value = x.quotes || "";
+      var ql = lab("Āyah or ḥadīth quoted", qt); ql.className += " nsfull"; f.appendChild(ql);
+      var nt = el("textarea"); nt.rows = 2; nt.placeholder = "What will you do about it? e.g. No backbiting this week"; nt.value = x.action || "";
+      var nl = lab("Action / takeaway", nt); nl.className += " nsfull"; f.appendChild(nl);
+      var r2 = el("div", "row");
+      var ac = el("select"); NS_ACT.forEach(function (o) { var op = el("option", null, o[1]); op.value = o[0]; ac.appendChild(op); }); ac.value = x.acted || "no";
+      r2.appendChild(lab("Acted upon?", ac));
+      var sv = el("button", "cta"); sv.appendChild(document.createTextNode(x.id ? "Save" : "Add"));
+      sv.onclick = function () { if (!tp.value.trim()) { tp.focus(); return; }
+        var y = x.id ? x : { id:uid(), added:Date.now() };
+        y.date = dt.value; y.kind = ty.value; y.by = by.value.trim(); y.topic = tp.value.trim(); y.quotes = qt.value.trim(); y.action = nt.value.trim(); y.acted = ac.value;
+        if (!x.id) L.push(y); nsEdit = null; save(); render(); scrollTo_("ns-log"); };
+      var sw = el("div", "slsave"); sw.appendChild(sv);
+      if (x.id) { var cn = el("button", "ghost", "Cancel"); cn.onclick = function () { nsEdit = null; render(); }; sw.appendChild(cn); }
+      r2.appendChild(sw); f.appendChild(r2);
+      return f;
+    }
+    if (!nsEdit) p.appendChild(form({}));
+    var cnt = {}; NS_ACT.forEach(function (o) { cnt[o[0]] = L.filter(function (x) { return (x.acted || "no") === o[0]; }).length; });
+    if (L.length) {
+      var fb = el("div", "stfilter");
+      [["all","All " + L.length]].concat(NS_ACT.map(function (o) { return [o[0], o[1] + " " + cnt[o[0]]]; })).forEach(function (o) {
+        var b = el("button", nsFilter === o[0] ? "on" : null, o[1]); b.onclick = function () { nsFilter = o[0]; render(); }; fb.appendChild(b); });
+      p.appendChild(fb);
+    }
+    var shown = L.filter(function (x) { return nsFilter === "all" || (x.acted || "no") === nsFilter; }).sort(function (a, b) { return (b.date || "").localeCompare(a.date || "") || b.added - a.added; });
+    if (!L.length) p.appendChild(el("p", "empty", "Nothing yet. After Jumuʿah or a reminder, note the topic, what was quoted and what you'll act on."));
+    var ul = el("ul", "nslist");
+    shown.forEach(function (x) {
+      var li = el("li", "nsitem");
+      if (nsEdit === x.id) { li.appendChild(form(x)); ul.appendChild(li); return; }
+      var st = NS_ACT.filter(function (o) { return o[0] === (x.acted || "no"); })[0];
+      li.style.setProperty("--sc", st[2]);
+      var top = el("div", "nstop");
+      top.appendChild(el("span", "nskind", x.kind === "naseeha" ? "Naṣīḥah" : x.kind === "talk" ? "Talk" : "Khuṭbah"));
+      top.appendChild(el("span", "nsdate", x.date ? new Date(x.date + "T12:00").toLocaleDateString("en-GB", { weekday:"short", day:"numeric", month:"short", year:"numeric" }) : ""));
+      if (x.by) top.appendChild(el("span", "nsby", x.by));
+      li.appendChild(top);
+      li.appendChild(el("b", "nstopic", x.topic));
+      if (x.quotes) { var q = el("blockquote", "nsq", x.quotes); li.appendChild(q); }
+      if (x.action) { var a = el("p", "nsact"); a.appendChild(el("span", null, "Takeaway: ")); a.appendChild(document.createTextNode(x.action)); li.appendChild(a); }
+      var bot = el("div", "nsbot");
+      var sel = el("select", "nssel"); sel.setAttribute("aria-label", "Acted upon?");
+      NS_ACT.forEach(function (o) { var op = el("option", null, o[1]); op.value = o[0]; sel.appendChild(op); }); sel.value = x.acted || "no";
+      sel.onchange = function () { x.acted = sel.value; save(); render(); };
+      bot.appendChild(sel);
+      var ed = el("button", "linkbtn", "Edit"); ed.onclick = function () { nsEdit = x.id; render(); }; bot.appendChild(ed);
+      var dl = el("button", "iconbtn"); dl.appendChild(icon("trash")); dl.setAttribute("aria-label", "Delete");
+      dl.onclick = function () { if (!confirm("Delete this entry?")) return; state.naseeha = L.filter(function (y) { return y !== x; }); save(); render(); };
+      bot.appendChild(dl);
+      li.appendChild(bot); ul.appendChild(li);
+    });
+    p.appendChild(ul);
+    app.appendChild(p);
+  }
   function renderFitness(){
     var F = state.fit, now = new Date(), tk = dkey(now), ws = weekStart(now), wk = dkey(ws);
     var p = el("div", "panel"); p.id = "fit-log";
