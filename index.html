@@ -560,6 +560,10 @@ ul.nslist li.nsitem{display:block;border:0;border-left:3px solid var(--sc);paddi
 .nsact{margin:6px 0;font-size:14px;white-space:pre-wrap}.nsact span{font-weight:700}
 .nsbot{display:flex;align-items:center;gap:12px;margin-top:8px}
 .nssel{border-radius:999px;padding:5px 10px;border:1px solid var(--sc);color:var(--sc);background:transparent;font:inherit;font-size:13px;font-weight:600}
+.topchips{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 10px 18px}
+.topchip{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:4px 4px 4px 10px;border-radius:999px;border:1px solid var(--line)}
+.chipx{border:0;background:none;color:var(--muted);cursor:pointer;font:inherit;font-size:13px;padding:0 6px;border-radius:999px}
+.topchip.armed{border-color:#b5482f}.topchip.armed .chipx{color:#fff;background:#b5482f;font-size:11px;font-weight:700;padding:2px 8px}
 .fdate{display:inline-flex;align-items:center;gap:5px}
 .fdate span{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.75}
 .fdate.done span{color:#3f9a78;opacity:1}
@@ -3021,7 +3025,22 @@ li.mrow2 .label{display:flex;flex-direction:column}
   state.uniYear = state.uniYear || 1;
   state.uniMods = state.uniMods || {};      // year -> [{ id, name, color, topics[] }]
   var MOD_COLORS = ["#e0603f","#6c9bd2","#3f9a78","#c58af9","#d9a33a","#5ec4d6"];
-  state.uniTopicsAdd = state.uniTopicsAdd || {};   // built-in module id -> extra topics
+  state.uniTopicsAdd = state.uniTopicsAdd || {}; state.uniTopicsHide = state.uniTopicsHide || {};   // removed topics (kept by index so other topics keep their place)
+  var editTopics = null;
+  function liveTopics(m){ var o = []; m.topics.forEach(function (t, i) { if (!state.uniTopicsHide[m.id + ":" + i]) o.push(i); }); return o; }
+  function topicChips(m, box){
+    if (editTopics !== m.id) return;
+    var w = el("div", "topchips"), live = liveTopics(m);
+    if (!live.length) w.appendChild(el("small", "muted", "No topics left."));
+    live.forEach(function (i) { var k = m.id + ":" + i, n = 0;
+      ["lectures","tutorials","seminars"].forEach(function (sx) { n += ((state.trk && state.trk[sx]) || []).filter(function (x) { return x.topic === k; }).length; });
+      var c = el("span", "topchip"); c.appendChild(el("span", null, m.topics[i]));
+      var x = el("button", "chipx", "×"), armed = false; x.setAttribute("aria-label", "Remove topic " + m.topics[i]); x.title = "Remove topic";
+      x.onclick = function () { if (!armed) { armed = true; c.classList.add("armed"); x.textContent = n ? "Remove? " + n + (n === 1 ? " item moves" : " items move") + " to Not sorted" : "Remove?"; return; }
+        state.uniTopicsHide[k] = 1; save(); render(); };
+      c.appendChild(x); w.appendChild(c); });
+    box.appendChild(w);
+  }   // built-in module id -> extra topics
   function modsFor(y){ return (y === 1 ? UNI_MODULES.map(function (m) { var x = Object.assign({}, m); x.topics = m.topics.concat(state.uniTopicsAdd[m.id] || []); return x; }) : []).concat(state.uniMods[y] || []); }
   function mods(){ return modsFor(state.uniYear); }
   function trkKey(sec){ return UNI_SUBS.indexOf(sec) >= 0 && state.uniYear !== 1 ? sec + "@y" + state.uniYear : sec; }
@@ -3052,20 +3071,22 @@ li.mrow2 .label{display:flex;flex-direction:column}
     if (y === 1) UNI_MODULES.forEach(function (m0) {
       var m = modsFor(1).find(function (x) { return x.id === m0.id; });
       var r = el("div", "modrow"); var dot = el("i"); dot.style.background = m.color; r.appendChild(dot);
-      r.appendChild(el("span", null, (m.short || m.name) + " · " + m.topics.length + " topics"));
+      r.appendChild(el("span", null, (m.short || m.name) + " · " + liveTopics(m).length + " topics"));
+      var et = el("button", "linkbtn", editTopics === m.id ? "Done" : "Topics"); et.onclick = function () { editTopics = editTopics === m.id ? null : m.id; render(); }; r.appendChild(et);
       var add = el("button", "linkbtn", addingTopic === m.id ? "Cancel" : "+ topic"); add.onclick = function () { addingTopic = addingTopic === m.id ? null : m.id; render(); };
-      r.appendChild(add); box.appendChild(r);
+      r.appendChild(add); box.appendChild(r); topicChips(m, box);
       if (addingTopic === m.id) { var tr = el("div", "row"); var ti = el("input"); ti.type = "text"; ti.placeholder = "New topic for " + (m.short || m.name); var tb = el("button", "cta", "Add");
         tb.onclick = function () { if (!ti.value.trim()) return; (state.uniTopicsAdd[m.id] = state.uniTopicsAdd[m.id] || []).push(ti.value.trim()); addingTopic = null; save(); render(); }; ti.onkeydown = function (e) { if (e.key === "Enter") tb.click(); };
         tr.appendChild(ti); tr.appendChild(tb); box.appendChild(tr); setTimeout(function () { ti.focus(); }, 0); }
     });
     mine.forEach(function (m) {
       var r = el("div", "modrow"); var dot = el("i"); dot.style.background = m.color; r.appendChild(dot);
-      r.appendChild(el("span", null, m.name + " · " + m.topics.length + " topics"));
+      r.appendChild(el("span", null, m.name + " · " + liveTopics(m).length + " topics"));
+      var et = el("button", "linkbtn", editTopics === m.id ? "Done" : "Topics"); et.onclick = function () { editTopics = editTopics === m.id ? null : m.id; render(); }; r.appendChild(et);
       var add = el("button", "linkbtn", addingTopic === m.id ? "Cancel" : "+ topic"); add.onclick = function () { addingTopic = addingTopic === m.id ? null : m.id; render(); };
       var del = el("button", "iconbtn"), armed = false; del.title = "Remove module"; del.appendChild(icon("trash"));
       del.onclick = function () { if (!armed) { armed = true; del.classList.add("armed"); del.title = "Press again: its items move to Not sorted yet"; return; } state.uniMods[y] = mine.filter(function (x) { return x !== m; }); save(); render(); };
-      r.appendChild(add); r.appendChild(del); box.appendChild(r);
+      r.appendChild(add); r.appendChild(del); box.appendChild(r); topicChips(m, box);
       if (addingTopic === m.id) { var tr = el("div", "row"); var ti = el("input"); ti.type = "text"; ti.placeholder = "New topic for " + m.name; var tb = el("button", "cta", "Add");
         tb.onclick = function () { if (!ti.value.trim()) return; m.topics.push(ti.value.trim()); addingTopic = null; save(); render(); }; ti.onkeydown = function (e) { if (e.key === "Enter") tb.click(); };
         tr.appendChild(ti); tr.appendChild(tb); box.appendChild(tr); }
@@ -3073,11 +3094,11 @@ li.mrow2 .label{display:flex;flex-direction:column}
     return box;
   }
   function topicKey(m, i){ return m.id + ":" + i; }
-  function topicInfo(k){ if (!k) return null; var a = k.split(":"), m = mods().find(function (x) { return x.id === a[0]; }); if (!m || !m.topics[+a[1]]) return null; return { m:m, i:+a[1], name:m.topics[+a[1]] }; }
+  function topicInfo(k){ if (!k) return null; var a = k.split(":"), m = mods().find(function (x) { return x.id === a[0]; }); if (!m || !m.topics[+a[1]] || state.uniTopicsHide[k]) return null; return { m:m, i:+a[1], name:m.topics[+a[1]] }; }
   function topicSelect(val, onch, cls){
     var sel = el("select", cls || "topsel"); sel.setAttribute("aria-label", "Module and topic");
     var o0 = el("option", null, "Choose module & topic…"); o0.value = ""; sel.appendChild(o0);
-    mods().forEach(function (m) { var g = el("optgroup"); g.label = m.name; m.topics.forEach(function (t, i) { var o = el("option", null, t); o.value = topicKey(m, i); g.appendChild(o); }); sel.appendChild(g); });
+    mods().forEach(function (m) { var g = el("optgroup"); g.label = m.name; m.topics.forEach(function (t, i) { if (state.uniTopicsHide[m.id + ":" + i]) return; var o = el("option", null, t); o.value = topicKey(m, i); g.appendChild(o); }); sel.appendChild(g); });
     sel.value = val || ""; sel.onchange = function () { onch(sel.value); };
     return sel;
   }
