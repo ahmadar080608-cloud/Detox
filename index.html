@@ -548,6 +548,9 @@ li.frow{align-items:center;gap:12px}
 .panel input.ftitle{border:0;background:transparent;border-radius:6px;padding:2px 4px;margin-left:-4px;font-weight:700;font-size:15px;min-width:0}
 .panel input.ftitle:focus{background:var(--bg);outline:1px solid var(--line)}
 .fmeta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.fdate{display:inline-flex;align-items:center;gap:5px}
+.fdate span{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.75}
+.fdate.done span{color:#3f9a78;opacity:1}
 .fmeta input[type=date]{border:0;background:none;color:var(--muted);font:inherit;padding:0}
 .linkbtn{border:0;background:none;color:var(--accent);font-weight:700;font-size:12px;padding:0}
 .iconbtn.armed{color:#d93c3c;background:#fbe0dc}
@@ -970,14 +973,15 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
 .modcard .stack{margin:0;height:8px}
 .modcard span{font-size:12px;color:var(--muted);font-weight:600}
 li.tmod{border:0;padding:20px 0 4px;font-weight:800;font-size:15px;color:var(--mc)}
-li.tmod span{border-left:4px solid var(--mc);padding-left:10px}
+li.tmod span:not(.chev){border-left:4px solid var(--mc);padding-left:10px}
 li.ttopic{padding-top:10px}
 li.ttopic small{margin-left:auto}
-li.colh{cursor:pointer;display:flex;align-items:center;gap:8px;user-select:none}
-li.colh .chev{display:inline-flex;transition:transform .2s;opacity:.7}
+li.colh{cursor:pointer;display:flex;align-items:center;gap:8px;user-select:none;flex-wrap:nowrap;text-align:left}
+li.colh > span:not(.chev){text-align:left}
+li.colh .chev{display:inline-flex;flex:none;transition:transform .2s;opacity:.7}
 li.colh .chev .ic{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2}
 li.colh.shut .chev{transform:rotate(-90deg)}
-li.tmod.colh span{border-left:0;padding-left:0;flex:1;min-width:0}
+li.tmod.colh span:not(.chev){border-left:0;padding-left:0;flex:1;min-width:0}
 li.tmod.colh small{margin-left:auto;font-size:12px;font-weight:600;color:var(--muted)}
 li.colh:hover span{opacity:.85}
 select.topsel{font-size:13px;padding:7px 10px;max-width:260px}
@@ -3187,14 +3191,20 @@ li.mrow2 .label{display:flex;flex-direction:column}
       }
       var li = el("li", "trow2");
       li.style.setProperty("--sc", stInfo(cfg, x.status)[2]);
-      li.appendChild(statusSelect(cfg, x.status, function (v) { x.status = v; save(); render(); }));
+      li.appendChild(statusSelect(cfg, x.status, function (v) { x.status = v;
+        if (uni) { if (v === "cards" || v === "teach") { if (!x.doneAt) x.doneAt = dkey(new Date()); } else delete x.doneAt; }
+        save(); render(); }));
       var tb = el("div", "ftx");
       var tt = el("input"); tt.type = "text"; tt.className = "ftitle"; tt.value = x.title; tt.maxLength = 160; tt.setAttribute("aria-label", cfg.noun + " title");
       tt.onchange = function () { x.title = tt.value.trim() || x.title; save(); };
       tb.appendChild(tt);
       var meta = el("div", "fmeta");
       var d2 = el("input"); d2.type = "date"; d2.value = x.date || ""; d2.setAttribute("aria-label", "Date"); d2.onchange = function () { x.date = d2.value; save(); };
-      meta.appendChild(d2);
+      if (uni) { var lw = el("label", "fdate"); lw.appendChild(el("span", null, "Lecture")); lw.appendChild(d2); meta.appendChild(lw);
+        if (x.status === "cards" || x.status === "teach") { var cw = el("label", "fdate done"); cw.appendChild(el("span", null, "Completed"));
+          var d3 = el("input"); d3.type = "date"; d3.value = x.doneAt || ""; d3.setAttribute("aria-label", "Date completed"); d3.onchange = function () { x.doneAt = d3.value; save(); };
+          cw.appendChild(d3); meta.appendChild(cw); } }
+      else meta.appendChild(d2);
       if (uni) meta.appendChild(topicSelect(x.topic || "", function (v) { x.topic = v || undefined; save(); render(); }, "topsel row"));
       var nb = el("button", "linkbtn", x.notes ? "Notes ✓" : "Add notes"); nb.onclick = function () { trkNote = trkNote === x.id ? null : x.id; render(); };
       meta.appendChild(nb); tb.appendChild(meta);
@@ -4028,6 +4038,14 @@ li.mrow2 .label{display:flex;flex-direction:column}
     var FIX = {"y1l7": "bs:5", "y1l9": "bs:0", "y1l29": "bs:5", "y1l45": "bs:5", "y1l50": "bs:6", "y1l61": "bs:6", "y1l92": "bs:8", "y1l95": "bs:4", "y1l102": "bs:5"};
     (state.trk.lectures || []).forEach(function (x) { if (FIX[x.id] && x.topic === FIX[x.id]) x.topic = undefined; });
     state.fixLec1 = 1; save();
+  }
+  // Year 1 timetable, Jan–Mar 2027 (assessments left out)
+  if (!state.seedLec2) {
+    var LS2 = state.trk.lectures = state.trk.lectures || [], TS2 = state.trk.tutorials = state.trk.tutorials || [];
+    var have2 = {}; LS2.concat(TS2).forEach(function (x) { have2[(x.title || "").toLowerCase()] = 1; });
+    [["2027-01-04", "L", "ob:0", "AHN-1001 Introduction to head & neck anatomy", "09:00–10:00 · lecture"], ["2027-01-04", "L", "eb:0", "EBD-1006 Research Methods", "10:00–11:00 · lecture"], ["2027-01-04", "L", "ob:0", "AHN-1005 Skull & intracranial region", "11:00–12:00 · lecture"], ["2027-01-04", "L", "ob:0", "AHN-1003 Brain, associated structures and cranial nerves", "13:30–14:30 · lecture"], ["2027-01-04", "L", "ob:0", "AHN-1004 Oral & nasal cavities", "14:30–15:30 · lecture"], ["2027-01-06", "L", "ob:1", "EAD-1001 Craniofacial Development Overview", "09:00–10:00 · lecture"], ["2027-01-06", "L", "ob:1", "EAD-1002 Embryogenesis", "10:00–11:00 · lecture"], ["2027-01-06", "L", "ob:1", "EAD-1003 Pharyngeal Arch Development", "11:00–12:00 · lecture"], ["2027-01-08", "L", "ob:0", "AHN-1005 Skull & intracranial region (dissecting room practical)", "09:00–10:30 · Hodgkin Upper Dissecting Room"], ["2027-01-11", "L", "ob:0", "AHN-1006 Mastication, TMJ & swallowing", "12:00–13:00 · lecture"], ["2027-01-11", "L", "ob:0", "AHN-1004 Oral & nasal cavities (dissecting room practical)", "15:30–17:00 · Hodgkin Upper Dissecting Room"], ["2027-01-13", "L", "ob:0", "AHN-1006 Face & scalp", "09:00–10:00 · lecture"], ["2027-01-13", "L", "ob:0", "AHN-1008 Blood supply to the head and venous drainage", "10:00–11:00 · lecture"], ["2027-01-15", "T", "eb:0", "EBD-1008 Optional Q&A", "12:30–13:30 · live online"], ["2027-01-15", "L", "ob:0", "AHN-1009 Face, Scalp & Floor of Mouth (dissecting room practical)", "14:00–15:30 · Hodgkin Upper Dissecting Room"], ["2027-01-20", "L", "ob:1", "EAD-1007 Tooth development and morphogenesis", "09:00–10:00 · lecture"], ["2027-01-20", "L", "ob:1", "EAD-1008 Root development and eruption", "10:00–11:00 · lecture"], ["2027-01-22", "L", "ob:0", "AHN-1010 Neck", "09:00–10:00 · lecture"], ["2027-01-22", "L", "ob:0", "AHN-1011 Pharynx & larynx", "11:00–12:00 · lecture"], ["2027-01-25", "L", "ob:0", "AHN-1013 Neck, pharynx and larynx (dissecting room practical)", "10:30–12:00 · Hodgkin Upper Dissecting Room"], ["2027-01-25", "L", "ob:0", "AHN-1012 Revision Lecture for Head and Neck Anatomy", "14:00–15:00 · lecture"], ["2027-01-27", "L", "ob:4", "EAD-1009 Tooth Development Practicals (Virtual Histology practical)", "09:00–11:00 · live online workshop"], ["2027-01-29", "L", "eb:0", "EBD-1007 Written Essay vs Poster: features and clinical relevance", "10:00–11:00 · lecture, New Hunts House LT1"], ["2027-02-01", "L", "eb:0", "EBD-1009 Developing Critical Thinking and Reasoning", "13:30–15:00 · workshop, Hodgkin Large Committee Room"], ["2027-02-03", "L", "ob:2", "DET-1002 Structure and Function of Enamel", "09:00–10:00 · lecture"], ["2027-02-03", "L", "ob:2", "DET-1003 Amelogenesis", "10:00–11:00 · lecture"], ["2027-02-03", "L", "ob:2", "DET-1001 Dentine", "11:00–12:00 · lecture"], ["2027-02-04", "L", "", "Haptics Dental Simulation 1 (Foundations of Clinical Practice)", "11:30–12:30 · workshop, Floor 18 SIM/Haptics Room"], ["2027-02-10", "L", "ob:2", "DET-1004 Dentinogenesis", "09:00–10:00 · lecture, New Hunts House LT2"], ["2027-02-10", "L", "ob:2", "DET-1005 Dental Pulp", "10:00–11:00 · lecture, New Hunts House LT2"], ["2027-02-10", "L", "ob:2", "DET-1006 Structure of cementum and alveolar bones", "12:00–13:00 · lecture, New Hunts House LT2"], ["2027-02-10", "L", "ob:1", "EAD-1005 Suture Development", "14:00–15:00 · lecture, New Hunts House LT2"], ["2027-02-17", "L", "ob:2", "DET-1007 Structure and function of periodontal ligament", "09:00–10:00 · lecture"], ["2027-02-17", "L", "ob:2", "DET-1008 Gingiva and Periimplant Tissues", "10:00–11:00 · lecture"], ["2027-02-17", "L", "ob:2", "BD1C-DET-1001 Dental Stem Cells and Regenerative Approaches in Dentistry", "11:00–12:00 · lecture"], ["2027-02-24", "T", "eb:0", "EBD-1010 Optional Q&A", "13:00–14:00 · live online"], ["2027-03-01", "L", "ob:2", "DET-1009 Dental Hard Tissues Histology workshop", "10:30–12:30 · practical, Hodgkin General Classroom"], ["2027-03-01", "T", "", "Epidemiology: what is it and why does it matter? Inequalities: teeth are not free living in society (Public Health and Epidemiology)", "13:30–15:30 · tutorial, Hodgkin Classroom 07"], ["2027-03-03", "L", "ob:2", "BD1C-DET-1002 Comparative dental histology and the evolutionary history of teeth", "09:00–10:00 · lecture"], ["2027-03-03", "L", "ob:2", "DET-1010 Revision Lecture on OCB Development and Dental Tissues", "10:00–11:00 · lecture"], ["2027-03-03", "L", "ob:3", "ORB-1002 Structure of the oral mucosa", "11:00–12:00 · lecture"], ["2027-03-03", "L", "ob:1", "EAD-1006 Molecular aspects of temporomandibular joint development", "16:00–17:00 · lecture"], ["2027-03-08", "L", "eb:0", "EBD-1011 Crafting evidence-based professional outputs", "15:30–16:30 · lecture"], ["2027-03-09", "L", "", "Chair Assist (Foundations of Clinical Practice)", "13:30–17:00 · practical, Tower Wing Floor 26"], ["2027-03-10", "L", "ob:3", "ORB-1003 Physiology of salivary glands", "09:00–10:00 · lecture"], ["2027-03-10", "L", "ob:3", "ORB-1004 Functions of saliva", "10:00–11:00 · lecture"], ["2027-03-10", "L", "ob:3", "ORB-1005 Stimuli causing salivary secretion", "11:00–12:00 · lecture"], ["2027-03-11", "L", "", "Haptics Dental Simulation 2 (Foundations of Clinical Practice)", "13:30–14:30 · workshop, Floor 18 SIM/Haptics Room"], ["2027-03-12", "L", "ob:3", "ORB-1007 Taste & smell", "14:00–15:00 · lecture"], ["2027-03-16", "L", "ob:3", "ORB-1008 Development of the salivary glands", "10:30–11:30 · lecture"], ["2027-03-16", "L", "ob:3", "ORB-1006 Saliva interactions with teeth", "12:00–13:00 · lecture"], ["2027-03-17", "L", "ob:3", "ORB-1009 Salivary gland practical: Histology Workshop", "13:00–15:00 · practical, Hodgkin General Classroom"], ["2027-03-22", "L", "ob:1", "EAD-1004 Mechanisms of post-natal growth", "14:00–15:00 · lecture"], ["2027-03-23", "L", "ob:3", "BD1C-ORB-1001 Linking human syndromes to molecular processes", "09:00–10:00 · lecture"], ["2027-03-23", "L", "ob:1", "BD1C-EAD-1001 Craniofacial anomalies", "10:00–11:00 · lecture"], ["2027-03-23", "L", "ob:3", "ORB-1010 Revision Lecture on OCB of soft oral tissues and salivary glands", "11:00–12:00 · lecture"]].forEach(function (r, i) { if (have2[r[3].toLowerCase()]) return;
+      (r[1] === "T" ? TS2 : LS2).push({ id:"y2l" + i, title:r[3], date:r[0], status:"none", notes:r[4], added:Date.now() + 1000 + i, topic:r[2] || undefined }); });
+    state.seedLec2 = 1; save();
   }
   function cdScopeName(sc){ return sc === "studies" ? "Islamic Sciences" : "Year " + sc.split("@y")[1]; }
   function renderCountdowns(scope){
