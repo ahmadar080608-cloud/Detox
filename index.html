@@ -1712,29 +1712,65 @@ li.mrow2 .label{display:flex;flex-direction:column}
     if (B <= 114) return { n:B, dir:1 };
     var l = memOrderList(); return { n:l.length ? l[l.length - 1] : 1, dir:q.memOrder === "end" ? 1 : -1 };
   }
+  // page weight of each āyah, anchored to real juz' sizes (20 pages; Juz' 1 = 21, Juz' 30 = 23)
+  var AYW = null;
+  function ayW(n, a){
+    if (!AYW) { AYW = []; var j = 0, cnt = new Array(31).fill(0), jz = [];
+      for (var m = 1; m <= 114; m++) { jz[m] = []; for (var b = 1; b <= AYAT[m-1]; b++) { while (j < 30 && (JUZ[j][0] < m || (JUZ[j][0] === m && JUZ[j][1] <= b))) j++; jz[m][b] = j; cnt[j]++; } }
+      for (var m2 = 1; m2 <= 114; m2++) { AYW[m2] = []; for (var b2 = 1; b2 <= AYAT[m2-1]; b2++) { var jj = jz[m2][b2]; AYW[m2][b2] = (jj === 1 ? 21 : jj === 30 ? 23 : 20) / cnt[jj]; } } }
+    return AYW[n][a] || 0;
+  }
+  function pgRange(n, a, b){ var t = 0; for (var i = a; i <= b; i++) t += ayW(n, i); return t; }
   function revPlan(){
     var r = {}, shortP = q.shortPages || 10, need = shortP, short = [], A = revAnchor();
     for (var m = 1; m <= 114; m++) if ((q.memA[m] || 0) > 0) r[m] = q.memA[m];
     // short: start at the newest sūrah and walk back through what came just before it
     var walk = []; for (var w = A.n; w >= 1 && w <= 114; w += A.dir) if (r[w]) walk.push(w); else if (walk.length) break;
     for (var i = 0; i < walk.length && need > 0.3; i++) {
-      var n = walk[i], c = r[n], perA = pagesFor(n, 1) || 0.05, pg = pagesFor(n, c);
+      var n = walk[i], c = r[n], pg = pgRange(n, 1, c);
       if (pg <= need + 0.5) { short.push({ n:n, a:1, b:c, p:pg }); need -= pg; r[n] = 0; }
-      else { var k = Math.max(1, Math.min(c, Math.round(need / perA))); short.push({ n:n, a:c - k + 1, b:c, p:pagesFor(n, k) }); r[n] = c - k; need = 0; }
+      else { var k = 0, acc = 0; while (k < c && acc + ayW(n, c - k) / 2 < need) { acc += ayW(n, c - k); k++; } k = Math.max(1, k);
+        short.push({ n:n, a:c - k + 1, b:c, p:pgRange(n, c - k + 1, c) }); r[n] = c - k; need = 0; }
     }
-    // long: everything else, as whole juz' where possible
-    var units = [];
-    for (var j = 1; j <= 30; j++) {
-      var segs = juzSegs(j);
-      if (segs.every(function (g) { return (r[g.n] || 0) >= g.b; })) { units.push({ juz:j, name:"Juz’ " + j, sub:SURAH[segs[0].n-1] + " – " + SURAH[segs[segs.length-1].n-1], p:j === 1 ? 21 : j === 30 ? 23 : 20 }); continue; }
-      segs.forEach(function (g) { var c = r[g.n] || 0; if (c < g.a) return; var bb = Math.min(c, g.b), last = units[units.length - 1];
-        if (last && last.n === g.n && last.b === g.a - 1) last.b = bb; else units.push({ n:g.n, a:g.a, b:bb }); });
+    // long: everything else as one continuous stretch, cut into 7 equal portions
+    var E = [], cum = 0;
+    for (var n2 = 1; n2 <= 114; n2++) { var c2 = r[n2] || 0; for (var a2 = 1; a2 <= c2; a2++) { cum += ayW(n2, a2); E.push({ n:n2, a:a2, c:cum }); } }
+    var total = cum, days = [[], [], [], [], [], [], []];
+    if (q.memOrder === "end") {} // revision always runs in muṣḥaf order
+    var jStart = {}; JUZ.forEach(function (x, i) { jStart[x[0] + ":" + x[1]] = i + 1; });
+    var cuts = [0];
+    if (E.length) {
+      var T = total / 7, prevCut = 0;
+      for (var d = 1; d < 7; d++) {
+        var tgt = total * d / 7, lo = tgt - T * 0.1, hi = tgt + T * 0.1, best = -1, bestScore = 1e9;
+        for (var i2 = prevCut; i2 < E.length - 1; i2++) {
+          var cv = E[i2].c; if (cv < lo) continue; if (cv > hi) break;
+          var nx = E[i2 + 1], pri = jStart[nx.n + ":" + nx.a] ? 0 : nx.a === 1 ? 1 : nx.n !== E[i2].n || nx.a !== E[i2].a + 1 ? 1 : 2;
+          var score = Math.abs(cv - tgt) + [0, 0.03, 0.08][pri] * T;
+          if (score < bestScore) { best = i2 + 1; bestScore = score; }
+        }
+        if (best < 0) { best = prevCut; while (best < E.length - 1 && E[best].c < tgt) best++; }
+        best = Math.max(best, prevCut); cuts.push(best); prevCut = best;
+      }
     }
-    units.forEach(function (u) { if (u.juz) return; var nm = partName(u.n, u.a, u.b); u.name = nm.name; u.sub = nm.sub; u.p = pagesFor(u.n, u.b - u.a + 1); });
-    if (q.memOrder === "end") units.reverse();
-    // split the long revision over 7 days, keeping it in order
-    var total = units.reduce(function (x, u) { return x + u.p; }, 0), days = [[], [], [], [], [], [], []], acc = 0, di = 0;
-    units.forEach(function (u) { if (di < 6 && acc >= total * (di + 1) / 7 - u.p / 2 && days[di].length) di++; days[di].push(u); acc += u.p; });
+    cuts.push(E.length);
+    var label = function (s0, e0) {
+      var ja = jStart[s0.n + ":" + s0.a], nxe = JUZ.findIndex(function (x) { return x[0] > e0.n || (x[0] === e0.n && x[1] > e0.a); });
+      var endsJuz = nxe < 0 ? (e0.n === 114 && e0.a === AYAT[113]) : (function () { var x = JUZ[nxe]; return x[1] > 1 ? (x[0] === e0.n && x[1] === e0.a + 1) : (x[0] === e0.n + 1 && e0.a === AYAT[e0.n - 1]); })();
+      if (ja && endsJuz) { var jb = nxe < 0 ? 30 : nxe; return ja === jb ? "Juz’ " + ja : "Juz’ " + ja + "–" + jb; }
+      if (s0.n === e0.n) return s0.a === 1 && e0.a === AYAT[s0.n - 1] ? SURAH[s0.n - 1] : SURAH[s0.n - 1] + " " + s0.a + "–" + e0.a;
+      return SURAH[s0.n - 1] + (s0.a > 1 ? " " + s0.a : "") + " → " + SURAH[e0.n - 1] + (e0.a < AYAT[e0.n - 1] ? " " + e0.a : "");
+    };
+    for (var d2 = 0; d2 < 7; d2++) {
+      var part = E.slice(cuts[d2], cuts[d2 + 1]); if (!part.length) continue;
+      var runs = [], st = part[0], pv = part[0], p0 = (cuts[d2] ? E[cuts[d2] - 1].c : 0);
+      for (var k2 = 1; k2 <= part.length; k2++) {
+        var cur = part[k2], contig = cur && ((cur.n === pv.n && cur.a === pv.a + 1) || (cur.n === pv.n + 1 && cur.a === 1 && pv.a === AYAT[pv.n - 1]));
+        if (!contig) { runs.push({ name:label(st, pv), juz:true, p:pv.c - p0 }); if (cur) { st = cur; p0 = pv.c; } }
+        if (cur) pv = cur;
+      }
+      days[d2] = runs;
+    }
     short.sort(function (x, y) { return x.n - y.n; });
     short.forEach(function (x) { var nm = partName(x.n, x.a, x.b); x.name = nm.name; x.sub = nm.sub; });
     return { short:short, shortP:short.reduce(function (x, y) { return x + y.p; }, 0), days:days, total:total };
