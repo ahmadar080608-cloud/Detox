@@ -206,6 +206,16 @@ button.tag{cursor:pointer}
 .mjuz.closed::after{transform:rotate(-45deg)}
 .mjuz .mc{margin-right:22px}
 .mjbox{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px 14px;align-items:start}
+.revbox .bar{background:var(--line);margin-bottom:6px}
+.revbig{display:flex;align-items:baseline;gap:8px;margin:4px 0 8px}
+.revbig b{font-family:Lalezar,serif;font-size:40px;line-height:1}
+.revbig span{color:var(--muted);font-weight:600}
+.revhist{display:flex;align-items:flex-end;gap:8px;height:110px}
+.rhcol{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;height:100%}
+.rhcol i{display:block;width:100%;max-width:44px;min-height:3px;border-radius:8px 8px 3px 3px;background:var(--line)}
+.rhcol.now i{background:var(--accent)}.rhcol i.ok{background:#3f9a78}
+.rhcol em{font-style:normal;font-size:11px;font-weight:700}
+.rhcol span{font-size:11px;color:var(--muted)}
 .revbox{background:var(--bg);border-radius:16px;padding:14px 16px;margin-top:14px}
 .revbox.short{border:1.5px solid color-mix(in srgb,var(--accent) 50%,transparent)}
 .revboxh{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
@@ -1729,8 +1739,8 @@ li.mrow2 .label{display:flex;flex-direction:column}
     short.forEach(function (x) { var nm = partName(x.n, x.a, x.b); x.name = nm.name; x.sub = nm.sub; });
     return { short:short, shortP:short.reduce(function (x, y) { return x + y.p; }, 0), days:days, total:total };
   }
-  function revChecklist(pnl, ws){
-    var P = revPlan(), wk = dkey(ws), tk = dkey(new Date());
+  function revChecklist(pnl, ws, P){
+    P = P || revPlan(); var wk = dkey(ws), tk = dkey(new Date());
     q.longDone = q.longDone || {}; q.shortDone = q.shortDone || {};
     var cut = dkey(new Date(ws.getTime() - 35 * 864e5));
     Object.keys(q.longDone).forEach(function (k) { if (k < cut) delete q.longDone[k]; });
@@ -1754,15 +1764,18 @@ li.mrow2 .label{display:flex;flex-direction:column}
     for (var i = 0; i < 400; i++) { var d0 = new Date(); d0.setDate(d0.getDate() - i); if (q.shortDone[dkey(d0)]) streak++; else if (i === 0) continue; else break; }
     var sf = el("div", "revfoot");
     var sbtn = el("button", sdone ? "revdone on" : "revdone", sdone ? "✓ Done today" : "Mark today's short revision done");
-    sbtn.onclick = function () { if (q.shortDone[tk]) { subP(q.shortDone[tk]); delete q.shortDone[tk]; } else q.shortDone[tk] = { d:tk, p:addP(P.shortP) }; redraw(); };
+    sbtn.onclick = function () { if (q.shortDone[tk]) delete q.shortDone[tk]; else q.shortDone[tk] = { d:tk, pages:Math.round(P.shortP * 10) / 10 }; redraw(); };
     sf.appendChild(sbtn); sf.appendChild(el("span", "meta", streak ? streak + (streak === 1 ? " day" : " days") + " in a row" : "Start your streak today"));
     sb.appendChild(sf); pnl.appendChild(sb);
 
     // long revision (over the week)
     var lb = el("div", "revbox");
     var nd = Object.keys(L).length, used = P.days.filter(function (d) { return d.length; }).length;
-    var lh = el("div", "revboxh"); var lt = el("div"); lt.appendChild(el("b", null, "Long revision · over the week")); lt.appendChild(el("span", "meta", "Everything else you've memorised, about " + fmtP(P.total) + " pages, split across the week")); lh.appendChild(lt);
-    lh.appendChild(el("span", "revcount", nd + " / " + used)); lb.appendChild(lh);
+    var lh = el("div", "revboxh"); var lt = el("div"); lt.appendChild(el("b", null, "Long revision · this week")); lt.appendChild(el("span", "meta", "Everything else you've memorised, split across the week. Resets every Monday.")); lh.appendChild(lt);
+    lh.appendChild(el("span", "revcount", nd + " / " + used + " days")); lb.appendChild(lh);
+    var donePg = Object.keys(L).reduce(function (a, k) { return a + (L[k].p || 0); }, 0), tgtPg = Math.max(1, Math.round(P.total));
+    var big = el("div", "revbig"); big.appendChild(el("b", null, String(donePg))); big.appendChild(el("span", null, "of " + tgtPg + " pages this week")); lb.appendChild(big);
+    lb.appendChild(barEl(Math.min(1, donePg / tgtPg)));
     if (!P.total) lb.appendChild(el("p", "meta", "Nothing yet: all your memorisation is in your short revision for now."));
     var dn = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
     P.days.forEach(function (arr, i) {
@@ -1779,11 +1792,23 @@ li.mrow2 .label{display:flex;flex-direction:column}
         row.appendChild(b); }
       lb.appendChild(row);
     });
-    lb.appendChild(el("p", "meta", "Ticking adds the pages to today's revision count above. If you miss a day, tick it when you catch up."));
+    lb.appendChild(el("p", "meta", "If you miss a day, tick it when you catch up."));
+    // last 6 weeks of long revision
+    var hist = el("div", "revhist"), wks = [];
+    for (var h = 5; h >= 0; h--) { var s0 = new Date(ws.getTime() - h * 7 * 864e5); wks.push({ s:s0, v:revWeek(s0) }); }
+    var mx = Math.max(tgtPg, 1); wks.forEach(function (x) { mx = Math.max(mx, x.v); });
+    lb.appendChild(el("h3", null, "Last 6 weeks"));
+    wks.forEach(function (x, i) { var c = el("div", "rhcol" + (i === 5 ? " now" : "")), bar = el("i"); bar.style.height = Math.round(x.v / mx * 70) + "px"; if (x.v >= tgtPg) bar.className = "ok";
+      c.title = "Week of " + x.s.toDateString() + ": " + x.v + " pages"; c.appendChild(el("em", null, x.v ? String(x.v) : "")); c.appendChild(bar);
+      c.appendChild(el("span", null, x.s.toLocaleDateString(undefined, { day:"numeric", month:"short" }))); hist.appendChild(c); });
+    lb.appendChild(hist);
     pnl.appendChild(lb);
   }
   var openSurah = null;
   function renderQuranTrackers(){
+    q.shortDone = q.shortDone || {};
+    Object.keys(q.shortDone).forEach(function (k) { var o = q.shortDone[k]; if (o && o.p && !o.out) { q.rev[o.d] = Math.max(0, (q.rev[o.d] || 0) - o.p); if (!q.rev[o.d]) delete q.rev[o.d]; o.out = 1; } });
+    var plan0 = revPlan(); q.revTarget = Math.max(1, Math.round(plan0.total) || 1);
     var ms = memStats(), ws = weekStart(new Date()), rw = revWeek(ws), tw = tadWeek();
 
     // ---- memorisation goals ----
@@ -1830,7 +1855,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     var sum = el("div", "qsum");
     [
       { id:"q-mem",  ic:"quran",   v:pct(ms.pct), l:"Memorised", f:ms.pct/100, c:"--c1" },
-      { id:"q-rev",  ic:"tools",   v:rw + "/" + q.revTarget, l:"Revision this week", f:rw/q.revTarget, c:"--c3" },
+      { id:"q-rev",  ic:"tools",   v:rw + "/" + q.revTarget, l:"Long revision · pages", f:rw/q.revTarget, c:"--c3" },
       { id:"q-read", ic:"hadith",  v:readW + "/" + q.readTarget, l:"Reading this week", f:readW/q.readTarget, c:"--c4" },
       { id:"q-tad",  ic:"target",  v:tw + "/" + q.tadTarget, l:"Tadabbur this week", f:tw/q.tadTarget, c:"--c5" }
     ].forEach(function (s) {
@@ -1960,9 +1985,8 @@ li.mrow2 .label{display:flex;flex-direction:column}
 
     // ---- weekly revision ----
     var pr = el("div", "panel"); pr.id = "q-rev";
-    pr.appendChild(el("h2", null, "Weekly revision"));
-    weeklyBlock(pr, q.rev, q.revTarget, function (v) { q.revTarget = v; }, "pages", 604, "Target reached this week, mā shāʾ Allāh.", "1 juz is about 20 pages.");
-    revChecklist(pr, ws);
+    pr.appendChild(el("h2", null, "Revision"));
+    revChecklist(pr, ws, plan0);
     app.appendChild(pr);
 
     // ---- weekly reading ----
