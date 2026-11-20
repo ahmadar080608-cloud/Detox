@@ -68,10 +68,11 @@ nav .spacer{height:14px}
 main{margin-left:250px;padding:48px 56px 80px;max-width:1140px}
 
 /* ===== cards ===== */
-.grain{position:relative;isolation:isolate;overflow:hidden}
-.grain::after{content:"";position:absolute;inset:0;z-index:0;opacity:.5;mix-blend-mode:overlay;pointer-events:none;
+.grain{position:relative;isolation:isolate;overflow:hidden;-webkit-mask-image:-webkit-radial-gradient(white,black);mask-image:radial-gradient(white,black)}
+.grain::after{content:"";position:absolute;inset:0;z-index:0;border-radius:inherit;opacity:.5;mix-blend-mode:overlay;pointer-events:none;
  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 .grain>*{position:relative;z-index:1}
+.subtabs{scrollbar-width:none}.subtabs::-webkit-scrollbar{display:none}
 .bgl{position:absolute!important;z-index:0!important;font-family:Lalezar,Amiri,serif;line-height:1;color:rgba(0,0,0,.13);white-space:nowrap;pointer-events:none;font-size:240px;left:-20px;top:-40px}
 .bgl.arb{font-family:Amiri,serif;direction:rtl}
 .otag{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#fff;border:1.5px solid rgba(255,255,255,.6);padding:4px 10px;line-height:1.2;white-space:nowrap}
