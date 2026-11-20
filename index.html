@@ -1054,7 +1054,8 @@ li.mrow2 .label{display:flex;flex-direction:column}
   header{position:sticky;top:0;bottom:auto;width:auto;flex-direction:row;align-items:center;padding:14px 18px;gap:0;overflow:visible}
   .brand .t1{font-size:26px}.brand .t2{font-size:9px;margin-top:4px}
   nav{position:fixed;left:0;right:0;bottom:0;flex-direction:row;justify-content:space-around;background:var(--hdr);
-      padding:6px 2px calc(6px + env(safe-area-inset-bottom));border-top:1px solid rgba(255,255,255,.08);z-index:10}
+      padding:6px 2px calc(6px + env(safe-area-inset-bottom));border-top:1px solid rgba(255,255,255,.08);z-index:50;
+      -webkit-transform:translateZ(0);transform:translateZ(0)}
   nav button{flex-direction:column;gap:3px;font-size:10px;padding:6px 4px;border-left:0;border-top:2px solid transparent;flex:1;align-items:center}
   nav button.on{border-top-color:var(--accent)}
   nav button small,nav button.child,nav .spacer{display:none}
@@ -1220,6 +1221,12 @@ li.mrow2 .label{display:flex;flex-direction:column}
 
   var app = document.getElementById("app");
   var navEl = document.getElementById("nav");
+  // iPhone: a fixed bar inside the sticky header can vanish while scrolling, so on phones the bar lives directly in <body>
+  (function () { var mq = window.matchMedia("(max-width:899px)");
+    function placeNav(){ var hdr = document.querySelector("header");
+      if (mq.matches) { if (navEl.parentNode !== document.body) document.body.appendChild(navEl); }
+      else if (navEl.parentNode !== hdr) hdr.insertBefore(navEl, document.getElementById("memSide")); }
+    placeNav(); if (mq.addEventListener) mq.addEventListener("change", placeNav); else if (mq.addListener) mq.addListener(placeNav); })();
   var addingIn = null;   // which section has the new-task row open
 
   // ---------- sidebar ----------
