@@ -1757,7 +1757,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     var sb = el("div", "revbox short");
     var sh = el("div", "revboxh"); var st = el("div"); st.appendChild(el("b", null, "Short revision · every day")); st.appendChild(el("span", "meta", "Your newest memorisation, about " + fmtP(P.shortP) + " pages")); sh.appendChild(st);
     var sz = el("select"); sz.setAttribute("aria-label", "Short revision size");
-    [[5,"¼ juz’"],[10,"½ juz’"],[20,"1 juz’"]].forEach(function (o) { var op = el("option", null, o[1]); op.value = o[0]; if ((q.shortPages || 10) === o[0]) op.selected = true; sz.appendChild(op); });
+    [[5,"¼ juz’"],[10,"½ juz’"],[15,"¾ juz’"],[20,"1 juz’"]].forEach(function (o) { var op = el("option", null, o[1]); op.value = o[0]; if ((q.shortPages || 10) === o[0]) op.selected = true; sz.appendChild(op); });
     sz.onchange = function () { q.shortPages = +sz.value; redraw(); }; sh.appendChild(sz); sb.appendChild(sh);
     sb.appendChild(list(P.short));
     var sdone = q.shortDone[tk], streak = 0;
