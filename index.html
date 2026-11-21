@@ -574,6 +574,11 @@ ul.nslist li.nsitem{display:block;border:0;border-left:3px solid var(--sc);paddi
 .tutf.add{margin:12px 0 0}
 .tutsel{font:inherit;font-size:13px;padding:6px 26px 6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--field,transparent);color:inherit;max-width:180px}
 .tutf.add .tutsel{font-size:14px;padding:9px 28px 9px 14px}
+.folderbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
+.fold{display:inline-flex;align-items:center;gap:7px;font:inherit;font-size:13px;font-weight:600;padding:8px 12px;border-radius:12px;border:1px solid var(--line);background:transparent;color:inherit;cursor:pointer}
+.fold .ic{width:16px;height:16px}.fold small{font-size:11px;opacity:.6;font-weight:700}
+.fold.on{background:var(--ink,#1d1d1d);color:var(--bg,#fff);border-color:transparent}
+.foldhead{align-items:center;gap:10px;margin:4px 0 8px}.foldhead .ftitle{flex:1;min-width:140px;font-weight:700}
 .fdate{display:inline-flex;align-items:center;gap:5px}
 .fdate span{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.75}
 .fdate.done span{color:#3f9a78;opacity:1}
@@ -1188,6 +1193,8 @@ li.mrow2 .label{display:flex;flex-direction:column}
     tafsir:'<path d="M2 5.5C4.5 4 7.5 4 12 6c4.5-2 7.5-2 10-.5V11"/><path d="M2 5.5V19c2.5-1.5 5.5-1.5 10 .5"/><path d="M12 6v7"/><circle cx="17.5" cy="16.5" r="3"/><path d="M19.7 18.7L22 21"/>',
     seerah:'<circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h7.5a3.5 3.5 0 0 0 0-7h-7a3.5 3.5 0 0 1 0-7H16"/>',
     logic:'<path d="M8 3H7a2 2 0 0 0-2 2v4l-2 3 2 3v4a2 2 0 0 0 2 2h1M16 3h1a2 2 0 0 1 2 2v4l2 3-2 3v4a2 2 0 0 1-2 2h-1"/><path d="M9.5 12h5"/>',
+    folder:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+    files:'<path d="M8 3h8l4 4v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M4 7v12a2 2 0 0 0 2 2"/>',
     pdf:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/>',
     upload:'<path d="M12 15V3M7 8l5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/>',
     download:'<path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/>',
@@ -1609,6 +1616,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
       if (sec === "hadith") { var hr = document.getElementById("h-rev"), mt = document.getElementById("mt-hadith"); if (hr && mt) hr.parentNode.insertBefore(mt, hr); } }
     if (sec === "fitness") renderFitness();
     if (sec === "isoc" || sec === "dawah" || sec === "ambitions" || sec === "fitness") renderSciGoals(sec);
+    if (sec === "tutoring") renderPdfs("tutoring", { title:"Workbooks & folders", empty:"Upload your workbooks, worksheets and past papers", unit:["file","files"], noTicks:true, folders:true });
     if (sec === "dawah") renderPdfs("dawah", { title:"Da‘wah files", empty:"Upload your da‘wah PDFs: talks, leaflets, reminders and resources", unit:["file","files"], noTicks:true });
     if (sec === "adhkar") renderAdhkar();
     if (sec === "naseeha") renderNaseeha();
@@ -2890,9 +2898,13 @@ li.mrow2 .label{display:flex;flex-direction:column}
   function fmtSize(b){ return b > 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(b / 1024)) + " KB"; }
   var pdfMsg = {}, openPdfNote = null, viewer = null;
 
+  var pdfFolderOpen = {}, pdfNewFolder = {};
   function renderPdfs(sec, opt){
     opt = opt || {};
     var L = state.sciFiles[sec] = state.sciFiles[sec] || [], tk = dkey(new Date());
+    var FL = null, curF = "";
+    if (opt.folders) { state.pdfFolders = state.pdfFolders || {}; FL = state.pdfFolders[sec] = state.pdfFolders[sec] || [];
+      curF = pdfFolderOpen[sec] || ""; if (curF && curF !== "__none" && !FL.some(function (f) { return f.id === curF; })) curF = pdfFolderOpen[sec] = ""; }
     var p = el("div", "panel"); p.id = "f-" + sec;
     p.appendChild(el("h2", null, opt.title || "Lessons & PDFs"));
     var top = el("div", "row"); top.style.justifyContent = "space-between";
@@ -2909,6 +2921,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
         return chain.then(function () {
           if (!/\.pdf$/i.test(f.name) && f.type !== "application/pdf") { failed.push(f.name + " (not a PDF)"); return; }
           var id = uid(), rec = { id:id, title:f.name.replace(/\.pdf$/i, "").replace(/[_-]+/g, " ").trim(), name:f.name, size:f.size, date:tk, added:Date.now(), notes:"" };
+          if (FL && curF && curF !== "__none") rec.folder = curF;
           return fPut({ id:id, sec:sec, name:f.name, type:"application/pdf", blob:f }).then(function () {
             localFiles[id] = 1; L.unshift(rec); done++; save();
             if (driveOn()) return driveUpload(sec, f, f.name).then(function (d) { rec.drive = d; save(); }).catch(function (e) { driveErr = (e && e.message) || "Couldn't reach Google Drive."; });
@@ -2926,6 +2939,28 @@ li.mrow2 .label{display:flex;flex-direction:column}
       [[nr, "revised"], [np, "acted upon partly"], [nf, "acted upon fully"]].forEach(function (x) { var sp = el("span"); sp.appendChild(el("b", null, x[0] + "/" + L.length)); sp.appendChild(document.createTextNode(" " + x[1])); fs.appendChild(sp); });
       p.appendChild(fs);
     }
+    if (FL) {
+      var fb = el("div", "folderbar");
+      var fbtn = function (id, name, n) { var b = el("button", "fold" + (curF === id ? " on" : "")); b.appendChild(icon(id && id !== "__none" ? "folder" : "files")); b.appendChild(el("span", null, name)); b.appendChild(el("small", null, String(n)));
+        b.onclick = function () { pdfFolderOpen[sec] = id; render(); }; return b; };
+      fb.appendChild(fbtn("", "All files", L.length));
+      FL.forEach(function (f) { fb.appendChild(fbtn(f.id, f.name, L.filter(function (x) { return x.folder === f.id; }).length)); });
+      var nNone = L.filter(function (x) { return !x.folder || !FL.some(function (f) { return f.id === x.folder; }); }).length;
+      if (FL.length && nNone) fb.appendChild(fbtn("__none", "Not in a folder", nNone));
+      var nf = el("button", "linkbtn", pdfNewFolder[sec] ? "Cancel" : "+ New folder"); nf.onclick = function () { pdfNewFolder[sec] = !pdfNewFolder[sec]; render(); }; fb.appendChild(nf);
+      p.appendChild(fb);
+      if (pdfNewFolder[sec]) { var nr0 = el("div", "row"); var ni = el("input"); ni.type = "text"; ni.maxLength = 60; ni.placeholder = "Folder name, e.g. Yusuf · GCSE Biology"; var nb0 = el("button", "cta", "Create");
+        nb0.onclick = function () { var n = ni.value.trim(); if (!n) return; var f = { id:uid(), name:n }; FL.push(f); pdfNewFolder[sec] = false; pdfFolderOpen[sec] = f.id; save(); render(); };
+        ni.onkeydown = function (e) { if (e.key === "Enter") nb0.click(); }; nr0.appendChild(ni); nr0.appendChild(nb0); p.appendChild(nr0); setTimeout(function () { ni.focus(); }, 0); }
+      var cf = FL.find(function (f) { return f.id === curF; });
+      if (cf) { var fr = el("div", "row foldhead");
+        var fn = el("input"); fn.type = "text"; fn.className = "ftitle"; fn.value = cf.name; fn.maxLength = 60; fn.setAttribute("aria-label", "Folder name"); fn.onchange = function () { cf.name = fn.value.trim() || cf.name; save(); render(); };
+        fr.appendChild(icon("folder")); fr.appendChild(fn); fr.appendChild(el("span", "meta", "New uploads go into this folder."));
+        var fd = el("button", "iconbtn"), farmed = false; fd.title = "Delete folder"; fd.appendChild(icon("trash"));
+        fd.onclick = function () { if (!farmed) { farmed = true; fd.classList.add("armed"); fd.title = "Press again: the files stay, outside any folder"; pdfMsg[sec] = "Press the bin again to delete the folder “" + cf.name + "”. Its files are kept."; render(); return; }
+          L.forEach(function (x) { if (x.folder === cf.id) delete x.folder; }); state.pdfFolders[sec] = FL.filter(function (f) { return f !== cf; }); pdfFolderOpen[sec] = ""; pdfMsg[sec] = "Folder deleted. Its files are now outside any folder."; save(); render(); };
+        fr.appendChild(fd); p.appendChild(fr); }
+    }
     if (pdfMsg[sec]) p.appendChild(el("p", "toast", pdfMsg[sec]));
     if (!L.length) {
       var em = el("button", "dropzone");
@@ -2935,7 +2970,9 @@ li.mrow2 .label{display:flex;flex-direction:column}
       p.appendChild(em);
     }
     var ul = el("ul");
-    L.slice().sort(function (a, b) { return (b.date || "").localeCompare(a.date || "") || b.added - a.added; }).forEach(function (x) {
+    var inFolder = function (x) { if (!FL || !curF) return true; if (curF === "__none") return !x.folder || !FL.some(function (f) { return f.id === x.folder; }); return x.folder === curF; };
+    if (FL && curF && L.length && !L.some(inFolder)) p.appendChild(el("p", "empty", "This folder is empty. Upload files here, or move files in with the folder menu on each file."));
+    L.filter(inFolder).sort(function (a, b) { return (b.date || "").localeCompare(a.date || "") || b.added - a.added; }).forEach(function (x) {
       var li = el("li", "frow");
       var ic = el("span", "fic"); ic.appendChild(icon("pdf")); li.appendChild(ic);
       var tb = el("div", "ftx");
@@ -2946,6 +2983,11 @@ li.mrow2 .label{display:flex;flex-direction:column}
       var dt = el("input"); dt.type = "date"; dt.value = x.date || tk; dt.setAttribute("aria-label", "Lesson date");
       dt.onchange = function () { x.date = dt.value || x.date; save(); render(); };
       meta.appendChild(dt); meta.appendChild(el("span", null, fmtSize(x.size || 0)));
+      if (FL && FL.length) { var fsel = el("select", "tutsel"); fsel.setAttribute("aria-label", "Folder");
+        var o0 = el("option", null, "No folder"); o0.value = ""; fsel.appendChild(o0);
+        FL.forEach(function (f) { var o = el("option", null, f.name); o.value = f.id; fsel.appendChild(o); });
+        fsel.value = FL.some(function (f) { return f.id === x.folder; }) ? x.folder : ""; fsel.onchange = function () { if (fsel.value) x.folder = fsel.value; else delete x.folder; save(); render(); };
+        meta.appendChild(fsel); }
       if (x.drive) { var dv = el("a", "drivechip", "In Drive"); dv.href = x.drive.link; dv.target = "_blank"; dv.rel = "noopener"; dv.title = "Open in Google Drive"; meta.appendChild(dv); }
       else if (!localFiles[x.id]) meta.appendChild(el("span", "drivechip off", "On another device"));
       var nb = el("button", "linkbtn", x.notes ? "Notes ✓" : "Add notes"); nb.onclick = function () { openPdfNote = openPdfNote === x.id ? null : x.id; render(); };
