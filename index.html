@@ -572,6 +572,9 @@ ul.nslist li.nsitem{display:block;border:0;border-left:3px solid var(--sc);paddi
 .mvbtns .mv:disabled{opacity:.25;cursor:default}
 .tutf{display:flex;flex-wrap:wrap;gap:6px}
 .tutf.add{margin:12px 0 0}
+.tutpick{display:inline-flex;align-items:center;gap:6px}
+.tutnew{max-width:170px;padding-right:12px}
+.tutok{padding:6px 14px;font-size:13px}
 .tutsel{font:inherit;font-size:13px;padding:6px 26px 6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--field,transparent);color:inherit;max-width:180px}
 .tutf.add .tutsel{font-size:14px;padding:9px 28px 9px 14px}
 .folderbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
@@ -3117,10 +3120,20 @@ li.mrow2 .label{display:flex;flex-direction:column}
     list.forEach(function (v) { var o = el("option", null, v); o.value = v; sel.appendChild(o); });
     if (kind) { var on = el("option", null, "+ New " + kind + "…"); on.value = "__new"; sel.appendChild(on); }
     sel.value = val || "";
-    sel.onchange = function () { if (sel.value === "__new") { var n = prompt("New " + kind); n = n && n.trim(); if (!n) { sel.value = val || ""; return; }
-        var k = kind === "tutee" ? "tutees" : "subjects"; state.tut[k] = state.tut[k] || []; if (state.tut[k].indexOf(n) < 0) state.tut[k].push(n); val = n; onch(n); return; }
+    var wrap = el("span", "tutpick"); wrap.appendChild(sel);
+    sel.onchange = function () {
+      if (sel.value === "__new") {   // type the new name right here (no pop-up)
+        var inp = el("input"); inp.type = "text"; inp.maxLength = 60; inp.className = "tutsel tutnew"; inp.placeholder = "New " + kind + " name";
+        var ok = el("button", "cta tutok", "Add"), cx = el("button", "linkbtn", "Cancel");
+        var finish = function () { var n = inp.value.trim(); if (!n) { inp.focus(); return; }
+          var k = kind === "tutee" ? "tutees" : "subjects"; state.tut[k] = state.tut[k] || []; if (state.tut[k].indexOf(n) < 0) state.tut[k].push(n);
+          var o = el("option", null, n); o.value = n; sel.insertBefore(o, sel.lastChild); sel.value = n; val = n;
+          wrap.innerHTML = ""; wrap.appendChild(sel); save(); onch(n); };
+        ok.onclick = finish; inp.onkeydown = function (e) { if (e.key === "Enter") { e.preventDefault(); finish(); } if (e.key === "Escape") cx.onclick(); };
+        cx.onclick = function () { sel.value = val || ""; wrap.innerHTML = ""; wrap.appendChild(sel); };
+        wrap.innerHTML = ""; wrap.appendChild(inp); wrap.appendChild(ok); wrap.appendChild(cx); setTimeout(function () { inp.focus(); }, 0); return; }
       val = sel.value; onch(sel.value); };
-    return sel;
+    return wrap;
   }
   function tutSubjects(){ var a = TUT_SUBJ.slice(); (state.tut.subjects || []).forEach(function (x) { if (a.indexOf(x) < 0) a.push(x); }); return a; }
   function tutTutees(){ return (state.tut.tutees || []).slice(); }
@@ -3256,7 +3269,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     if (cfg.statuses === UNI_STATUS) { state.uniLastTopic = state.uniLastTopic || {}; tp = topicSelect(state.uniLastTopic[sec] || "", function (v) { state.uniLastTopic[sec] = v; save(); }, "topsel add"); }
     if (cfg.cats) { ar = el("select"); ar.setAttribute("aria-label", "Life area"); AREAS.forEach(function (a) { var o = el("option", null, a); o.value = a; ar.appendChild(o); }); dt.title = "Target date (optional)"; }
     if (tp) r.appendChild(tp);
-    if (tutNew) { var tr0 = tutFields(tutNew, function () {}); tr0.classList.add("add"); p.appendChild(tr0); }
+    if (tutNew) { var tr0 = tutFields(tutNew, function () { state.tut.last = Object.assign({}, tutNew); save(); }); tr0.classList.add("add"); p.appendChild(tr0); }
     r.appendChild(ti); if (ar) r.appendChild(ar); r.appendChild(dt); r.appendChild(ss); r.appendChild(ab);
     p.appendChild(r);
     // paste a whole list
