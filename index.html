@@ -606,6 +606,8 @@ ul.rtedit li input[type=text]{flex:1;min-width:180px}
 .rtdays{display:flex;flex-wrap:wrap;gap:4px}
 .rtday{font:inherit;font-size:11px;font-weight:700;padding:4px 8px;border-radius:999px;border:1px solid var(--line);background:transparent;color:inherit;cursor:pointer}
 .rtday.on{background:var(--accent,#e0603f);border-color:transparent;color:#fff}
+.seedask{border:1px solid var(--accent,#e0603f)}
+.seedask b{display:block;font-size:16px;margin-bottom:4px}
 .fdate{display:inline-flex;align-items:center;gap:5px}
 .fdate span{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.75}
 .fdate.done span{color:#3f9a78;opacity:1}
@@ -1619,7 +1621,29 @@ li.mrow2 .label{display:flex;flex-direction:column}
     app.appendChild(p);
     makeCollapsible("routine");
   }
+  function seededCount(){
+    var n = (state.countdowns || []).filter(function (c) { return /^bds1-/.test(c.id || ""); }).length;
+    ["lectures","tutorials"].forEach(function (k) { n += ((state.trk && state.trk[k]) || []).filter(function (x) { return /^y[124]l\d+$/.test(x.id || ""); }).length; });
+    return n;
+  }
+  function seededCard(){
+    if (state.seedKeep) return;
+    var n = seededCount(); if (!n) return;
+    var p = el("div", "panel seedask");
+    p.appendChild(el("b", null, "This includes a KCL BDS Year 1 timetable and exam dates"));
+    p.appendChild(el("p", "meta", n + " lectures, tutorials and exam dates (e.g. the OSCE) came with the app. If they aren't your course, remove them. Anything you added yourself stays."));
+    var r = el("div", "row");
+    var rm = el("button", "cta", "Remove them");
+    rm.onclick = function () { if (!confirm("Remove the built-in KCL timetable and exam dates (" + n + " items)?")) return;
+      state.countdowns = (state.countdowns || []).filter(function (c) { return !/^bds1-/.test(c.id || ""); });
+      ["lectures","tutorials"].forEach(function (k) { if (state.trk && state.trk[k]) state.trk[k] = state.trk[k].filter(function (x) { return !/^y[124]l\d+$/.test(x.id || ""); }); });
+      state.seedKeep = 1; save(); render(); };
+    var kp = el("button", "ghost", "They're mine, keep them"); kp.onclick = function () { state.seedKeep = 1; save(); render(); };
+    r.appendChild(rm); r.appendChild(kp); p.appendChild(r);
+    app.appendChild(p);
+  }
   function renderHome(){
+    seededCard();
     var toprow = el("div", "toprow"); toprow.appendChild(ayahCard()); toprow.appendChild(mementoEl("card")); app.appendChild(toprow);
     var cds = countdownStrip(); if (cds) app.appendChild(cds);
     routinePanel();
@@ -4354,6 +4378,9 @@ li.mrow2 .label{display:flex;flex-direction:column}
   function cdLabel(d){ return d === 0 ? "Today" : d === 1 ? "Tomorrow" : d < 0 ? (-d) + (d === -1 ? " day ago" : " days ago") : d + " days"; }
   function upcomingCountdowns(){ return state.countdowns.filter(function (c) { return daysUntil(c.date) >= 0; }).sort(function (a, b) { return a.date.localeCompare(b.date); }); }
   state.countdowns.forEach(function (c) { if (!c.scope) c.scope = "uni@y" + (state.uniYear || 1); });
+  // The built-in KCL timetable/exam seeds are only for the original owner's data (which already has these flags).
+  // New people start empty instead of getting someone else's course.
+  ["seedBDS1","seedLec1","seedLec2","fixLec1","fixLec2","fixLec3","fixLec4"].forEach(function (k) { if (!state[k]) state[k] = 1; });
   // BDS1 Assessment & Feedback calendar 2026/27 (added once into Year 1)
   if (!state.seedBDS1) {
     [["Clinical Exams (OSCE) · Summative","2026-11-24","exam","4NNYB01B · on campus · results 01/12/2026"],
