@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Detox · Focus Hub</title>
+<title>حرص · Focus Hub</title>
+<meta name="apple-mobile-web-app-title" content="حرص">
+<meta name="application-name" content="حرص">
 <link rel="icon" href="logo.svg?v=2" type="image/svg+xml">
 <link rel="icon" href="favicon-32.png?v=2" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
@@ -1143,7 +1145,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
 </head>
 <body>
 <header>
-  <div class="brand" id="brand"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="var(--accent)"/><path d="M28 24l-4-4a7 7 0 0 0-10 10l4 4M36 40l4 4a7 7 0 0 0 10-10l-4-4" fill="none" stroke="#f4f1ec" stroke-width="3.6" stroke-linecap="round"/><path d="M27 37l-3 3M37 27l3-3M31 18v-4M33 50v-4" stroke="#131816" stroke-width="3" stroke-linecap="round"/></svg><div><div class="t1">Detox <span id="syncdot" class="syncdot"></span></div><div class="t2">Focus Hub</div></div></div>
+  <div class="brand" id="brand"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="var(--accent)"/><path d="M28 24l-4-4a7 7 0 0 0-10 10l4 4M36 40l4 4a7 7 0 0 0 10-10l-4-4" fill="none" stroke="#f4f1ec" stroke-width="3.6" stroke-linecap="round"/><path d="M27 37l-3 3M37 27l3-3M31 18v-4M33 50v-4" stroke="#131816" stroke-width="3" stroke-linecap="round"/></svg><div><div class="t1" lang="ar">حرص <span id="syncdot" class="syncdot"></span></div><div class="t2">Focus Hub</div></div></div>
   <nav id="nav"></nav>
   <div id="memSide"></div>
   <div class="side-one" id="sideOne"></div>
@@ -2368,7 +2370,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
   var mode = "focus", remaining = state.focusMin*60, timerId = null, endAt = 0;
   function fmt(s){ var m = Math.floor(s/60), r = s%60; return (m<10?"0":"")+m+":"+(r<10?"0":"")+r; }
   function paintTimer(){
-    document.title = (timerId ? fmt(remaining) + " · " : "") + "Detox · Focus Hub";
+    document.title = (timerId ? fmt(remaining) + " · " : "") + "حرص · Focus Hub";
     var t = document.getElementById("timer"); if (!t) return;
     t.textContent = fmt(remaining);
     document.getElementById("mode").textContent = mode === "focus" ? "Focus · " + state.focusMin + " min" : "Break · " + state.breakMin + " min";
@@ -2485,7 +2487,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     rf.onchange = function () { var f = rf.files && rf.files[0]; if (!f) return; var r = new FileReader();
       r.onload = function () { try { var o = JSON.parse(r.result); if (!o || typeof o !== "object" || !("tasks" in o || "sched" in o || "quran" in o)) throw 0;
           if (!confirm("Replace everything on this device with the backup from this file?")) return;
-          restoreState(o, "Restored from your backup file."); } catch (e) { alertMsg("That file isn't a Detox backup."); } };
+          restoreState(o, "Restored from your backup file."); } catch (e) { alertMsg("That file isn't a backup from this app."); } };
       r.readAsText(f); };
     br.appendChild(dl); br.appendChild(rb); br.appendChild(rf); p4.appendChild(br);
     var bk = []; try { bk = JSON.parse(localStorage.getItem("detox.backups") || "[]"); } catch (e) {}
@@ -2526,7 +2528,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
       var si = el("button", "cta gbtn"); si.appendChild(gLogo()); si.appendChild(document.createTextNode(Y.status === "signing" ? "Signing in…" : "Sign in with Google"));
       si.onclick = function () { Y.signIn(); };
       p.appendChild(si);
-      p.appendChild(el("p", "meta", "Google will ask to see your calendar and to add files to Drive. Detox can only see the Drive files it creates itself. If Google says the app isn't verified, press Advanced → Continue: it's your own private app."));
+      p.appendChild(el("p", "meta", "Google will ask to see your calendar and to add files to Drive. The app can only see the Drive files it creates itself. If Google says the app isn't verified, press Advanced → Continue: it's your own private app."));
       if (Y.err) p.appendChild(el("p", "toast", Y.err));
       app.appendChild(p); return;
     }
@@ -2538,8 +2540,8 @@ li.mrow2 .label{display:flex;flex-direction:column}
     // ask: account already has data
     if (Y.status === "ask" && Y.ask) {
       var ab = el("div", "accask");
-      ab.appendChild(el("b", null, "Your account already has Detox data from another device"));
-      ab.appendChild(el("p", "meta", "Last saved " + new Date(Y.ask.t).toLocaleString(undefined, { weekday:"short", day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" }) + ". Which should Detox keep?"));
+      ab.appendChild(el("b", null, "Your account already has data from another device"));
+      ab.appendChild(el("p", "meta", "Last saved " + new Date(Y.ask.t).toLocaleString(undefined, { weekday:"short", day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" }) + ". Which should be kept?"));
       var r0 = el("div", "row");
       var c1 = el("button", "cta", "Use my account's data"); c1.onclick = function () { Y.choose("cloud"); };
       var c2 = el("button", "ghost", "Use this device's data"); c2.onclick = function () { if (confirm("This replaces the data in your account with what's on this device. Continue?")) Y.choose("local"); };
