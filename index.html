@@ -581,7 +581,11 @@ ul.nslist li.nsitem{display:block;border:0;border-left:3px solid var(--sc);paddi
 .fold{display:inline-flex;align-items:center;gap:7px;font:inherit;font-size:13px;font-weight:600;padding:8px 12px;border-radius:12px;border:1px solid var(--line);background:transparent;color:inherit;cursor:pointer}
 .fold .ic{width:16px;height:16px}.fold small{font-size:11px;opacity:.6;font-weight:700}
 .fold.on{background:var(--ink,#1d1d1d);color:var(--bg,#fff);border-color:transparent}
-.foldhead{align-items:center;gap:10px;margin:4px 0 8px}.foldhead .ftitle{flex:1;min-width:140px;font-weight:700}
+.foldhead{align-items:center;gap:10px;margin:4px 0 8px}
+.fcrumb{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:12px 0 4px;font-size:14px}
+.fcrumb .ic{width:16px;height:16px;opacity:.7}
+.fcrumb .sep{opacity:.5}
+.fcrumb .linkbtn.here{color:inherit;font-weight:800;cursor:default}.foldhead .ftitle{flex:1;min-width:140px;font-weight:700}
 .fdate{display:inline-flex;align-items:center;gap:5px}
 .fdate span{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.75}
 .fdate.done span{color:#3f9a78;opacity:1}
@@ -2901,13 +2905,19 @@ li.mrow2 .label{display:flex;flex-direction:column}
   function fmtSize(b){ return b > 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(b / 1024)) + " KB"; }
   var pdfMsg = {}, openPdfNote = null, viewer = null;
 
-  var pdfFolderOpen = {}, pdfNewFolder = {};
+  var pdfFolderOpen = {}, pdfNewFolder = {}, pdfFolderSec = null;
+  function folderOpts(){   // [id, indented name] in tree order, for the folder dropdowns
+    var FL = (state.pdfFolders || {})[pdfFolderSec] || [], out = [];
+    var ok = function (id) { return FL.some(function (f) { return f.id === id; }); };
+    (function walk(pid, d) { FL.filter(function (f) { return pid ? f.parent === pid : !(f.parent && ok(f.parent)); }).forEach(function (f) { out.push([f.id, (d ? "\u00a0\u00a0".repeat(d) + "↳ " : "") + f.name]); walk(f.id, d + 1); }); })("", 0);
+    return out;
+  }
   function renderPdfs(sec, opt){
     opt = opt || {};
     var L = state.sciFiles[sec] = state.sciFiles[sec] || [], tk = dkey(new Date());
     var FL = null, curF = "";
     if (opt.folders) { state.pdfFolders = state.pdfFolders || {}; FL = state.pdfFolders[sec] = state.pdfFolders[sec] || [];
-      curF = pdfFolderOpen[sec] || ""; if (curF && curF !== "__none" && !FL.some(function (f) { return f.id === curF; })) curF = pdfFolderOpen[sec] = ""; }
+      pdfFolderSec = sec; curF = pdfFolderOpen[sec] || ""; if (curF && !FL.some(function (f) { return f.id === curF; })) curF = pdfFolderOpen[sec] = ""; }
     var p = el("div", "panel"); p.id = "f-" + sec;
     p.appendChild(el("h2", null, opt.title || "Lessons & PDFs"));
     var top = el("div", "row"); top.style.justifyContent = "space-between";
@@ -2924,7 +2934,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
         return chain.then(function () {
           if (!/\.pdf$/i.test(f.name) && f.type !== "application/pdf") { failed.push(f.name + " (not a PDF)"); return; }
           var id = uid(), rec = { id:id, title:f.name.replace(/\.pdf$/i, "").replace(/[_-]+/g, " ").trim(), name:f.name, size:f.size, date:tk, added:Date.now(), notes:"" };
-          if (FL && curF && curF !== "__none") rec.folder = curF;
+          if (FL && curF) rec.folder = curF;
           return fPut({ id:id, sec:sec, name:f.name, type:"application/pdf", blob:f }).then(function () {
             localFiles[id] = 1; L.unshift(rec); done++; save();
             if (driveOn()) return driveUpload(sec, f, f.name).then(function (d) { rec.drive = d; save(); }).catch(function (e) { driveErr = (e && e.message) || "Couldn't reach Google Drive."; });
@@ -2943,26 +2953,43 @@ li.mrow2 .label{display:flex;flex-direction:column}
       p.appendChild(fs);
     }
     if (FL) {
+      var fById = function (id) { return FL.find(function (f) { return f.id === id; }); };
+      var kids = function (id) { return FL.filter(function (f) { return id ? f.parent === id : !(f.parent && fById(f.parent)); }); };
+      var desc = function (id) { var o = [id]; kids(id).forEach(function (k) { o = o.concat(desc(k.id)); }); return o; };
+      var countIn = function (id) { var ids = desc(id); return L.filter(function (x) { return ids.indexOf(x.folder) >= 0; }).length; };
+      // breadcrumb
+      var bc = el("div", "fcrumb"), chain = [], c0 = fById(curF);
+      while (c0) { chain.unshift(c0); c0 = fById(c0.parent); }
+      var crumb = function (id, name) { var bb = el("button", "linkbtn" + (curF === id ? " here" : ""), name); bb.onclick = function () { pdfFolderOpen[sec] = id; render(); }; return bb; };
+      bc.appendChild(icon("folder")); bc.appendChild(crumb("", "All folders"));
+      chain.forEach(function (f) { bc.appendChild(el("span", "sep", "›")); bc.appendChild(crumb(f.id, f.name)); });
+      p.appendChild(bc);
       var fb = el("div", "folderbar");
-      var fbtn = function (id, name, n) { var b = el("button", "fold" + (curF === id ? " on" : "")); b.appendChild(icon(id && id !== "__none" ? "folder" : "files")); b.appendChild(el("span", null, name)); b.appendChild(el("small", null, String(n)));
-        b.onclick = function () { pdfFolderOpen[sec] = id; render(); }; return b; };
-      fb.appendChild(fbtn("", "All files", L.length));
-      FL.forEach(function (f) { fb.appendChild(fbtn(f.id, f.name, L.filter(function (x) { return x.folder === f.id; }).length)); });
-      var nNone = L.filter(function (x) { return !x.folder || !FL.some(function (f) { return f.id === x.folder; }); }).length;
-      if (FL.length && nNone) fb.appendChild(fbtn("__none", "Not in a folder", nNone));
-      var nf = el("button", "linkbtn", pdfNewFolder[sec] ? "Cancel" : "+ New folder"); nf.onclick = function () { pdfNewFolder[sec] = !pdfNewFolder[sec]; render(); }; fb.appendChild(nf);
+      kids(curF).forEach(function (f) { var bb = el("button", "fold"); bb.appendChild(icon("folder")); bb.appendChild(el("span", null, f.name));
+        var nsub = kids(f.id).length; bb.appendChild(el("small", null, countIn(f.id) + (nsub ? " · " + nsub + (nsub === 1 ? " folder" : " folders") : "")));
+        bb.onclick = function () { pdfFolderOpen[sec] = f.id; render(); }; fb.appendChild(bb); });
+      var nf = el("button", "linkbtn", pdfNewFolder[sec] ? "Cancel" : curF ? "+ New folder inside" : "+ New folder"); nf.onclick = function () { pdfNewFolder[sec] = !pdfNewFolder[sec]; render(); }; fb.appendChild(nf);
       p.appendChild(fb);
-      if (pdfNewFolder[sec]) { var nr0 = el("div", "row"); var ni = el("input"); ni.type = "text"; ni.maxLength = 60; ni.placeholder = "Folder name, e.g. Yusuf · GCSE Biology"; var nb0 = el("button", "cta", "Create");
-        nb0.onclick = function () { var n = ni.value.trim(); if (!n) return; var f = { id:uid(), name:n }; FL.push(f); pdfNewFolder[sec] = false; pdfFolderOpen[sec] = f.id; save(); render(); };
+      if (pdfNewFolder[sec]) { var nr0 = el("div", "row"); var ni = el("input"); ni.type = "text"; ni.maxLength = 60; ni.placeholder = curF ? "Folder name, e.g. Past papers" : "Folder name, e.g. Yusuf · GCSE Biology"; var nb0 = el("button", "cta", "Create");
+        nb0.onclick = function () { var n = ni.value.trim(); if (!n) return; var f = { id:uid(), name:n }; if (curF) f.parent = curF; FL.push(f); pdfNewFolder[sec] = false; pdfFolderOpen[sec] = f.id; save(); render(); };
         ni.onkeydown = function (e) { if (e.key === "Enter") nb0.click(); }; nr0.appendChild(ni); nr0.appendChild(nb0); p.appendChild(nr0); setTimeout(function () { ni.focus(); }, 0); }
-      var cf = FL.find(function (f) { return f.id === curF; });
+      var cf = fById(curF);
       if (cf) { var fr = el("div", "row foldhead");
         var fn = el("input"); fn.type = "text"; fn.className = "ftitle"; fn.value = cf.name; fn.maxLength = 60; fn.setAttribute("aria-label", "Folder name"); fn.onchange = function () { cf.name = fn.value.trim() || cf.name; save(); render(); };
-        fr.appendChild(icon("folder")); fr.appendChild(fn); fr.appendChild(el("span", "meta", "New uploads go into this folder."));
+        fr.appendChild(icon("folder")); fr.appendChild(fn);
+        var mvw = el("label", "fdate"); mvw.appendChild(el("span", null, "Inside"));
+        var mv = el("select", "tutsel"); var bad = desc(cf.id);
+        var oT = el("option", null, "Top level"); oT.value = ""; mv.appendChild(oT);
+        folderOpts().forEach(function (o) { if (bad.indexOf(o[0]) >= 0) return; var op = el("option", null, o[1]); op.value = o[0]; mv.appendChild(op); });
+        mv.value = cf.parent && fById(cf.parent) ? cf.parent : ""; mv.onchange = function () { if (mv.value) cf.parent = mv.value; else delete cf.parent; save(); render(); };
+        mvw.appendChild(mv); fr.appendChild(mvw);
         var fd = el("button", "iconbtn"), farmed = false; fd.title = "Delete folder"; fd.appendChild(icon("trash"));
-        fd.onclick = function () { if (!farmed) { farmed = true; fd.classList.add("armed"); fd.title = "Press again: the files stay, outside any folder"; pdfMsg[sec] = "Press the bin again to delete the folder “" + cf.name + "”. Its files are kept."; render(); return; }
-          L.forEach(function (x) { if (x.folder === cf.id) delete x.folder; }); state.pdfFolders[sec] = FL.filter(function (f) { return f !== cf; }); pdfFolderOpen[sec] = ""; pdfMsg[sec] = "Folder deleted. Its files are now outside any folder."; save(); render(); };
-        fr.appendChild(fd); p.appendChild(fr); }
+        fd.onclick = function () { if (!farmed) { farmed = true; fd.classList.add("armed"); fd.title = "Press again to delete"; pdfMsg[sec] = "Press the bin again to delete the folder “" + cf.name + "”. Its files and folders move up a level."; var m = p.querySelector(".toast"); if (m) m.textContent = pdfMsg[sec]; else fr.after(el("p", "toast", pdfMsg[sec])); return; }
+          L.forEach(function (x) { if (x.folder === cf.id) { if (cf.parent) x.folder = cf.parent; else delete x.folder; } });
+          FL.forEach(function (f) { if (f.parent === cf.id) { if (cf.parent) f.parent = cf.parent; else delete f.parent; } });
+          state.pdfFolders[sec] = FL.filter(function (f) { return f !== cf; }); pdfFolderOpen[sec] = cf.parent || ""; pdfMsg[sec] = "Folder deleted. What was in it moved up a level."; save(); render(); };
+        fr.appendChild(fd); p.appendChild(fr);
+        p.appendChild(el("p", "meta", "New uploads go into this folder.")); }
     }
     if (pdfMsg[sec]) p.appendChild(el("p", "toast", pdfMsg[sec]));
     if (!L.length) {
@@ -2973,8 +3000,8 @@ li.mrow2 .label{display:flex;flex-direction:column}
       p.appendChild(em);
     }
     var ul = el("ul");
-    var inFolder = function (x) { if (!FL || !curF) return true; if (curF === "__none") return !x.folder || !FL.some(function (f) { return f.id === x.folder; }); return x.folder === curF; };
-    if (FL && curF && L.length && !L.some(inFolder)) p.appendChild(el("p", "empty", "This folder is empty. Upload files here, or move files in with the folder menu on each file."));
+    var inFolder = function (x) { if (!FL) return true; var real = x.folder && FL.some(function (f) { return f.id === x.folder; }) ? x.folder : ""; return real === curF; };
+    if (FL && curF && !L.some(inFolder)) p.appendChild(el("p", "empty", "No files directly in this folder. Upload here, or move files in with the folder menu on each file."));
     L.filter(inFolder).sort(function (a, b) { return (b.date || "").localeCompare(a.date || "") || b.added - a.added; }).forEach(function (x) {
       var li = el("li", "frow");
       var ic = el("span", "fic"); ic.appendChild(icon("pdf")); li.appendChild(ic);
@@ -2988,7 +3015,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
       meta.appendChild(dt); meta.appendChild(el("span", null, fmtSize(x.size || 0)));
       if (FL && FL.length) { var fsel = el("select", "tutsel"); fsel.setAttribute("aria-label", "Folder");
         var o0 = el("option", null, "No folder"); o0.value = ""; fsel.appendChild(o0);
-        FL.forEach(function (f) { var o = el("option", null, f.name); o.value = f.id; fsel.appendChild(o); });
+        folderOpts().forEach(function (f) { var o = el("option", null, f[1]); o.value = f[0]; fsel.appendChild(o); });
         fsel.value = FL.some(function (f) { return f.id === x.folder; }) ? x.folder : ""; fsel.onchange = function () { if (fsel.value) x.folder = fsel.value; else delete x.folder; save(); render(); };
         meta.appendChild(fsel); }
       if (x.drive) { var dv = el("a", "drivechip", "In Drive"); dv.href = x.drive.link; dv.target = "_blank"; dv.rel = "noopener"; dv.title = "Open in Google Drive"; meta.appendChild(dv); }
