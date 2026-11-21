@@ -71,9 +71,15 @@ async function pull(initial) {
   try {
     const snap = await getDoc(ref());
     const st = D().getState(), same = st._sync && st._sync.uid === SY.user.uid;
+    const other = !!(st._sync && st._sync.uid && st._sync.uid !== SY.user.uid);   // this device holds another account's data
     const changed = hash(st) !== localStorage.getItem(hkey());
-    if (!snap.exists()) { ready = true; await push(); return; }
+    if (!snap.exists()) {
+      // Never copy one person's data into another person's account
+      if (other) return take("{}", 0, "Signed in as " + (SY.user.email || "a new account") + ". This account has no data yet, so it starts empty.");
+      ready = true; await push(); return;
+    }
     const d = snap.data(), cloudT = d.t || 0;
+    if (other) return take(d.s, cloudT, "Signed in as " + (SY.user.email || "another account") + ". Loaded that account's data.");
     if (!same) {
       if (looksEmpty(st)) return take(d.s, cloudT);
       ready = false; SY.status = "ask"; SY.ask = { t: cloudT, s: d.s, name: d.name || "" }; paint(); return;
@@ -144,9 +150,17 @@ SY.signIn = async () => {
   catch (e) { SY.status = "out"; SY.err = nice(e); paint(); }
 };
 SY.signOut = async () => {
-  clearTimeout(timer); if (ready) await push();
+  clearTimeout(timer);
+  if (ready) { await push(); if (SY.status !== "synced") { SY.err = "Couldn't save your latest changes, so you're still signed in. Check your internet and try again."; paint(); return; } }
   ready = false; SY.gtoken = null; try { sessionStorage.removeItem("detox.gtoken"); } catch (e) {}
   await signOut(auth);
+  // Remove this account's data from the device so the next person can't see it (it's safe in the account)
+  try {
+    localStorage.removeItem(D().KEY); localStorage.removeItem("detox.backups");
+    Object.keys(localStorage).forEach(k => { if (k.indexOf("detox.syncHash.") === 0) localStorage.removeItem(k); });
+    sessionStorage.setItem("detox.syncMsg", "Signed out. Your data was saved to your Google account and removed from this device.");
+  } catch (e) {}
+  location.reload();
 };
 // Google API token for Calendar and Drive (lasts about an hour)
 SY.hasToken = () => !!(SY.gtoken && SY.gtoken.exp > Date.now());

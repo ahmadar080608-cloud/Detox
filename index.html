@@ -1195,7 +1195,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
 
 <script src="schedule.js?v=20261119k"></script>
 <script src="adhkar.js?v=20261120b"></script>
-<script type="module" src="sync.js?v=2"></script>
+<script type="module" src="sync.js?v=3"></script>
 <script>
 (function () {
   // ---------- icons (line icons, Lucide-style) ----------
@@ -2653,7 +2653,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     var who = el("div", "accwho");
     if (Y.user.photoURL) { var im = el("img"); im.src = Y.user.photoURL; im.alt = ""; im.referrerPolicy = "no-referrer"; who.appendChild(im); }
     var wt = el("div"); wt.appendChild(el("b", null, Y.user.displayName || "Signed in")); wt.appendChild(el("span", "meta", Y.user.email || "")); who.appendChild(wt);
-    var so = el("button", "ghost sm", "Sign out"); so.style.marginLeft = "auto"; so.onclick = function () { if (confirm("Sign out? Your data stays on this device and in your account.")) Y.signOut(); }; who.appendChild(so);
+    var so = el("button", "ghost sm", "Sign out"); so.style.marginLeft = "auto"; so.onclick = function () { if (confirm("Sign out? Your data is saved to your Google account and removed from this device, so nobody else using it can see it. Sign in again to get it back.")) Y.signOut(); }; who.appendChild(so);
     p.appendChild(who);
     // ask: account already has data
     if (Y.status === "ask" && Y.ask) {
