@@ -570,6 +570,10 @@ ul.nslist li.nsitem{display:block;border:0;border-left:3px solid var(--sc);paddi
 .mvbtns .mv{padding:2px}
 .mvbtns .mv .ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2}
 .mvbtns .mv:disabled{opacity:.25;cursor:default}
+.tutf{display:flex;flex-wrap:wrap;gap:6px}
+.tutf.add{margin:12px 0 0}
+.tutsel{font:inherit;font-size:13px;padding:6px 26px 6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--field,transparent);color:inherit;max-width:180px}
+.tutf.add .tutsel{font-size:14px;padding:9px 28px 9px 14px}
 .fdate{display:inline-flex;align-items:center;gap:5px}
 .fdate span{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.75}
 .fdate.done span{color:#3f9a78;opacity:1}
@@ -3018,7 +3022,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     business:  { noun:"idea",     list:"Ideas",     statuses:[["idea","Idea","#9aa0a6"],["research","Researching","#d9a33a"],["test","Testing","#6c9bd2"],["live","Running","#3f9a78"],["park","Parked","#b5482f"]], ph:"e.g. Gardening service in North London" },
     isoc:      { noun:"event or idea", list:"Events & ideas", statuses:[["idea","Idea","#9aa0a6"],["plan","Planning","#d9a33a"],["ready","Booked / ready","#6c9bd2"],["done","Done","#3f9a78"]], ph:"e.g. Weekly halaqah, Islamic trivia night, reminder video" },
     ambitions: { noun:"ambition", list:"My ambitions", statuses:[["dream","Dream","#c58af9"],["plan","Planning","#d9a33a"],["doing","In progress","#6c9bd2"],["done","Achieved","#3f9a78"]], ph:"e.g. Memorise the whole Qur'an, perform Hajj, open my own dental practice", cats:true },
-    tutoring:  { noun:"session",  list:"Sessions",  statuses:[["plan","Planned","#9aa0a6"],["done","Taught","#6c9bd2"],["paid","Paid","#3f9a78"]], ph:"e.g. GCSE Biology · Cell transport", dated:true }
+    tutoring:  { noun:"session",  list:"Sessions",  statuses:[["plan","Planned","#9aa0a6"],["done","Taught","#6c9bd2"],["paid","Paid","#3f9a78"]], ph:"Topic, e.g. Cell transport", dated:true }
   };
   var trkFilter = {}, trkNote = null, trkBulk = {}, trkMod = {}, trkTopicOpen = {};
   // University modules and their topics (Lectures, Tutorials, Seminars)
@@ -3060,6 +3064,30 @@ li.mrow2 .label{display:flex;flex-direction:column}
     return bar;
   }
   var addingMod = false, addingTopic = null;
+  // Tutoring: level, exam board, subject and tutee for each session
+  var TUT_LEVELS = ["KS1","KS2 / SATs","KS3","GCSE","A-Level","11+","Other"];
+  var TUT_BOARDS = ["AQA","Edexcel","OCR","WJEC / Eduqas","CCEA","Cambridge (CIE)","No board"];
+  var TUT_SUBJ = ["Biology","Chemistry","Physics","Combined Science","Maths","English Language","English Literature","Science"];
+  function tutPick(kind, val, opts, onch, ph){
+    var sel = el("select", "tutsel"); sel.setAttribute("aria-label", ph);
+    var o0 = el("option", null, ph); o0.value = ""; sel.appendChild(o0);
+    var list = opts.slice(); if (val && list.indexOf(val) < 0) list.push(val);
+    list.forEach(function (v) { var o = el("option", null, v); o.value = v; sel.appendChild(o); });
+    if (kind) { var on = el("option", null, "+ New " + kind + "…"); on.value = "__new"; sel.appendChild(on); }
+    sel.value = val || "";
+    sel.onchange = function () { if (sel.value === "__new") { var n = prompt("New " + kind); n = n && n.trim(); if (!n) { sel.value = val || ""; return; }
+        var k = kind === "tutee" ? "tutees" : "subjects"; state.tut[k] = state.tut[k] || []; if (state.tut[k].indexOf(n) < 0) state.tut[k].push(n); val = n; onch(n); return; }
+      val = sel.value; onch(sel.value); };
+    return sel;
+  }
+  function tutSubjects(){ var a = TUT_SUBJ.slice(); (state.tut.subjects || []).forEach(function (x) { if (a.indexOf(x) < 0) a.push(x); }); return a; }
+  function tutTutees(){ return (state.tut.tutees || []).slice(); }
+  function tutFields(x, onch){
+    var w = el("div", "tutf");
+    [["level", TUT_LEVELS, null, "Level"], ["board", TUT_BOARDS, null, "Exam board"], ["subject", tutSubjects(), "subject", "Subject"], ["tutee", tutTutees(), "tutee", "Tutee"]].forEach(function (f) {
+      w.appendChild(tutPick(f[2], x[f[0]] || "", f[1], function (v) { x[f[0]] = v || undefined; onch(f[0], v); }, f[3])); });
+    return w;
+  }
   function moduleEditor(){
     var box = el("div", "modedit"), y = state.uniYear, mine = state.uniMods[y] || [];
     var tg = el("button", "linkbtn", addingMod ? "Close" : "+ Add a module to Year " + y);
@@ -3158,6 +3186,11 @@ li.mrow2 .label{display:flex;flex-direction:column}
       cfg.statuses.forEach(function (st) { var b = el("button", cur === st[0] ? "on" : null); var d = el("i"); d.style.background = st[2]; b.appendChild(d); b.appendChild(document.createTextNode(st[1] + " " + (counts[st[0]] || 0)));
         b.onclick = function () { trkFilter[sec] = cur === st[0] ? "all" : st[0]; render(); }; fl.appendChild(b); });
       p.appendChild(fl);
+      if (sec === "tutoring") { var tees = []; L.forEach(function (x) { if (x.tutee && tees.indexOf(x.tutee) < 0) tees.push(x.tutee); });
+        if (tees.length > 1) { var tf = el("div", "stfilter"), ct = state.tutFilter || "";
+          [""].concat(tees).forEach(function (n) { var c = n ? L.filter(function (x) { return x.tutee === n; }).length : L.length;
+            var b = el("button", ct === n ? "on" : null, (n || "All tutees") + " " + c); b.onclick = function () { state.tutFilter = n; save(); render(); }; tf.appendChild(b); });
+          p.appendChild(tf); } }
     }
     if (cfg.statuses === UNI_STATUS) p.appendChild(moduleEditor());
     // add one
@@ -3166,7 +3199,14 @@ li.mrow2 .label{display:flex;flex-direction:column}
     var dt = el("input"); dt.type = "date"; dt.className = "dateinp"; dt.setAttribute("aria-label", "Date"); if (cfg.dated) dt.value = tk;
     var ss = statusSelect(cfg, cfg.statuses[0][0], function (v) { ss.value = v; var c = stInfo(cfg, v)[2]; ss.style.color = c; ss.style.borderColor = c; ss.style.background = "color-mix(in srgb," + c + " 14%,var(--bg))"; });
     var ab = el("button", "cta"); ab.appendChild(icon("plus")); ab.appendChild(document.createTextNode("Add"));
-    var addOne = function () { var t = ti.value.trim(); if (!t) return; L.push({ id:uid(), title:t, date:dt.value || "", status:ss.value, notes:"", added:Date.now(), area:ar ? ar.value : undefined, topic:tp ? (tp.value || undefined) : undefined }); save(); render();
+    var tutNew = null;
+    if (sec === "tutoring") { state.tut = state.tut || {}; tutNew = Object.assign({}, state.tut.last || {}); }
+    var addOne = function () { var t = ti.value.trim();
+      if (tutNew && !t) t = [tutNew.subject, tutNew.tutee].filter(Boolean).join(" · ");
+      if (!t) return;
+      var nx = { id:uid(), title:t, date:dt.value || "", status:ss.value, notes:"", added:Date.now(), area:ar ? ar.value : undefined, topic:tp ? (tp.value || undefined) : undefined };
+      if (tutNew) { ["level","board","subject","tutee"].forEach(function (k) { if (tutNew[k]) nx[k] = tutNew[k]; }); state.tut.last = Object.assign({}, tutNew); }
+      L.push(nx); save(); render();
       var x = document.querySelector("#t-" + sec + " .row input[type=text]"); if (x) x.focus(); };
     ab.onclick = addOne; ti.onkeydown = function (e) { if (e.key === "Enter") addOne(); };
     var ar = null;
@@ -3174,6 +3214,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     if (cfg.statuses === UNI_STATUS) { state.uniLastTopic = state.uniLastTopic || {}; tp = topicSelect(state.uniLastTopic[sec] || "", function (v) { state.uniLastTopic[sec] = v; save(); }, "topsel add"); }
     if (cfg.cats) { ar = el("select"); ar.setAttribute("aria-label", "Life area"); AREAS.forEach(function (a) { var o = el("option", null, a); o.value = a; ar.appendChild(o); }); dt.title = "Target date (optional)"; }
     if (tp) r.appendChild(tp);
+    if (tutNew) { var tr0 = tutFields(tutNew, function () {}); tr0.classList.add("add"); p.appendChild(tr0); }
     r.appendChild(ti); if (ar) r.appendChild(ar); r.appendChild(dt); r.appendChild(ss); r.appendChild(ab);
     p.appendChild(r);
     // paste a whole list
@@ -3201,7 +3242,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
       oc.onchange = function () { state.bizActiveOnly = oc.checked; save(); render(); };
       onlyA.appendChild(oc); onlyA.appendChild(document.createTextNode("Show only ideas in progress")); p.appendChild(onlyA);
     }
-    var shown = L.filter(function (x) { return (!trkFilter[sec] || trkFilter[sec] === "all" || x.status === trkFilter[sec]) && !(sec === "business" && state.bizActiveOnly && !x.active); });
+    var shown = L.filter(function (x) { return (!trkFilter[sec] || trkFilter[sec] === "all" || x.status === trkFilter[sec]) && !(sec === "business" && state.bizActiveOnly && !x.active) && !(sec === "tutoring" && state.tutFilter && x.tutee !== state.tutFilter); });
     if (cfg.dated) shown = shown.slice().sort(function (a, b) { return (b.date || "").localeCompare(a.date || "") || b.added - a.added; });
     if (!L.length) p.appendChild(el("p", "empty", "Nothing here yet. Add your first " + cfg.noun + " above."));
     var uni = cfg.statuses === UNI_STATUS, lastMod = null, lastTopic = null, uniCol = state.uniCol = state.uniCol || {};
@@ -3249,6 +3290,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
           cw.appendChild(d3); meta.appendChild(cw); } }
       else meta.appendChild(d2);
       if (uni) meta.appendChild(topicSelect(x.topic || "", function (v) { x.topic = v || undefined; save(); render(); }, "topsel row"));
+      if (sec === "tutoring") { state.tut = state.tut || {}; meta.appendChild(tutFields(x, function (k) { save(); if (k === "tutee" || k === "subject") render(); })); }
       var nb = el("button", "linkbtn", x.notes ? "Notes ✓" : "Add notes"); nb.onclick = function () { trkNote = trkNote === x.id ? null : x.id; render(); };
       meta.appendChild(nb); tb.appendChild(meta);
       li.appendChild(tb);
