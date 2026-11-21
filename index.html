@@ -569,7 +569,8 @@ ul.nslist li.nsitem{display:block;border:0;border-left:3px solid var(--sc);paddi
 .mvbtns{display:flex;flex-direction:column;gap:0;flex:none;position:relative;z-index:1}
 .mvbtns .mv{padding:2px}
 .mvbtns .mv .ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2}
-.mvbtns .mv:disabled{opacity:.25;cursor:default}
+.mvbtns .mv:disabled,.iconbtn.mv:disabled{opacity:.25;cursor:default}
+ul.rtedit .mv .ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2}
 .tutf{display:flex;flex-wrap:wrap;gap:6px}
 .tutf.add{margin:12px 0 0}
 .tutpick{display:inline-flex;align-items:center;gap:6px}
@@ -586,6 +587,25 @@ ul.nslist li.nsitem{display:block;border:0;border-left:3px solid var(--sc);paddi
 .fcrumb .ic{width:16px;height:16px;opacity:.7}
 .fcrumb .sep{opacity:.5}
 .fcrumb .linkbtn.here{color:inherit;font-weight:800;cursor:default}.foldhead .ftitle{flex:1;min-width:140px;font-weight:700}
+.rtcount{color:var(--muted)}
+.rtcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:6px 0 10px}
+.rtcol{border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.rtcol.now{border-color:var(--accent,#e0603f)}
+.rtlbl{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.rtlbl b{font-size:11px;letter-spacing:.14em;text-transform:uppercase}.rtlbl small{color:var(--muted);font-weight:700}
+ul.rtlist{list-style:none;margin:0;padding:0}
+ul.rtlist li{padding:6px 0;border:0}
+ul.rtlist label{display:flex;align-items:center;gap:10px;cursor:pointer}
+ul.rtlist input{width:18px;height:18px;flex:none;accent-color:var(--accent,#e0603f)}
+ul.rtlist li.done span{text-decoration:line-through;opacity:.55}
+.rtonly{margin-left:auto;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent,#e0603f)}
+.rth{font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin:14px 0 6px}
+ul.rtedit{list-style:none;margin:0 0 8px;padding:0}
+ul.rtedit li{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
+ul.rtedit li input[type=text]{flex:1;min-width:180px}
+.rtdays{display:flex;flex-wrap:wrap;gap:4px}
+.rtday{font:inherit;font-size:11px;font-weight:700;padding:4px 8px;border-radius:999px;border:1px solid var(--line);background:transparent;color:inherit;cursor:pointer}
+.rtday.on{background:var(--accent,#e0603f);border-color:transparent;color:#fff}
 .fdate{display:inline-flex;align-items:center;gap:5px}
 .fdate span{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.75}
 .fdate.done span{color:#3f9a78;opacity:1}
@@ -1525,9 +1545,84 @@ li.mrow2 .label{display:flex;flex-direction:column}
     c.appendChild(el("div", "ayref", "Sūrat an-Najm 53:39–42 · Saheeh International"));
     return c;
   }
+  // Daily routine: morning / evening checklists, with items for particular days (e.g. Sunday)
+  var RT_WHEN = [["morning","Morning","sunrise"],["evening","Evening","moon"]];
+  var RT_DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  var rtEdit = false, rtNewDays = [];
+  function routineItems(){ return (state.routine = state.routine || []); }
+  function routineEditor(box){
+    var L = routineItems();
+    RT_WHEN.forEach(function (w) {
+      var its = L.filter(function (x) { return x.when === w[0]; });
+      box.appendChild(el("h3", "rth", w[1]));
+      if (!its.length) box.appendChild(el("p", "meta", "Nothing yet."));
+      var ul = el("ul", "rtedit");
+      its.forEach(function (x, i) {
+        var li = el("li");
+        var t = el("input"); t.type = "text"; t.value = x.text; t.maxLength = 120; t.setAttribute("aria-label", "Routine item"); t.onchange = function () { x.text = t.value.trim() || x.text; save(); };
+        li.appendChild(t);
+        var dw = el("div", "rtdays");
+        var ev = el("button", "rtday" + (!(x.days && x.days.length) ? " on" : ""), "Every day"); ev.onclick = function () { x.days = []; save(); render(); }; dw.appendChild(ev);
+        RT_DAYS.forEach(function (d, k) { var on = x.days && x.days.indexOf(k) >= 0; var b = el("button", "rtday" + (on ? " on" : ""), d);
+          b.onclick = function () { x.days = (x.days || []).slice(); var j = x.days.indexOf(k); if (j >= 0) x.days.splice(j, 1); else x.days.push(k); x.days.sort(); save(); render(); }; dw.appendChild(b); });
+        li.appendChild(dw);
+        var sw = el("button", "linkbtn", w[0] === "morning" ? "→ Evening" : "→ Morning"); sw.title = "Move to the other list"; sw.onclick = function () { x.when = w[0] === "morning" ? "evening" : "morning"; save(); render(); }; li.appendChild(sw);
+        var up = el("button", "iconbtn mv"); up.innerHTML = '<svg viewBox="0 0 24 24" class="ic"><path d="M6 15l6-6 6 6"/></svg>'; up.title = "Move up"; up.disabled = i === 0;
+        up.onclick = function () { var a = L.indexOf(its[i - 1]), b = L.indexOf(x); L[a] = x; L[b] = its[i - 1]; save(); render(); }; li.appendChild(up);
+        var del = el("button", "iconbtn"); del.title = "Delete"; del.appendChild(icon("trash")); del.onclick = function () { state.routine = L.filter(function (y) { return y !== x; }); save(); render(); }; li.appendChild(del);
+        ul.appendChild(li);
+      });
+      box.appendChild(ul);
+      var r = el("div", "row"); var ni = el("input"); ni.type = "text"; ni.maxLength = 120; ni.placeholder = w[0] === "morning" ? "e.g. Morning adhkar" : "e.g. Evening adhkar, Sūrat al-Mulk";
+      var nb = el("button", "cta"); nb.appendChild(icon("plus")); nb.appendChild(document.createTextNode("Add"));
+      nb.onclick = function () { var v = ni.value.trim(); if (!v) { ni.focus(); return; } L.push({ id:uid(), text:v, when:w[0], days:[] }); save(); render(); };
+      ni.onkeydown = function (e) { if (e.key === "Enter") nb.click(); };
+      r.appendChild(ni); r.appendChild(nb); box.appendChild(r);
+    });
+    box.appendChild(el("p", "meta", "Each item shows every day unless you pick days, e.g. pick Sun for something you only do on Sundays."));
+  }
+  function routinePanel(){
+    var L = routineItems(), now = new Date(), tk = dkey(now), dow = now.getDay();
+    state.routineDone = state.routineDone || {};
+    Object.keys(state.routineDone).forEach(function (k) { if (k < dkey(new Date(now.getTime() - 14 * 864e5))) delete state.routineDone[k]; });
+    var done = state.routineDone[tk] = state.routineDone[tk] || {};
+    var today = L.filter(function (x) { return !(x.days && x.days.length) || x.days.indexOf(dow) >= 0; });
+    var p = el("div", "panel"); p.id = "routine";
+    var hd = el("h2", null, "Today's routine");
+    var nDone = today.filter(function (x) { return done[x.id]; }).length;
+    if (today.length && !rtEdit) hd.appendChild(el("span", "rtcount", " · " + nDone + "/" + today.length));
+    p.appendChild(hd);
+    if (rtEdit) {
+      routineEditor(p);
+      var db = el("button", "cta", "Done"); db.onclick = function () { rtEdit = false; render(); }; p.appendChild(db);
+      app.appendChild(p); return;
+    }
+    if (!L.length) p.appendChild(el("p", "empty", "Set what you need to do each morning and evening, and anything for particular days (like Sunday)."));
+    var cols = el("div", "rtcols"), late = now.getHours() >= 15;
+    RT_WHEN.forEach(function (w) {
+      var its = today.filter(function (x) { return x.when === w[0]; });
+      if (!its.length && L.length) return;
+      if (!L.length) return;
+      var c = el("div", "rtcol" + ((w[0] === "evening") === late ? " now" : ""));
+      var h = el("div", "rtlbl"); h.appendChild(el("b", null, w[1])); h.appendChild(el("small", null, its.filter(function (x) { return done[x.id]; }).length + "/" + its.length)); c.appendChild(h);
+      var ul = el("ul", "rtlist");
+      its.forEach(function (x) {
+        var li = el("li" , done[x.id] ? "done" : null); var lb = el("label");
+        var cb = el("input"); cb.type = "checkbox"; cb.checked = !!done[x.id]; cb.onchange = function () { if (cb.checked) done[x.id] = 1; else delete done[x.id]; save(); render(); };
+        lb.appendChild(cb); lb.appendChild(el("span", null, x.text));
+        if (x.days && x.days.length && x.days.length < 7) lb.appendChild(el("small", "rtonly", x.days.length === 1 ? RT_DAYS[x.days[0]] + " only" : x.days.map(function (k) { return RT_DAYS[k]; }).join(", ")));
+        li.appendChild(lb); ul.appendChild(li); });
+      c.appendChild(ul); cols.appendChild(c);
+    });
+    p.appendChild(cols);
+    var eb = el("button", "linkbtn", L.length ? "Edit routine" : "Set up my routine"); eb.onclick = function () { rtEdit = true; render(); }; p.appendChild(eb);
+    app.appendChild(p);
+    makeCollapsible("routine");
+  }
   function renderHome(){
     var toprow = el("div", "toprow"); toprow.appendChild(ayahCard()); toprow.appendChild(mementoEl("card")); app.appendChild(toprow);
     var cds = countdownStrip(); if (cds) app.appendChild(cds);
+    routinePanel();
     var t = oneThing();
     var c = el("div", "onecard grain");
     var lbl = el("div", "lbl"); lbl.appendChild(icon("target")); lbl.appendChild(document.createTextNode("Today's one thing")); c.appendChild(lbl);
@@ -2447,6 +2542,10 @@ li.mrow2 .label{display:flex;flex-direction:column}
     h.appendChild(el("div", "ph-big", "Settings"));
     h.appendChild(el("div", "ph-sub", "Make it yours"));
     app.appendChild(h);
+
+    var rp = el("div", "panel"); rp.id = "set-routine"; rp.appendChild(el("h2", null, "Daily routine"));
+    rp.appendChild(el("p", "meta", "Shown at the top of Overview each day. Tick items off there; ticks reset every morning."));
+    routineEditor(rp); app.appendChild(rp); makeCollapsible("set-routine");
 
     // theme
     var p = el("div", "panel"); p.appendChild(el("h2", null, "Theme"));
