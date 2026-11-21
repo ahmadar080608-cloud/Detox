@@ -4177,6 +4177,20 @@ li.mrow2 .label{display:flex;flex-direction:column}
   if (!state.fixLec3) { ["lectures","tutorials"].forEach(function (k) { (state.trk[k] || []).forEach(function (x) {
       if (/^y[12]l\d+$/.test(x.id) && x.notes && /^(\d\d:\d\d–\d\d:\d\d · |Online, |Practical \(also)/.test(x.notes)) delete x.notes; }); });
     state.fixLec3 = 1; save(); }
+  // Thorax Anatomy Dissections (TAA) and Histology of Main Tissue Types (HMT) sessions back in Lectures with their topics
+  if (!state.fixLec4) {
+    var LT = state.trk.lectures = state.trk.lectures || [];
+    LT.forEach(function (x) { if ((x.id === "y1l7" || x.id === "y1l29") && !x.topic) x.topic = "bs:5"; });
+    var hv = {}; LT.forEach(function (x) { hv[(x.title || "").toLowerCase()] = 1; });
+    [["2026-10-01","bs:4","HMT-1001 Histology workshop: Epithelial and soft connective tissues"],
+     ["2026-10-23","bs:4","HMT-1003 Histology workshop: Bone and cartilage: cells and function"],
+     ["2026-10-27","bs:4","HMT-1004 Histology workshop: Bone development, ossification and remodelling"],
+     ["2026-11-27","bs:4","HMT-1006 Histology of endocrine glands"],
+     ["2026-12-04","bs:5","TAA-1004 Anatomy Revisions"]].forEach(function (r, i) {
+      if (hv[r[2].toLowerCase()]) return;
+      LT.push({ id:"y4l" + i, title:r[2], date:r[0], status:"none", added:Date.now() + 5000 + i, topic:r[1] }); });
+    state.fixLec4 = 1; save();
+  }
   function cdScopeName(sc){ return sc === "studies" ? "Islamic Sciences" : "Year " + sc.split("@y")[1]; }
   function renderCountdowns(scope){
     var p = el("div", "panel"); p.id = "cd-" + scope.replace("@", "-");
