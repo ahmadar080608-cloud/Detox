@@ -143,14 +143,21 @@
       return (hm(a.start) || 0) - (hm(b.start) || 0) || (a.dur || 0) - (b.dur || 0);
     });
   }
-  // Start time for a new item: straight after the day's last activity (or now, if that's later today)
-  function nextStart(k) {
-    var end = null;
-    itemsOn(k).forEach(function (it) { if (it.allDay || !it.start) return; var e = hm(it.start) + (it.dur || 0); if (end == null || e > end) end = e; });
-    var isT = k === today();
-    if (isT) { var n = Math.ceil((nowMin() + 1) / 5) * 5; if (end == null || n > end) end = n; }
-    if (end == null) end = 9 * 60;
-    return Math.min(end, 23 * 60 + 45);
+  // Start time for a new item: the first gap of at least 30 min in the day
+  // (searching from the day's first activity, and not before now if it's today)
+  function nextStart(k, need) {
+    need = need || 30;
+    var iv = [];
+    itemsOn(k).forEach(function (it) { if (it.allDay || !it.start) return; var st = hm(it.start); iv.push([st, st + (it.dur || 0)]); });
+    iv.sort(function (x, y) { return x[0] - y[0]; });
+    var cur = iv.length ? iv[0][0] : 9 * 60;
+    if (k === today()) cur = Math.max(cur, Math.ceil((nowMin() + 1) / 5) * 5);
+    for (var i = 0; i < iv.length; i++) {
+      if (iv[i][1] <= cur) continue;              // already finished
+      if (iv[i][0] - cur >= need) break;          // gap before this one is big enough
+      cur = Math.max(cur, iv[i][1]);
+    }
+    return Math.min(cur, 23 * 60 + 45);
   }
   function isFixed(it) { return !!(it.fixed || it.source === "ics" || it.source === "gcal"); }
   function fixedOn(k) { return itemsOn(k).filter(isFixed); }
