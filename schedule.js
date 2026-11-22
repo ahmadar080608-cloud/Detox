@@ -143,6 +143,15 @@
       return (hm(a.start) || 0) - (hm(b.start) || 0) || (a.dur || 0) - (b.dur || 0);
     });
   }
+  // Start time for a new item: straight after the day's last activity (or now, if that's later today)
+  function nextStart(k) {
+    var end = null;
+    itemsOn(k).forEach(function (it) { if (it.allDay || !it.start) return; var e = hm(it.start) + (it.dur || 0); if (end == null || e > end) end = e; });
+    var isT = k === today();
+    if (isT) { var n = Math.ceil((nowMin() + 1) / 5) * 5; if (end == null || n > end) end = n; }
+    if (end == null) end = 9 * 60;
+    return Math.min(end, 23 * 60 + 45);
+  }
   function isFixed(it) { return !!(it.fixed || it.source === "ics" || it.source === "gcal"); }
   function fixedOn(k) { return itemsOn(k).filter(isFixed); }
   function isDone(it, k) { return !!(it.done && it.done[k]); }
@@ -583,7 +592,7 @@
     var dh = el("div", "sch-dayh");
     dh.appendChild(el("h2", null, (k === tk ? "Today · " : "") + d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })));
     var dadd = el("button", "sch-pill"); dadd.appendChild(svg("plus")); dadd.appendChild(document.createTextNode(" Add")); dadd.title = "Add to this day";
-    dadd.onclick = function () { openEditor(null, k, k === tk ? Math.ceil((nowMin() + 1) / 15) * 15 : 9 * 60); };
+    dadd.onclick = function () { openEditor(null, k, nextStart(k)); };
     dh.appendChild(dadd);
     root.appendChild(dh);
 
@@ -634,7 +643,7 @@
       var em = el("div", "sch-empty");
       em.appendChild(el("p", null, allDay.length ? "No timed tasks on this day." : "Nothing planned yet."));
       var b = el("button", "sch-pill acc"); b.appendChild(svg("plus")); b.appendChild(document.createTextNode("Plan this day"));
-      b.onclick = function () { openEditor(null, k, isToday ? Math.ceil((now + 1) / 15) * 15 : 9 * 60); };
+      b.onclick = function () { openEditor(null, k, nextStart(k)); };
       em.appendChild(b); tl.appendChild(em);
     }
     timed.forEach(function (it, idx) {
@@ -740,7 +749,7 @@
       hb.onclick = function () { openDay(dk); };
       hd.appendChild(hb);
       var ad = el("button", "sch-ib sm"); ad.title = "Add to this day"; ad.appendChild(svg("plus"));
-      ad.onclick = function () { openEditor(null, dk, dk === tk ? Math.ceil((nowMin() + 1) / 15) * 15 : 9 * 60);
+      ad.onclick = function () { openEditor(null, dk, nextStart(dk));
         if (view === "week") { V.edit.draft.fixed = true; V.edit.draft.icon = "calendar"; V.edit.fromCal = true; C.rerender(); } };
       hd.appendChild(ad);
       col.appendChild(hd);
@@ -834,7 +843,7 @@
       hb.onclick = function () { V.calSel = dk; s.calView = "day"; C.save(); C.rerender(); };
       hd.appendChild(hb);
       var ad = el("button", "sch-ib sm"); ad.title = "Add an event on this day"; ad.appendChild(svg("plus"));
-      ad.onclick = function () { openEditor(null, dk, 9 * 60); var d0 = V.edit.draft; d0.fixed = true; d0.icon = "calendar"; d0.dur = 60; V.edit.fromCal = true; C.rerender(); };
+      ad.onclick = function () { openEditor(null, dk, nextStart(dk)); var d0 = V.edit.draft; d0.fixed = true; d0.icon = "calendar"; d0.dur = 60; V.edit.fromCal = true; C.rerender(); };
       hd.appendChild(ad); col.appendChild(hd);
       var its = fixedOn(dk), list = el("div", "sch-clist");
       if (!its.length) list.appendChild(el("p", "sch-cempty", "No events"));
@@ -899,7 +908,7 @@
     // quick add
     var f = el("div", "dev-add");
     var ti = el("input"); ti.type = "text"; ti.maxLength = 120; ti.placeholder = "Add an event, e.g. Dentist, Anatomy exam"; ti.setAttribute("aria-label", "New event");
-    var tm = el("input"); tm.type = "time"; tm.value = "09:00"; tm.setAttribute("aria-label", "Time");
+    var tm = el("input"); tm.type = "time"; tm.value = toHM(nextStart(dk)); tm.setAttribute("aria-label", "Time");
     var ad = el("label", "dev-allday"); var adc = el("input"); adc.type = "checkbox"; adc.onchange = function () { tm.disabled = adc.checked; };
     ad.appendChild(adc); ad.appendChild(document.createTextNode("All day"));
     var go = el("button", "cta"); go.appendChild(svg("plus")); go.appendChild(document.createTextNode("Add"));
@@ -1218,7 +1227,7 @@
     addFromTodo: function (title, dateKey) {
       var n = nowMin(), k = dateKey || today();
       V.day = k;
-      openEditor(null, k, k === today() ? Math.ceil((n + 1) / 30) * 30 : 9 * 60);
+      openEditor(null, k, nextStart(k));
       V.edit.draft.title = title; V.edit.draft.icon = guessIcon(title) || "list";
     },
     icon: svg
