@@ -613,6 +613,10 @@ ul.rtlist li.done span{text-decoration:line-through;opacity:.55}
 .wgcard{margin:0}
 .wghd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px}
 .wghd b{font-size:15px}
+.onepick{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.oneinp{min-width:260px;flex:1}
+.onesec{font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.7;margin:-4px 0 10px}
+.onedone{margin:10px 0 0;opacity:.8;font-size:14px}
 .rth{font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin:14px 0 6px}
 ul.rtedit{list-style:none;margin:0 0 8px;padding:0}
 ul.rtedit li{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
@@ -1382,7 +1386,16 @@ li.mrow2 .label{display:flex;flex-direction:column}
   function uid(){ return Math.random().toString(36).slice(2,10); }
   function el(tag, cls, text){ var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function openIn(sec){ return state.tasks.filter(function (t) { return !t.done && isUnder(t.section, sec); }); }
-  function oneThing(){ var t = state.tasks.find(function (x) { return x.id === state.oneThingId; }); if (!t || t.done) { state.oneThingId = null; return null; } return t; }
+  // Today's one thing can be a section task, a To-do item ("td:<id>") or your own words ("txt")
+  function oneThing(){
+    var id = state.oneThingId; if (!id) return null;
+    if (state.oneThingDay && state.oneThingDay !== dkey(new Date())) { state.oneThingId = null; state.oneThingText = null; return null; }   // a new day, a new one thing
+    if (id === "txt") return state.oneThingText ? { id:"txt", text:state.oneThingText, section:null } : null;
+    if (id.indexOf("td:") === 0) { var td = (state.todos || []).find(function (x) { return "td:" + x.id === id; });
+      if (!td || td.done) { state.oneThingId = null; return null; } return { id:id, text:td.text, section:"todo", todo:td }; }
+    var t = state.tasks.find(function (x) { return x.id === id; }); if (!t || t.done) { state.oneThingId = null; return null; } return t;
+  }
+  function setOneThing(id, text){ state.oneThingId = id; state.oneThingText = text || null; state.oneThingDay = id ? dkey(new Date()) : null; save(); render(); }
   function bgOf(p){ return "var(" + p.color + ")"; }
 
   var app = document.getElementById("app");
@@ -1462,7 +1475,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     var t = oneThing();
     side.appendChild(el("div", "lbl", "Today's one thing"));
     side.appendChild(el("div", "txt", t ? t.text : "Nothing chosen yet"));
-    if (t) side.appendChild(el("div", "sec", byId[t.section].name));
+    if (t && t.section && byId[t.section]) side.appendChild(el("div", "sec", byId[t.section].name));
   }
   document.getElementById("brand").onclick = function () { go("home"); };
   function go(id){ var was = state.tab; state.tab = id; addingIn = null; save(); render(); window.scrollTo(0,0);
@@ -1533,9 +1546,24 @@ li.mrow2 .label{display:flex;flex-direction:column}
     });
     return bar;
   }
+  var oneTyping = false;
   function oneThingPicker(){
+    var wrap = el("div", "onepick");
+    if (oneTyping) {
+      var inp = el("input"); inp.type = "text"; inp.maxLength = 160; inp.placeholder = "What's the one thing you'll finish today?"; inp.className = "oneinp";
+      var ok = el("button", "cta", "Set"), cx = el("button", "ghost", "Cancel");
+      var go1 = function () { var v = inp.value.trim(); if (!v) { inp.focus(); return; } oneTyping = false; setOneThing("txt", v); };
+      ok.onclick = go1; inp.onkeydown = function (e) { if (e.key === "Enter") go1(); if (e.key === "Escape") cx.onclick(); };
+      cx.onclick = function () { oneTyping = false; render(); };
+      wrap.appendChild(inp); wrap.appendChild(ok); wrap.appendChild(cx); setTimeout(function () { inp.focus(); }, 0);
+      return wrap;
+    }
     var sel = el("select"); sel.setAttribute("aria-label", "Choose today's one thing");
-    var o0 = el("option", null, "Choose a task..."); o0.value = ""; sel.appendChild(o0);
+    var o0 = el("option", null, oneThing() ? "Change…" : "Choose a task…"); o0.value = ""; sel.appendChild(o0);
+    var ow = el("option", null, "✎ Type my own…"); ow.value = "__type"; sel.appendChild(ow);
+    var TPO = { urgent:0, high:1, med:2, low:3 };
+    var tds = (state.todos || []).filter(function (x) { return !x.done; }).sort(function (a, b) { return (TPO[a.prio] || 2) - (TPO[b.prio] || 2); });
+    if (tds.length) { var g0 = el("optgroup"); g0.label = "To-do"; tds.forEach(function (x) { var o = el("option", null, x.text); o.value = "td:" + x.id; g0.appendChild(o); }); sel.appendChild(g0); }
     TASK_SECTIONS.forEach(function (sec) {
       var items = openIn(sec).sort(function (a,b) { return prioOrder[a.priority] - prioOrder[b.priority]; });
       if (!items.length) return;
@@ -1543,8 +1571,9 @@ li.mrow2 .label{display:flex;flex-direction:column}
       items.forEach(function (t) { var o = el("option", null, t.text); o.value = t.id; g.appendChild(o); });
       sel.appendChild(g);
     });
-    sel.onchange = function () { if (sel.value) { state.oneThingId = sel.value; save(); render(); } };
-    return sel;
+    sel.onchange = function () { if (sel.value === "__type") { oneTyping = true; render(); return; } if (sel.value) setOneThing(sel.value); };
+    wrap.appendChild(sel);
+    return wrap;
   }
   function tile(p, n, label){
     var b = el("button", "tile grain"); b.style.background = bgOf(p);
@@ -1570,7 +1599,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     star.title = t.id === state.oneThingId ? "Today's one thing" : "Make today's one thing";
     star.appendChild(icon("star")); star.disabled = t.done;
     if (t.id === state.oneThingId) star.querySelector("svg").style.fill = "currentColor";
-    star.onclick = function () { state.oneThingId = (state.oneThingId === t.id ? null : t.id); save(); render(); };
+    star.onclick = function () { setOneThing(state.oneThingId === t.id ? null : t.id); };
     var del = el("button", "iconbtn"); del.title = "Delete"; del.appendChild(icon("trash"));
     del.onclick = function () { state.tasks = state.tasks.filter(function (x) { return x.id !== t.id; }); if (state.oneThingId === t.id) state.oneThingId = null; save(); render(); };
     li.appendChild(star); li.appendChild(del);
@@ -1848,8 +1877,15 @@ li.mrow2 .label{display:flex;flex-direction:column}
     var c = el("div", "onecard grain");
     var lbl = el("div", "lbl"); lbl.appendChild(icon("target")); lbl.appendChild(document.createTextNode("Today's one thing")); c.appendChild(lbl);
     c.appendChild(el("div", "txt", t ? t.text : "Pick one task to finish today."));
-    var r = el("div", "row"); r.appendChild(oneThingPicker());
-    if (t) { var clr = el("button", "ghost", "Clear"); clr.onclick = function () { state.oneThingId = null; save(); render(); }; r.appendChild(clr); }
+    if (t && t.section && byId[t.section] && t.section !== "todo") c.appendChild(el("div", "onesec", byId[t.section].name));
+    var r = el("div", "row");
+    if (t) { var dn = el("button", "cta"); dn.appendChild(icon("target")); dn.appendChild(document.createTextNode("Done, alḥamdulillāh"));
+      dn.onclick = function () { if (t.todo) { t.todo.done = true; t.todo.doneAt = Date.now(); } else if (t.id !== "txt") { t.done = true; t.doneAt = Date.now(); }
+        state.oneDoneLog = state.oneDoneLog || {}; state.oneDoneLog[dkey(new Date())] = t.text; setOneThing(null); };
+      r.appendChild(dn); }
+    r.appendChild(oneThingPicker());
+    if (t) { var clr = el("button", "ghost", "Clear"); clr.onclick = function () { setOneThing(null); }; r.appendChild(clr); }
+    if (!t && state.oneDoneLog && state.oneDoneLog[dkey(new Date())]) c.appendChild(el("p", "onedone", "Finished today: " + state.oneDoneLog[dkey(new Date())]));
     c.appendChild(r); app.appendChild(c);
 
     var grid = el("div", "grid");
@@ -3967,7 +4003,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     if (b && b.count && !state.focusLog[k] && b.date === new Date().toDateString()) state.focusLog[k] = { n:b.count, m:b.count * (state.focusMin || 25), s:{} }; })();
   function logFocus(mins){
     var k = dkey(new Date()), e = state.focusLog[k] = state.focusLog[k] || { n:0, m:0, s:{} };
-    var t = oneThing(), sec = t ? t.section : "general";
+    var t = oneThing(), sec = t && t.section ? t.section : "general";
     e.n += 1; e.m += mins; e.s[sec] = (e.s[sec] || 0) + mins;
   }
   function fmtMins(m){ var h = Math.floor(m / 60), r = m % 60; return h ? h + "h" + (r ? " " + r + "m" : "") : r + "m"; }
