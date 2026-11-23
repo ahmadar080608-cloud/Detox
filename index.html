@@ -1622,7 +1622,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
       if (!L.length) [
         ["Morning adhkar","morning",[],"adhkar:morning"],["Log last night's sleep","morning",[],"tools#tl-sleep"],["Plan today","morning",[],"schedule"],
         ["Qur'an revision","evening",[],"quran#q-rev"],["Evening adhkar","evening",[],"adhkar:evening"],["Adhkar before sleep","evening",[],"adhkar:sleep"],
-        ["Weekly muḥāsabah","evening",[0],"tools#tl-muh"],["Set this week's goals","evening",[0],"weekgoals"],["Plan the week","evening",[0],"schedule"]
+        ["Weekly muḥāsabah","evening",[0],"tools#tl-muh"],["Set this week's goals","evening",[0],"weekgoals"],["Plan this week's fasting","evening",[0],"tools#tl-fast"],["Plan the week","evening",[0],"schedule"]
       ].forEach(function (r) { L.push({ id:uid(), text:r[0], when:r[1], days:r[2], to:r[3] }); });
       save();
     }
@@ -1633,6 +1633,13 @@ li.mrow2 .label{display:flex;flex-direction:column}
     var ix = -1;
     L.forEach(function (x, i) { if ((x.to === "quran#q-goals" || x.to === "university#UNIGOALS") && x.days && x.days.length === 1 && x.days[0] === 0) { if (ix < 0) ix = i; x._rm = 1; } });
     if (ix >= 0) { L.splice(ix, 0, { id:uid(), text:"Set this week's goals", when:"evening", days:[0], to:"weekgoals" }); state.routine = L.filter(function (x) { return !x._rm; }); save(); }
+  }
+  function rtMigrate3(L){   // add the Sunday-evening fasting button once
+    if (state.routineV3) return; state.routineV3 = 1;
+    if (L.some(function (x) { return x.to === "tools#tl-fast"; })) return;
+    var at = -1; L.forEach(function (x, i) { if (x.to === "weekgoals") at = i; });
+    var it = { id:uid(), text:"Plan this week's fasting", when:"evening", days:[0], to:"tools#tl-fast" };
+    if (at >= 0) L.splice(at + 1, 0, it); else L.push(it); save();
   }
   function rtToSelect(val, onch){
     var sel = el("select", "tutsel"); sel.setAttribute("aria-label", "Opens");
@@ -1675,7 +1682,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     box.appendChild(el("p", "meta", "Each button shows every day unless you pick days. E.g. pick Sun for things you only do on Sunday evening, like weekly muḥāsabah or setting your goals."));
   }
   function routinePanel(){
-    rtMigrate(routineItems());
+    rtMigrate(routineItems()); rtMigrate3(routineItems());
     var L = routineItems(), now = new Date(), tk = dkey(now), dow = now.getDay();
     state.routineDone = state.routineDone || {};
     Object.keys(state.routineDone).forEach(function (k) { if (k < dkey(new Date(now.getTime() - 14 * 864e5))) delete state.routineDone[k]; });
