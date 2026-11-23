@@ -908,6 +908,28 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
 .fitline polyline{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linejoin:round}
 .fitline circle{fill:var(--card);stroke:var(--accent);stroke-width:2}
 .fitline text{font-size:11px;fill:var(--muted);text-anchor:middle}
+.urgebox{border:1px solid var(--line);border-radius:18px;padding:14px 16px;margin:4px 0 16px;background:var(--bg)}
+.urgehd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}.urgehd b{font-size:16px}
+.urgebtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.urgebtn{display:flex;align-items:center;gap:10px;font:inherit;font-size:16px;font-weight:700;padding:14px 16px;border-radius:14px;cursor:pointer;text-align:left;border:2px solid}
+.urgebtn .ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.6;flex:none}
+.urgebtn span{flex:1}.urgebtn em{font-style:normal;font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+.urgebtn.ok{background:#3f9a78;border-color:#3f9a78;color:#fff}
+.urgebtn.bad{background:transparent;border-color:#d93c3c;color:#d93c3c}
+.urgebtn:active{transform:scale(.98)}
+.urgesplit{display:flex;height:8px;border-radius:99px;overflow:hidden;margin:12px 0 6px;background:var(--line)}
+.urgesplit i.ok{background:#3f9a78}.urgesplit i.bad{background:#d93c3c}
+.urgestat{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;font-weight:600}
+.urgemsg{margin-top:12px;padding:10px 12px;border-radius:12px;font-size:14px}
+.urgemsg.ok{background:rgba(63,154,120,.12)}.urgemsg.bad{background:rgba(217,60,60,.1)}
+.urgemsg p{margin:0 0 8px}.urgechips{display:flex;flex-wrap:wrap;gap:6px}
+.urgeweekrow{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-top:14px}
+.urgeweek{display:flex;gap:6px;align-items:flex-end}
+.uwd{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:var(--muted)}
+.uwd.today span{color:var(--ink);font-weight:800}
+.uwcol{display:flex;flex-direction:column;justify-content:flex-end;width:14px;height:56px;border-radius:4px;background:var(--line);overflow:hidden}
+.uwcol i.ok{background:#3f9a78}.uwcol i.bad{background:#d93c3c}
+.urgeweekrow .meta{margin:0}
 .urges{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
 .urge{flex:1;min-width:150px;display:flex;align-items:center;gap:10px;border-radius:14px;padding:12px 14px;border:1.5px solid;background:var(--bg);color:var(--ink);cursor:pointer;font:inherit;text-align:left}
 .urge b{font-size:26px;font-family:var(--serif,inherit)}
@@ -3946,6 +3968,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
   state.screen = state.screen || {}; state.screen.log = state.screen.log || {}; state.screen.limit = state.screen.limit || 120;
   function mfmt(m){ m = Math.round(m); return m >= 60 ? Math.floor(m / 60) + "h" + (m % 60 ? " " + (m % 60) + "m" : "") : m + "m"; }
   function scrollTo_(id){ var x = document.getElementById(id); if (x) x.scrollIntoView({ block:"start" }); }
+  var urgeMsg = null;
   function renderScreen(){
     var S = state.screen, L = S.log, now = new Date(), tk = dkey(now), lim = S.limit;
     var p = el("div", "panel"); p.id = "tl-screen";
@@ -3965,14 +3988,44 @@ li.mrow2 .label{display:flex;flex-direction:column}
     var sw = el("div", "slsave"); sw.appendChild(sv); f.appendChild(sw);
     p.appendChild(f);
     // urges today
-    var te = L[tk] || {}, ur = el("div", "urges");
-    var ub = function (k, label, cls) { var b = el("button", "urge " + cls); b.appendChild(el("b", null, String(te[k] || 0))); b.appendChild(el("span", null, label));
-      b.onclick = function () { var e = L[tk] = L[tk] || {}; e[k] = (e[k] || 0) + 1; save(); render(); scrollTo_("tl-screen"); }; return b; };
-    ur.appendChild(ub("r", "Urges resisted today", "ok")); ur.appendChild(ub("g", "Times I gave in today", "bad"));
-    var un = el("button", "ghost sm", "Undo"); un.title = "Take one off the last counter you can";
-    un.onclick = function () { var e = L[tk]; if (!e) return; if (e.g) e.g--; else if (e.r) e.r--; save(); render(); scrollTo_("tl-screen"); };
-    ur.appendChild(un);
-    p.appendChild(ur);
+    var te = L[tk] || {}, r0 = te.r || 0, g0 = te.g || 0;
+    var ub = el("div", "urgebox");
+    var uh = el("div", "urgehd"); uh.appendChild(el("b", null, "Felt the urge to scroll?")); uh.appendChild(el("span", "meta", "Tap one each time it happens"));
+    ub.appendChild(uh);
+    var btns = el("div", "urgebtns");
+    var tap = function (k) { var e = L[tk] = L[tk] || {}; e[k] = (e[k] || 0) + 1; e.last = k; urgeMsg = k; save(); render(); scrollTo_("tl-screen"); };
+    var b1 = el("button", "urgebtn ok"); b1.innerHTML = '<svg viewBox="0 0 24 24" class="ic"><path d="M5 12l5 5L20 7"/></svg>'; b1.appendChild(el("span", null, "I resisted")); b1.appendChild(el("em", null, String(r0)));
+    b1.onclick = function () { tap("r"); };
+    var b2 = el("button", "urgebtn bad"); b2.innerHTML = '<svg viewBox="0 0 24 24" class="ic"><path d="M6 6l12 12M18 6L6 18"/></svg>'; b2.appendChild(el("span", null, "I gave in")); b2.appendChild(el("em", null, String(g0)));
+    b2.onclick = function () { tap("g"); };
+    btns.appendChild(b1); btns.appendChild(b2); ub.appendChild(btns);
+    if (r0 + g0) {
+      var sb = el("div", "urgesplit"); var i1u = el("i", "ok"), i2u = el("i", "bad"); i1u.style.flex = r0; i2u.style.flex = g0; sb.appendChild(i1u); sb.appendChild(i2u); ub.appendChild(sb);
+      var st0 = el("div", "urgestat"); st0.appendChild(el("span", null, "Today you beat " + r0 + " of " + (r0 + g0) + " urges (" + Math.round(r0 / (r0 + g0) * 100) + "%)"));
+      var un = el("button", "linkbtn", "Undo last"); un.onclick = function () { var e = L[tk]; if (!e) return; var k = e.last && e[e.last] ? e.last : (e.g ? "g" : "r"); if (e[k]) e[k]--; delete e.last; urgeMsg = null; save(); render(); scrollTo_("tl-screen"); };
+      st0.appendChild(un); ub.appendChild(st0);
+    }
+    if (urgeMsg) {
+      var mg = el("div", "urgemsg " + (urgeMsg === "r" ? "ok" : "bad"));
+      mg.appendChild(el("p", null, urgeMsg === "r" ? "Well done. Use the moment for something better:" : "That's okay, start again now. Put the phone in another room and try one of these:"));
+      var ch = el("div", "urgechips");
+      [["Read a page of Qur'an","quran"],["Adhkar","adhkar"],["25-min focus","tools"],["To-do","todo"]].forEach(function (c) { var cb0 = el("button", "ghost sm", c[0] + " →"); cb0.onclick = function () { urgeMsg = null; go(c[1]); }; ch.appendChild(cb0); });
+      mg.appendChild(ch); ub.appendChild(mg);
+    }
+    // last 7 days of urges
+    var u7 = [], tr7 = 0, tg7 = 0; for (var ui = 6; ui >= 0; ui--) { var ud = new Date(now); ud.setDate(ud.getDate() - ui); var ue = L[dkey(ud)] || {}; u7.push({ d:ud, r:ue.r || 0, g:ue.g || 0, k:dkey(ud) }); tr7 += ue.r || 0; tg7 += ue.g || 0; }
+    if (tr7 + tg7) {
+      var umx = Math.max.apply(null, u7.map(function (x) { return x.r + x.g; })) || 1;
+      var uw = el("div", "urgeweek");
+      u7.forEach(function (x) { var c = el("div", "uwd" + (x.k === tk ? " today" : "")); var col = el("div", "uwcol");
+        var gg = el("i", "bad"); gg.style.height = Math.round(x.g / umx * 54) + "px"; var rr = el("i", "ok"); rr.style.height = Math.round(x.r / umx * 54) + "px";
+        col.appendChild(gg); col.appendChild(rr); c.title = x.d.toDateString() + ": " + x.r + " resisted, " + x.g + " gave in";
+        c.appendChild(col); c.appendChild(el("span", null, x.d.toLocaleDateString(undefined, { weekday:"narrow" }))); uw.appendChild(c); });
+      var uwr = el("div", "urgeweekrow"); uwr.appendChild(uw);
+      uwr.appendChild(el("p", "meta", "Last 7 days: " + tr7 + " resisted, " + tg7 + " gave in · " + Math.round(tr7 / (tr7 + tg7) * 100) + "% won"));
+      ub.appendChild(uwr);
+    }
+    p.appendChild(ub);
     // stats
     var days = []; for (var i = 6; i >= 0; i--) { var d = new Date(now); d.setDate(d.getDate() - i); days.push({ d:d, k:dkey(d), e:L[dkey(d)] }); }
     var got = days.filter(function (x) { return x.e && x.e.m != null; });
