@@ -2111,9 +2111,10 @@ li.mrow2 .label{display:flex;flex-direction:column}
     var readW = weekDays(ws).reduce(function (a,d) { return a + (q.readLog[dkey(d)] || 0); }, 0);
 
     // summary tiles (tap to jump)
+    var mpT = 0; for (var mj = 1; mj <= 114; mj++) if (q.memA[mj]) mpT += pagesFor(mj, q.memA[mj]); mpT = Math.min(604, mpT);
     var sum = el("div", "qsum");
     [
-      { id:"q-mem",  ic:"quran",   v:pct(ms.pct), l:"Memorised", f:ms.pct/100, c:"--c1" },
+      { id:"q-mem",  ic:"quran",   v:fmtP(mpT), l:"Memorised · pages", f:mpT/604, c:"--c1" },
       { id:"q-rev",  ic:"tools",   v:rw + "/" + q.revTarget, l:"Long revision · pages", f:rw/q.revTarget, c:"--c3" },
       { id:"q-read", ic:"hadith",  v:readW + "/" + q.readTarget, l:"Reading this week", f:readW/q.readTarget, c:"--c4" },
       { id:"q-tad",  ic:"target",  v:tw + "/" + q.tadTarget, l:"Tadabbur this week", f:tw/q.tadTarget, c:"--c5" }
@@ -2130,11 +2131,12 @@ li.mrow2 .label{display:flex;flex-direction:column}
     // ---- memorisation (by ayah, counted from ayah 1) ----
     var pm = el("div", "panel"); pm.id = "q-mem";
     pm.appendChild(el("h2", null, "Memorisation"));
-    var big = el("div", "bignum", ms.ayat.toLocaleString()); big.appendChild(el("small", null, "of " + TOTAL_AYAT.toLocaleString() + " ayat · " + pct(ms.pct)));
-    pm.appendChild(big);
-    pm.appendChild(barEl(ms.pct/100));
     var memPages = 0; for (var mi = 1; mi <= 114; mi++) if (q.memA[mi]) memPages += pagesFor(mi, q.memA[mi]);
-    pm.appendChild(el("p", "meta", "About " + fmtP(memPages) + " of 604 pages · " + ms.surahs + " surahs complete · " + ms.learning + " in progress"));
+    memPages = Math.min(604, memPages);
+    var big = el("div", "bignum", fmtP(memPages)); big.appendChild(el("small", null, "of 604 pages · " + pct(memPages / 6.04)));
+    pm.appendChild(big);
+    pm.appendChild(barEl(memPages / 604));
+    pm.appendChild(el("p", "meta", ms.ayat.toLocaleString() + " of " + TOTAL_AYAT.toLocaleString() + " ayat · " + ms.surahs + " surahs complete · " + ms.learning + " in progress"));
 
     var bfw = el("label", "bfill" + (memBackfill ? " on" : "")); var bfc = el("input"); bfc.type = "checkbox"; bfc.checked = memBackfill;
     bfc.onchange = function () { memBackfill = bfc.checked; render(); };
