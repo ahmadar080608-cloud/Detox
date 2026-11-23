@@ -609,6 +609,10 @@ ul.rtlist li.done span{text-decoration:line-through;opacity:.55}
 .rtgt{flex:1}.rtarrow{color:var(--accent,#e0603f);font-size:17px}
 .rtrow.done .rtgt{text-decoration:line-through;opacity:.55}
 .rtgo .rtonly{margin-left:0}
+.wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin:14px 0}
+.wgcard{margin:0}
+.wghd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px}
+.wghd b{font-size:15px}
 .rth{font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin:14px 0 6px}
 ul.rtedit{list-style:none;margin:0 0 8px;padding:0}
 ul.rtedit li{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
@@ -1306,6 +1310,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
   ];
 
   var byId = {}; PAGES.forEach(function (p) { byId[p.id] = p; });
+  byId.weekgoals = { id:"weekgoals", name:"This week's goals", icon:"target", group:null, color:"--c2", bg:"أهداف" };   // opened from the Sunday routine (not in the sidebar)
   var SCIENCES = ["aqeedah","fiqh","tazkiyah","tafsir","hadith","seerah","logic"];
   var ISLAMIC_SUBS = ["quran","adhkar","studies","arabic","naseeha","isoc"];
   var STUDY_SUBS = SCIENCES;
@@ -1574,7 +1579,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     ["adhkar:morning","Morning adhkar"],["adhkar:evening","Evening adhkar"],["adhkar:sleep","Adhkar before sleep"],["adhkar:salah","Adhkar after ṣalāh"],
     ["quran","Qur'an"],["quran#q-rev","Qur'an revision"],["quran#q-mem","Qur'an memorisation"],["quran#q-goals","Qur'an goals"],
     ["tools#tl-muh","Weekly muḥāsabah"],["tools#tl-sleep","Sleep log"],["tools#tl-screen","Phone detox"],["tools#tl-fast","Fasting"],["tools","Focus timer"],
-    ["schedule","Schedule"],["todo","To-do"],["university#UNIGOALS","University goals"],["lectures","Lectures"],["hadith","Hadith"],["arabic","Arabic"],
+    ["weekgoals","This week's goals (every section)"],["schedule","Schedule"],["todo","To-do"],["university#UNIGOALS","University goals"],["lectures","Lectures"],["hadith","Hadith"],["arabic","Arabic"],
     ["naseeha","Naṣīḥah & Khuṭbahs"],["fitness","Fitness"],["finance","Finance"],["tutoring","Tutoring"],["ambitions","Life ambitions"]
   ];
   function rtLabel(to){ var f = RT_TO.filter(function (x) { return x[0] === to; })[0]; return f ? f[1] : ""; }
@@ -1595,11 +1600,17 @@ li.mrow2 .label{display:flex;flex-direction:column}
       if (!L.length) [
         ["Morning adhkar","morning",[],"adhkar:morning"],["Log last night's sleep","morning",[],"tools#tl-sleep"],["Plan today","morning",[],"schedule"],
         ["Qur'an revision","evening",[],"quran#q-rev"],["Evening adhkar","evening",[],"adhkar:evening"],["Adhkar before sleep","evening",[],"adhkar:sleep"],
-        ["Weekly muḥāsabah","evening",[0],"tools#tl-muh"],["Set this week's Qur'an goals","evening",[0],"quran#q-goals"],["Set this week's uni goals","evening",[0],"university#UNIGOALS"],["Plan the week","evening",[0],"schedule"]
+        ["Weekly muḥāsabah","evening",[0],"tools#tl-muh"],["Set this week's goals","evening",[0],"weekgoals"],["Plan the week","evening",[0],"schedule"]
       ].forEach(function (r) { L.push({ id:uid(), text:r[0], when:r[1], days:r[2], to:r[3] }); });
       save();
     }
     return L;
+  }
+  function rtMigrate(L){   // the two separate Sunday goal buttons become one "every section" button
+    if (state.routineV2) return; state.routineV2 = 1;
+    var ix = -1;
+    L.forEach(function (x, i) { if ((x.to === "quran#q-goals" || x.to === "university#UNIGOALS") && x.days && x.days.length === 1 && x.days[0] === 0) { if (ix < 0) ix = i; x._rm = 1; } });
+    if (ix >= 0) { L.splice(ix, 0, { id:uid(), text:"Set this week's goals", when:"evening", days:[0], to:"weekgoals" }); state.routine = L.filter(function (x) { return !x._rm; }); save(); }
   }
   function rtToSelect(val, onch){
     var sel = el("select", "tutsel"); sel.setAttribute("aria-label", "Opens");
@@ -1642,6 +1653,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     box.appendChild(el("p", "meta", "Each button shows every day unless you pick days. E.g. pick Sun for things you only do on Sunday evening, like weekly muḥāsabah or setting your goals."));
   }
   function routinePanel(){
+    rtMigrate(routineItems());
     var L = routineItems(), now = new Date(), tk = dkey(now), dow = now.getDay();
     state.routineDone = state.routineDone || {};
     Object.keys(state.routineDone).forEach(function (k) { if (k < dkey(new Date(now.getTime() - 14 * 864e5))) delete state.routineDone[k]; });
@@ -1740,6 +1752,64 @@ li.mrow2 .label{display:flex;flex-direction:column}
     return box;
   }
   var memBackfill = false;   // turned on while entering memorisation done before (not logged to goals)
+  // One page to set this week's goals for every section (used on Sunday evenings)
+  function renderWeekGoals(){
+    var now = new Date(), ws = weekStart(now), we = new Date(ws); we.setDate(ws.getDate() + 6);
+    var key = periodKeys(now).week, pw = new Date(ws); pw.setDate(pw.getDate() - 7); var prevKey = periodKeys(pw).week;
+    var h = el("div", "pagehead grain"); h.style.background = bgOf(byId.weekgoals);
+    h.appendChild(el("i", "bgl arb", "أهداف"));
+    var tag = el("span", "otag"); tag.appendChild(icon("target")); tag.appendChild(document.createTextNode("Weekly goals")); h.appendChild(tag);
+    h.appendChild(el("div", "ph-big", "This week's goals"));
+    h.appendChild(el("div", "ph-sub", ws.toLocaleDateString(undefined,{ weekday:"short", day:"numeric", month:"short" }) + " – " + we.toLocaleDateString(undefined,{ weekday:"short", day:"numeric", month:"short" }) + " · set a goal or two for each part of your week"));
+    app.appendChild(h);
+    var grid = el("div", "wgrid");
+    var card = function (title, open, fill) {
+      var c = el("div", "panel wgcard"); var hd = el("div", "wghd"); hd.appendChild(el("b", null, title));
+      var ob = el("button", "linkbtn", "Open →"); ob.onclick = function () { go(open); }; hd.appendChild(ob); c.appendChild(hd);
+      fill(c); grid.appendChild(c);
+    };
+    var listCard = function (title, open, store, hint) {
+      card(title, open, function (c) {
+        var L = store[key] = store[key] || [];
+        var ul = el("ul", "wgl");
+        L.forEach(function (g) { var li = el("li", g.done ? "done" : null);
+          var cb = el("input"); cb.type = "checkbox"; cb.checked = g.done; cb.setAttribute("aria-label", "Done"); cb.onchange = function () { g.done = cb.checked; save(); render(); };
+          li.appendChild(cb); li.appendChild(el("span", "label", g.text));
+          var del = el("button", "iconbtn"); del.title = "Remove goal"; del.appendChild(icon("x")); del.onclick = function () { store[key] = L.filter(function (x) { return x !== g; }); save(); render(); };
+          li.appendChild(del); ul.appendChild(li); });
+        c.appendChild(ul);
+        var ai = el("input"); ai.type = "text"; ai.className = "gnote"; ai.maxLength = 140; ai.placeholder = "+ " + (hint || "Add a goal");
+        c.appendChild(withBtn(ai, "Add", function () { var v = ai.value.trim(); if (!v) { ai.focus(); return false; } L.push({ id:uid(), text:v, done:false }); save(); render(); }));
+        var left = (store[prevKey] || []).filter(function (g) { return !g.done && !L.some(function (x) { return x.text === g.text; }); });
+        if (left.length) { var cb2 = el("button", "ghost", "Carry over " + left.length + " unfinished from last week"); cb2.style.marginTop = "8px";
+          cb2.onclick = function () { left.forEach(function (g) { L.push({ id:uid(), text:g.text, done:false }); }); save(); render(); }; c.appendChild(cb2); }
+      });
+    };
+    var targetCard = function (title, open, g, unit, hint) {
+      card(title, open, function (c) {
+        var tr = el("div", "row"); tr.appendChild(el("span", "meta", "Target"));
+        var ti = el("input"); ti.type = "number"; ti.min = 0; ti.step = "any"; ti.value = g.t; ti.style.maxWidth = "90px"; ti.setAttribute("aria-label", title + " weekly target");
+        ti.onchange = function () { var v = parseFloat(ti.value); if (v > 0) { g.t = Math.round(v * 100) / 100; save(); } };
+        tr.appendChild(ti); tr.appendChild(el("span", "meta", unit + " this week")); c.appendChild(tr);
+        var nt = el("input"); nt.type = "text"; nt.maxLength = 120; nt.className = "gnote"; nt.placeholder = hint;
+        c.appendChild(goalNote(g, nt, "week"));
+      });
+    };
+    var q0 = state.quran || {}; q0.goalsP = q0.goalsP || {};
+    if (q0.goalsP.week) targetCard("Qur'an memorisation", "quran", q0.goalsP.week, "pages", "e.g. Finish Al-Mulk");
+    var hd0 = state.hadith = state.hadith || {}; hd0.goals = hd0.goals || { week:{ t:2 }, month:{ t:8 }, year:{ t:50 } };
+    targetCard("Ḥadīth memorisation", "hadith", hd0.goals.week, "ḥadīth", "e.g. Hadith 10–12 of the Arbaʿīn");
+    var y = state.uniYear || 1; state.sciGoals = state.sciGoals || {};
+    listCard("University · Year " + y, "university", state.sciGoals["uni@y" + y] = state.sciGoals["uni@y" + y] || {}, "e.g. Make flashcards for this week's lectures");
+    ["aqeedah","fiqh","tazkiyah","tafsir","seerah","logic"].forEach(function (sx) { if (!byId[sx]) return;
+      listCard(byId[sx].name, sx, state.sciGoals[sx] = state.sciGoals[sx] || {}, (SCI_HINTS[sx] || {}).week); });
+    state.arGoals = state.arGoals || {};
+    listCard("Arabic", "arabic", state.arGoals, "e.g. Learn 20 new words");
+    ["isoc","dawah","fitness","ambitions"].forEach(function (sx) { if (!byId[sx]) return;
+      listCard(byId[sx].name, sx, state.sciGoals[sx] = state.sciGoals[sx] || {}, (SCI_HINTS[sx] || {}).week); });
+    app.appendChild(grid);
+    var bk = el("button", "ghost", "← Back to Overview"); bk.onclick = function () { go("home"); }; app.appendChild(bk);
+  }
   function renderHome(){
     seededCard();
     var toprow = el("div", "toprow"); toprow.appendChild(ayahCard()); toprow.appendChild(mementoEl("card")); app.appendChild(toprow);
@@ -5038,6 +5108,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     else if (t === "todo") renderTodo();
     else if (t === "islamic") renderIslamic();
     else if (t === "tools") renderTools();
+    else if (t === "weekgoals") renderWeekGoals();
     else if (t === "settings") renderSettings();
     else renderTasks(t);
     syncArabic();
