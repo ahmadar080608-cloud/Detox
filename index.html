@@ -642,6 +642,19 @@ ul.rtlist li.done span{text-decoration:line-through;opacity:.55}
 .sch-late b{font-size:14px;margin-right:4px}.sch-latel{font-size:13px;color:var(--muted)}
 .sch-late .sch-pill{padding:6px 12px;font-size:13px}
 .sch-toast .sch-pill{padding:5px 12px;font-size:13px;margin-left:auto}
+.ambplan{flex-basis:100%;margin-top:12px;padding:16px;border-radius:18px;background:var(--bg);border:1px solid var(--line);display:flex;flex-direction:column;gap:14px}
+.ambgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.ambf{display:flex;flex-direction:column;gap:6px}
+.ambf > label{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.ambf textarea{width:100%;box-sizing:border-box;resize:vertical;font:inherit;font-size:15px;line-height:1.5;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:inherit;min-height:70px}
+ul.ambsteps{list-style:none;margin:0;padding:0}
+ul.ambsteps li{display:flex;align-items:center;gap:8px;padding:6px 0;border:0;border-bottom:1px solid var(--line)}
+ul.ambsteps li input[type=checkbox]{width:18px;height:18px;flex:none;accent-color:var(--accent,#e0603f)}
+.ambst{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:15px;padding:4px 2px;color:inherit}
+ul.ambsteps li.done .ambst{text-decoration:line-through;opacity:.55}
+ul.ambsteps .dateinp{max-width:150px;font-size:13px;padding:4px 8px}
+ul.ambsteps .mv .ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2}
+.ambnext{font-size:13px;color:var(--muted);margin-top:4px}.ambnext span{font-weight:700;color:var(--ink)}
 .rth{font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin:14px 0 6px}
 ul.rtedit{list-style:none;margin:0 0 8px;padding:0}
 ul.rtedit li{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
@@ -1914,6 +1927,52 @@ li.mrow2 .label{display:flex;flex-direction:column}
     n.cur.forEach(function (x) { c.appendChild(row(x, false)); });
     if (n.next) { if (n.cur.length) c.appendChild(el("div", "nownext", "Next")); c.appendChild(row(n.next, true)); }
     app.appendChild(c);
+  }
+  // A full plan for one ambition: why, vision, steps, notes, du'a
+  function ambitionPlan(x){
+    var w = el("div", "ambplan");
+    var grow = function (ta) { ta.style.height = "auto"; ta.style.height = Math.max(ta.scrollHeight + 2, 70) + "px"; };
+    var field = function (key, label, ph, rows) {
+      var f = el("div", "ambf"); f.appendChild(el("label", null, label));
+      var ta = el("textarea"); ta.rows = rows || 3; ta.placeholder = ph; ta.value = x[key] || "";
+      ta.oninput = function () { x[key] = ta.value; grow(ta); clearTimeout(ta._t); ta._t = setTimeout(save, 600); };
+      ta.onblur = function () { x[key] = ta.value; save(); };
+      f.appendChild(ta); setTimeout(function () { grow(ta); }, 0); return f;
+    };
+    var top = el("div", "ambgrid");
+    top.appendChild(field("why", "Why I want this (my intention)", "e.g. For the sake of Allah, so my children grow up close to the Qur'an…", 3));
+    top.appendChild(field("vision", "What it looks like when it's done", "e.g. A centre with a masjid, a Qur'an school, a library and a youth space…", 3));
+    w.appendChild(top);
+    // steps
+    var sf = el("div", "ambf"); var L = x.steps = x.steps || [];
+    var dn = L.filter(function (z) { return z.done; }).length;
+    sf.appendChild(el("label", null, "Steps" + (L.length ? " · " + dn + " of " + L.length + " done" : "")));
+    if (L.length) { var bar0 = barEl(dn / L.length); bar0.style.margin = "4px 0 8px"; sf.appendChild(bar0); }
+    var ul = el("ul", "ambsteps");
+    L.forEach(function (z, i) {
+      var li = el("li", z.done ? "done" : null);
+      var cb = el("input"); cb.type = "checkbox"; cb.checked = !!z.done; cb.setAttribute("aria-label", "Step done");
+      cb.onchange = function () { z.done = cb.checked; save(); render(); };
+      li.appendChild(cb);
+      var t = el("input"); t.type = "text"; t.value = z.text; t.className = "ambst"; t.setAttribute("aria-label", "Step"); t.onchange = function () { z.text = t.value.trim() || z.text; save(); };
+      li.appendChild(t);
+      var dd = el("input"); dd.type = "date"; dd.className = "dateinp"; dd.value = z.due || ""; dd.title = "Aim to finish by"; dd.onchange = function () { z.due = dd.value || undefined; save(); };
+      li.appendChild(dd);
+      var up = el("button", "iconbtn mv"); up.innerHTML = '<svg viewBox="0 0 24 24" class="ic"><path d="M6 15l6-6 6 6"/></svg>'; up.title = "Move up"; up.disabled = i === 0;
+      up.onclick = function () { L[i] = L[i - 1]; L[i - 1] = z; save(); render(); }; li.appendChild(up);
+      var del = el("button", "iconbtn"); del.title = "Delete step"; del.appendChild(icon("x")); del.onclick = function () { x.steps = L.filter(function (y) { return y !== z; }); save(); render(); }; li.appendChild(del);
+      ul.appendChild(li);
+    });
+    sf.appendChild(ul);
+    var si = el("input"); si.type = "text"; si.className = "gnote"; si.maxLength = 160; si.placeholder = L.length ? "+ Add the next step" : "+ Break it into steps, e.g. Find out what the course requires";
+    sf.appendChild(withBtn(si, "Add", function () { var v = si.value.trim(); if (!v) { si.focus(); return false; } L.push({ id:uid(), text:v, done:false }); save(); render(); }));
+    w.appendChild(sf);
+    var bot = el("div", "ambgrid");
+    bot.appendChild(field("notes", "Notes and ideas", "Anything: research, people to speak to, costs, links…", 5));
+    bot.appendChild(field("dua", "My duʿāʾ for it", "e.g. O Allah, make this easy for me and accept it from me…", 5));
+    w.appendChild(bot);
+    w.appendChild(el("p", "meta", "Saves as you type."));
+    return w;
   }
   function renderHome(){
     seededCard();
@@ -3788,8 +3847,12 @@ li.mrow2 .label{display:flex;flex-direction:column}
       else meta.appendChild(d2);
       if (uni) meta.appendChild(topicSelect(x.topic || "", function (v) { x.topic = v || undefined; save(); render(); }, "topsel row"));
       if (sec === "tutoring") { state.tut = state.tut || {}; meta.appendChild(tutFields(x, function (k) { save(); if (k === "tutee" || k === "subject") render(); })); }
-      var nb = el("button", "linkbtn", x.notes ? "Notes ✓" : "Add notes"); nb.onclick = function () { trkNote = trkNote === x.id ? null : x.id; render(); };
-      meta.appendChild(nb); tb.appendChild(meta);
+      var amb = sec === "ambitions", nxl = null;
+      var stp = amb ? (x.steps || []) : null;
+      var nb = el("button", "linkbtn", amb ? (trkNote === x.id ? "Close" : "Open plan" + (stp.length ? " · " + stp.filter(function (z) { return z.done; }).length + "/" + stp.length + " steps" : "")) : x.notes ? "Notes ✓" : "Add notes");
+      nb.onclick = function () { trkNote = trkNote === x.id ? null : x.id; render(); };
+      if (amb && trkNote !== x.id) { var nxs = stp.filter(function (z) { return !z.done; })[0]; if (nxs) { var nxl = el("div", "ambnext"); nxl.appendChild(el("span", null, "Next step: ")); nxl.appendChild(document.createTextNode(nxs.text)); } }
+      meta.appendChild(nb); tb.appendChild(meta); if (nxl && amb && trkNote !== x.id) { tb.appendChild(nxl); nxl = null; }
       li.appendChild(tb);
       if (sec === "business") {
         var tg = el("label", "ipswitch" + (x.active ? " on" : ""));
@@ -3811,7 +3874,8 @@ li.mrow2 .label{display:flex;flex-direction:column}
           mv.appendChild(b); });
         li.appendChild(mv); }
       li.appendChild(del);
-      if (trkNote === x.id) { var nt = el("textarea"); nt.placeholder = "Notes"; nt.value = x.notes || ""; nt.onchange = function () { x.notes = nt.value; save(); };
+      if (trkNote === x.id && sec === "ambitions") li.appendChild(ambitionPlan(x));
+      else if (trkNote === x.id) { var nt = el("textarea"); nt.placeholder = "Notes"; nt.value = x.notes || ""; nt.onchange = function () { x.notes = nt.value; save(); };
         var w = el("div"); w.style.flexBasis = "100%"; w.appendChild(nt); li.appendChild(w); }
       ul.appendChild(li);
     });
