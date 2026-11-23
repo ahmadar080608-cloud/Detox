@@ -589,7 +589,8 @@
 
     var now = nowMin(), isToday = k === tk;
     if (view !== "day") {
-      if (V.toast) { var t0 = el("div", "sch-toast", V.toast); var tx0 = el("button", "sch-ib"); tx0.appendChild(svg("x")); tx0.onclick = function () { V.toast = ""; C.rerender(); }; t0.appendChild(tx0); root.appendChild(t0); }
+      if (view === "multi" && itemsOn(tk).some(movable)) root.appendChild(lateBar(tk));
+      if (V.toast) root.appendChild(toastEl());
       if (view === "month") root.appendChild(monthView(k, tk));
       else root.appendChild(columnsView(view === "multi" ? [k, addDays(k, 1), addDays(k, 2)] : weekDaysOf(k), tk, view));
       if (view === "week" || view === "month") root.appendChild(el("p", "meta sch-fixnote", "Week and Month show your calendar: everything you add from the calendar, plus waking up and sleeping. Your full daily plan, routine included, is in Day and Multi-Day."));
@@ -603,16 +604,8 @@
     dh.appendChild(dadd);
     root.appendChild(dh);
 
-    if (isToday && itemsOn(k).some(movable)) {
-      var lb = el("div", "sch-late"); lb.appendChild(el("b", null, "Running late?"));
-      var sn = el("button", "sch-pill acc", "I'm starting now"); sn.title = "Moves your current or next task to start now, and everything after it along with it"; sn.onclick = function () { startNow(k); }; lb.appendChild(sn);
-      lb.appendChild(el("span", "sch-latel", "or push the rest of today back"));
-      [10, 15, 30, 60].forEach(function (m) { var b = el("button", "sch-pill", "+" + m + " min"); b.onclick = function () { pushBack(k, m); }; lb.appendChild(b); });
-      root.appendChild(lb);
-    }
-    if (V.toast) { var t = el("div", "sch-toast", V.toast);
-      if (V.undo) { var ub = el("button", "sch-pill", "Undo"); ub.onclick = function () { S().items = JSON.parse(V.undo); V.undo = null; V.toast = "Undone."; C.save(); C.rerender(); }; t.appendChild(ub); }
-      var tx = el("button", "sch-ib"); tx.appendChild(svg("x")); tx.onclick = function () { V.toast = ""; V.undo = null; C.rerender(); }; t.appendChild(tx); root.appendChild(t); }
+    if (isToday && itemsOn(k).some(movable)) root.appendChild(lateBar(k));
+    if (V.toast) root.appendChild(toastEl());
 
     var items = itemsOn(k), allDay = items.filter(function (x) { return x.allDay || !x.start; }), timed = items.filter(function (x) { return !x.allDay && x.start; });
 
@@ -782,6 +775,7 @@
         b.appendChild(el("span", "cname", it.title));
         b.onclick = function () { openEditor(it, dk); };
         r.appendChild(b);
+        if (view !== "week" && movable(it)) r.appendChild(mvArrows(it, dk));
         r.appendChild(doneBtn(it, dk));
         list.appendChild(r);
       });
@@ -989,6 +983,29 @@
     if (d <= 0) { V.toast = "You're on time: " + next.title + " starts at " + fmtT(hm(next.start)) + "."; C.rerender(); return; }
     pushBack(k, d);
   }
+  function lateBar(k) {
+    var lb = el("div", "sch-late"); lb.appendChild(el("b", null, "Running late today?"));
+    var sn = el("button", "sch-pill acc", "I'm starting now"); sn.title = "Moves your current or next task to start now, and everything after it along with it"; sn.onclick = function () { startNow(k); }; lb.appendChild(sn);
+    lb.appendChild(el("span", "sch-latel", "or push the rest of today back"));
+    [10, 15, 30, 60].forEach(function (m) { var b = el("button", "sch-pill", "+" + m + " min"); b.onclick = function () { pushBack(k, m); }; lb.appendChild(b); });
+    return lb;
+  }
+  function toastEl() {
+    var t = el("div", "sch-toast"); t.appendChild(el("span", null, V.toast));
+    if (V.undo) { var ub = el("button", "sch-pill", "Undo"); ub.onclick = function () { S().items = JSON.parse(V.undo); V.undo = null; V.toast = "Undone."; C.save(); C.rerender(); }; t.appendChild(ub); }
+    var tx = el("button", "sch-ib"); tx.appendChild(svg("x")); tx.onclick = function () { V.toast = ""; V.undo = null; C.rerender(); }; t.appendChild(tx);
+    return t;
+  }
+  function mvArrows(it, k) {
+    var mv = el("div", "sch-mv");
+    [[-1, "M6 15l6-6 6 6", "Move earlier"], [1, "M6 9l6 6 6-6", "Move later"]].forEach(function (d) {
+      var b = el("button", "sch-mvb"); b.title = d[2] + " (swap with the next task)"; b.setAttribute("aria-label", d[2] + ": " + it.title);
+      b.innerHTML = '<svg viewBox="0 0 24 24"><path d="' + d[1] + '"/></svg>';
+      var ml = itemsOn(k).filter(movable), mi = ml.indexOf(it); if (mi + d[0] < 0 || mi + d[0] >= ml.length) b.disabled = true;
+      b.onclick = function (e) { e.stopPropagation(); moveItem(it, k, d[0]); };
+      mv.appendChild(b); });
+    return mv;
+  }
   function doneBtn(it, k) {
     var b = el("button", "sch-done" + (isDone(it, k) ? " on" : "")); b.style.setProperty("--c", it.color);
     b.setAttribute("aria-label", isDone(it, k) ? "Mark not done" : "Mark done");
@@ -1017,16 +1034,7 @@
     body.onclick = function () { openEditor(it, k); };
     r.appendChild(body);
     var endc = el("div", "sch-end");
-    if (movable(it)) {
-      var mv = el("div", "sch-mv");
-      [[-1, "M6 15l6-6 6 6", "Move earlier"], [1, "M6 9l6 6 6-6", "Move later"]].forEach(function (d) {
-        var b = el("button", "sch-mvb"); b.title = d[2] + " (swap with the next task)"; b.setAttribute("aria-label", d[2] + ": " + it.title);
-        b.innerHTML = '<svg viewBox="0 0 24 24"><path d="' + d[1] + '"/></svg>';
-        var ml = itemsOn(k).filter(movable), mi = ml.indexOf(it); if (mi + d[0] < 0 || mi + d[0] >= ml.length) b.disabled = true;
-        b.onclick = function (e) { e.stopPropagation(); moveItem(it, k, d[0]); };
-        mv.appendChild(b); });
-      endc.appendChild(mv);
-    }
+    if (movable(it)) endc.appendChild(mvArrows(it, k));
     endc.appendChild(doneBtn(it, k)); r.appendChild(endc);
     return r;
   }
