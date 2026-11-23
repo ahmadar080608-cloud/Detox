@@ -603,7 +603,16 @@
     dh.appendChild(dadd);
     root.appendChild(dh);
 
-    if (V.toast) { var t = el("div", "sch-toast", V.toast); var tx = el("button", "sch-ib"); tx.appendChild(svg("x")); tx.onclick = function () { V.toast = ""; C.rerender(); }; t.appendChild(tx); root.appendChild(t); }
+    if (isToday && itemsOn(k).some(movable)) {
+      var lb = el("div", "sch-late"); lb.appendChild(el("b", null, "Running late?"));
+      var sn = el("button", "sch-pill acc", "I'm starting now"); sn.title = "Moves your current or next task to start now, and everything after it along with it"; sn.onclick = function () { startNow(k); }; lb.appendChild(sn);
+      lb.appendChild(el("span", "sch-latel", "or push the rest of today back"));
+      [10, 15, 30, 60].forEach(function (m) { var b = el("button", "sch-pill", "+" + m + " min"); b.onclick = function () { pushBack(k, m); }; lb.appendChild(b); });
+      root.appendChild(lb);
+    }
+    if (V.toast) { var t = el("div", "sch-toast", V.toast);
+      if (V.undo) { var ub = el("button", "sch-pill", "Undo"); ub.onclick = function () { S().items = JSON.parse(V.undo); V.undo = null; V.toast = "Undone."; C.save(); C.rerender(); }; t.appendChild(ub); }
+      var tx = el("button", "sch-ib"); tx.appendChild(svg("x")); tx.onclick = function () { V.toast = ""; V.undo = null; C.rerender(); }; t.appendChild(tx); root.appendChild(t); }
 
     var items = itemsOn(k), allDay = items.filter(function (x) { return x.allDay || !x.start; }), timed = items.filter(function (x) { return !x.allDay && x.start; });
 
@@ -937,6 +946,49 @@
     return box;
   }
 
+  // ---------- moving things around on one day ----------
+  function movable(it) { return !isFixed(it) && !it.allDay && !!it.start; }
+  // Give an item a new start time on day k only (repeating items get a one-off copy for that day)
+  function setStartOn(it, k, m) {
+    m = Math.max(0, Math.min(23 * 60 + 59, Math.round(m)));
+    if (it.repeat && it.repeat.type !== "none") {
+      var s = S(); it.skip = it.skip || {}; it.skip[k] = true;
+      var one = JSON.parse(JSON.stringify(it));
+      one.id = uid(); one.date = k; one.repeat = { type: "none" }; delete one.skip; delete one.gid; one.gsync = false; one.oneOff = it.id;
+      one.done = it.done && it.done[k] ? (function () { var o = {}; o[k] = it.done[k]; return o; })() : {};
+      one.start = toHM(m); s.items.push(one); return one;
+    }
+    it.start = toHM(m); return it;
+  }
+  function snapshot() { return JSON.stringify(S().items); }
+  function moveItem(it, k, dir) {
+    var list = itemsOn(k).filter(movable), i = list.indexOf(it), j = i + dir;
+    if (i < 0 || j < 0 || j >= list.length) return;
+    var a = dir < 0 ? list[j] : it, b = dir < 0 ? it : list[j];      // a is earlier, b is later
+    var sA = hm(a.start), sB = hm(b.start), dA = a.dur || 0, dB = b.dur || 0;
+    V.undo = snapshot();
+    setStartOn(b, k, sA);                 // later one moves into the earlier slot
+    setStartOn(a, k, sB + dB - dA);       // earlier one finishes where the later one used to
+    V.toast = "Swapped " + b.title + " and " + a.title + ".";
+    C.save(); C.rerender();
+  }
+  function pushBack(k, mins) {
+    var now = nowMin();
+    var list = itemsOn(k).filter(function (it) { return movable(it) && !isDone(it, k) && hm(it.start) + (it.dur || 0) > now; });
+    if (!list.length) { V.toast = "Nothing left to move today."; C.rerender(); return; }
+    V.undo = snapshot();
+    list.forEach(function (it) { setStartOn(it, k, hm(it.start) + mins); });
+    V.toast = "Moved the rest of today " + mins + " min later (" + list.length + " item" + (list.length === 1 ? "" : "s") + "). Lectures and calendar events stay put.";
+    C.save(); C.rerender();
+  }
+  function startNow(k) {
+    var now = nowMin();
+    var next = itemsOn(k).filter(function (it) { return movable(it) && !isDone(it, k) && hm(it.start) + (it.dur || 0) > now; })[0];
+    if (!next) { V.toast = "Nothing left to move today."; C.rerender(); return; }
+    var d = Math.ceil((now - hm(next.start)) / 5) * 5;
+    if (d <= 0) { V.toast = "You're on time: " + next.title + " starts at " + fmtT(hm(next.start)) + "."; C.rerender(); return; }
+    pushBack(k, d);
+  }
   function doneBtn(it, k) {
     var b = el("button", "sch-done" + (isDone(it, k) ? " on" : "")); b.style.setProperty("--c", it.color);
     b.setAttribute("aria-label", isDone(it, k) ? "Mark not done" : "Mark done");
@@ -964,7 +1016,18 @@
     if (live) body.appendChild(el("div", "sch-live", fmtDur(en - now) + " left"));
     body.onclick = function () { openEditor(it, k); };
     r.appendChild(body);
-    r.appendChild(doneBtn(it, k));
+    var endc = el("div", "sch-end");
+    if (movable(it)) {
+      var mv = el("div", "sch-mv");
+      [[-1, "M6 15l6-6 6 6", "Move earlier"], [1, "M6 9l6 6 6-6", "Move later"]].forEach(function (d) {
+        var b = el("button", "sch-mvb"); b.title = d[2] + " (swap with the next task)"; b.setAttribute("aria-label", d[2] + ": " + it.title);
+        b.innerHTML = '<svg viewBox="0 0 24 24"><path d="' + d[1] + '"/></svg>';
+        var ml = itemsOn(k).filter(movable), mi = ml.indexOf(it); if (mi + d[0] < 0 || mi + d[0] >= ml.length) b.disabled = true;
+        b.onclick = function (e) { e.stopPropagation(); moveItem(it, k, d[0]); };
+        mv.appendChild(b); });
+      endc.appendChild(mv);
+    }
+    endc.appendChild(doneBtn(it, k)); r.appendChild(endc);
     return r;
   }
   function gapRow(c1, c2, gap, inGap, start, k) {
@@ -1231,6 +1294,12 @@
       var left = its.filter(function (it) { return !isDone(it, k); }).length;
       var nxt = its.filter(function (it) { return !it.allDay && it.start && hm(it.start) >= now && !isDone(it, k); })[0];
       return { total: its.length, left: left, next: nxt ? fmtT(hm(nxt.start)) + " · " + nxt.title : null }; },
+    now: function () { var k = today(), now = nowMin(), its = itemsOn(k).filter(function (it) { return !it.allDay && it.start; });
+      var pack = function (it) { if (!it) return null; var st = hm(it.start); return { id: it.id, title: it.title, color: it.color, icon: it.icon, start: st, end: st + (it.dur || 0), startT: fmtT(st), endT: fmtT(st + (it.dur || 0)), done: isDone(it, k), left: st + (it.dur || 0) - now, inMin: st - now }; };
+      var cur = its.filter(function (it) { var st = hm(it.start); return now >= st && now < st + (it.dur || 0); });
+      var nxt = its.filter(function (it) { return hm(it.start) > now && !isDone(it, k); })[0];
+      return { cur: cur.map(pack), next: pack(nxt) }; },
+    toggleDone: function (id) { var k = today(), it = S().items.find(function (x) { return x.id === id; }); if (!it) return; it.done = it.done || {}; if (it.done[k]) delete it.done[k]; else it.done[k] = true; C.save(); },
     addFromTodo: function (title, dateKey) {
       var n = nowMin(), k = dateKey || today();
       V.day = k;

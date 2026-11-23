@@ -617,6 +617,31 @@ ul.rtlist li.done span{text-decoration:line-through;opacity:.55}
 .oneinp{min-width:260px;flex:1}
 .onesec{font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.7;margin:-4px 0 10px}
 .onedone{margin:10px 0 0;opacity:.8;font-size:14px}
+.nowcard{background:var(--card);border-radius:22px;padding:14px 16px;margin:0 0 16px;border:1px solid var(--line)}
+.nowhd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.nowhd b{font-size:12px;letter-spacing:.18em;text-transform:uppercase}
+.nownext{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:10px 0 6px}
+.nowrow{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:16px;background:var(--bg);border-left:4px solid var(--c)}
+.nowrow + .nowrow{margin-top:8px}
+.nowic{flex:none;width:38px;height:38px;border-radius:12px;background:var(--c);display:grid;place-items:center;color:#fff}
+.nowic svg{width:20px;height:20px}
+.nowtx{flex:1;min-width:0;display:flex;flex-direction:column}
+.nowt{font-size:13px;color:var(--muted)}.nowtx b{font-size:17px;line-height:1.25}
+.nowdone{flex:none;width:30px;height:30px;border-radius:999px;border:2.5px solid var(--c);background:transparent;padding:0;cursor:pointer;display:grid;place-items:center;color:#fff}
+.nowdone.on{background:var(--c)}.nowdone svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:3}
+.nowrow.done b{text-decoration:line-through;opacity:.6}
+.sch-row{grid-template-columns:76px 64px 1fr auto}
+.sch-end{display:flex;align-items:center;gap:2px;min-width:44px;justify-content:flex-end}
+@media (max-width:899px){.sch-row{grid-template-columns:52px 52px 1fr auto}}
+.sch-mv{display:flex;flex-direction:column;justify-content:center;gap:2px;margin-right:4px}
+.sch-mvb{border:0;background:transparent;color:var(--muted);cursor:pointer;padding:2px;border-radius:8px;line-height:0}
+.sch-mvb:disabled{opacity:.2;cursor:default}
+.sch-mvb:hover{background:var(--card);color:var(--ink)}
+.sch-mvb svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.4}
+.sch-late{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 14px;padding:10px 12px;border-radius:16px;border:1px dashed var(--line)}
+.sch-late b{font-size:14px;margin-right:4px}.sch-latel{font-size:13px;color:var(--muted)}
+.sch-late .sch-pill{padding:6px 12px;font-size:13px}
+.sch-toast .sch-pill{padding:5px 12px;font-size:13px;margin-left:auto}
 .rth{font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin:14px 0 6px}
 ul.rtedit{list-style:none;margin:0 0 8px;padding:0}
 ul.rtedit li{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
@@ -1245,7 +1270,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
   <div id="arFrameHost"></div>
 </section>
 
-<script src="schedule.js?v=20261122b"></script>
+<script src="schedule.js?v=20261123b"></script>
 <script src="adhkar.js?v=20261120b"></script>
 <script type="module" src="sync.js?v=3"></script>
 <script>
@@ -1868,10 +1893,33 @@ li.mrow2 .label{display:flex;flex-direction:column}
     app.appendChild(grid);
     var bk = el("button", "ghost", "← Back to Overview"); bk.onclick = function () { go("home"); }; app.appendChild(bk);
   }
+  // "Right now" from today's schedule
+  function rightNowCard(){
+    if (!window.DetoxSchedule || !DetoxSchedule.now) return;
+    var n = DetoxSchedule.now(); if (!n.cur.length && !n.next) return;
+    var c = el("div", "nowcard");
+    var hd = el("div", "nowhd"); hd.appendChild(el("b", null, n.cur.length ? "Right now" : "Up next"));
+    var ob = el("button", "linkbtn", "Schedule →"); ob.onclick = function () { go("schedule"); }; hd.appendChild(ob); c.appendChild(hd);
+    var row = function (x, isNext) {
+      var r = el("div", "nowrow" + (x.done ? " done" : "")); r.style.setProperty("--c", x.color || "#6b8fd6");
+      var ic = el("span", "nowic"); if (DetoxSchedule.icon) ic.appendChild(DetoxSchedule.icon(x.icon || "list")); r.appendChild(ic);
+      var tx = el("div", "nowtx");
+      tx.appendChild(el("span", "nowt", x.startT + (x.end > x.start ? " – " + x.endT : "") + (isNext ? " · in " + (x.inMin >= 60 ? Math.floor(x.inMin / 60) + "h " + (x.inMin % 60) + "m" : x.inMin + " min") : x.end > x.start ? " · " + (x.left >= 60 ? Math.floor(x.left / 60) + "h " + (x.left % 60) + "m" : x.left + " min") + " left" : "")));
+      tx.appendChild(el("b", null, x.title)); r.appendChild(tx);
+      var db = el("button", "nowdone" + (x.done ? " on" : "")); db.setAttribute("aria-label", x.done ? "Mark not done" : "Mark done");
+      db.innerHTML = x.done ? '<svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>' : "";
+      db.onclick = function () { DetoxSchedule.toggleDone(x.id); render(); }; r.appendChild(db);
+      return r;
+    };
+    n.cur.forEach(function (x) { c.appendChild(row(x, false)); });
+    if (n.next) { if (n.cur.length) c.appendChild(el("div", "nownext", "Next")); c.appendChild(row(n.next, true)); }
+    app.appendChild(c);
+  }
   function renderHome(){
     seededCard();
     var toprow = el("div", "toprow"); toprow.appendChild(ayahCard()); toprow.appendChild(mementoEl("card")); app.appendChild(toprow);
     var cds = countdownStrip(); if (cds) app.appendChild(cds);
+    rightNowCard();
     routinePanel();
     var t = oneThing();
     var c = el("div", "onecard grain");
