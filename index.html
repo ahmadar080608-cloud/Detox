@@ -608,6 +608,9 @@ ul.rtedit li input[type=text]{flex:1;min-width:180px}
 .rtday.on{background:var(--accent,#e0603f);border-color:transparent;color:#fff}
 .seedask{border:1px solid var(--accent,#e0603f)}
 .seedask b{display:block;font-size:16px;margin-bottom:4px}
+.bfill{display:flex;align-items:center;gap:8px;margin:12px 0 0;font-size:14px;cursor:pointer;padding:8px 12px;border:1px solid var(--line);border-radius:12px;width:fit-content}
+.bfill input{width:18px;height:18px;accent-color:var(--accent,#e0603f)}
+.bfill.on{border-color:var(--accent,#e0603f);font-weight:600}
 .fdate{display:inline-flex;align-items:center;gap:5px}
 .fdate span{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.75}
 .fdate.done span{color:#3f9a78;opacity:1}
@@ -1642,6 +1645,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     r.appendChild(rm); r.appendChild(kp); p.appendChild(r);
     app.appendChild(p);
   }
+  var memBackfill = false;   // turned on while entering memorisation done before (not logged to goals)
   function renderHome(){
     seededCard();
     var toprow = el("div", "toprow"); toprow.appendChild(ayahCard()); toprow.appendChild(mementoEl("card")); app.appendChild(toprow);
@@ -2087,6 +2091,10 @@ li.mrow2 .label{display:flex;flex-direction:column}
     });
     pg0.appendChild(gg);
     pg0.appendChild(el("p", "meta", "Pages follow the 604-page Madinah muṣḥaf (15 lines a page). Progress comes from ayat you add in Memorisation below, converted to pages."));
+    var rsr = el("div", "row"); var rsb = el("button", "linkbtn", "Reset goal progress to 0"), rsArmed = false;
+    rsb.onclick = function () { if (!rsArmed) { rsArmed = true; rsb.textContent = "Press again to reset: this week, month and year go back to 0 (your memorisation stays)"; return; }
+      q.memLogP = {}; save(); render(); };
+    rsr.appendChild(rsb); pg0.appendChild(rsr);
     app.appendChild(pg0);
     var readW = weekDays(ws).reduce(function (a,d) { return a + (q.readLog[dkey(d)] || 0); }, 0);
 
@@ -2116,6 +2124,10 @@ li.mrow2 .label{display:flex;flex-direction:column}
     var memPages = 0; for (var mi = 1; mi <= 114; mi++) if (q.memA[mi]) memPages += pagesFor(mi, q.memA[mi]);
     pm.appendChild(el("p", "meta", "About " + fmtP(memPages) + " of 604 pages · " + ms.surahs + " surahs complete · " + ms.learning + " in progress"));
 
+    var bfw = el("label", "bfill" + (memBackfill ? " on" : "")); var bfc = el("input"); bfc.type = "checkbox"; bfc.checked = memBackfill;
+    bfc.onchange = function () { memBackfill = bfc.checked; render(); };
+    bfw.appendChild(bfc); bfw.appendChild(el("span", null, "Adding what I already knew: don't count it towards my goals"));
+    pm.appendChild(bfw);
     var ctl = el("div", "row"); ctl.style.margin = "12px 0";
     var srch = el("input"); srch.type = "text"; srch.placeholder = "Find a surah (name or number)"; srch.setAttribute("aria-label", "Find a surah");
     var flt = el("select"); flt.setAttribute("aria-label", "Show");
@@ -2157,7 +2169,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
           var rg = el("input"); rg.type = "range"; rg.min = 0; rg.max = tot; rg.value = c; rg.setAttribute("aria-label", "Ayat memorised");
           var num = el("input"); num.type = "number"; num.min = 0; num.max = tot; num.value = c; num.setAttribute("aria-label", "Ayat memorised");
           function setC(v){ v = Math.max(0, Math.min(tot, parseInt(v,10) || 0)); var d = v - (q.memA[n] || 0);
-            if (d) { var dk = dkey(new Date()); q.memLogP[dk] = (q.memLogP[dk] || 0) + pagesFor(n, d); if (Math.abs(q.memLogP[dk]) < 1e-6) delete q.memLogP[dk]; }
+            if (d && !memBackfill) { var dk = dkey(new Date()); q.memLogP[dk] = (q.memLogP[dk] || 0) + pagesFor(n, d); if (Math.abs(q.memLogP[dk]) < 1e-6) delete q.memLogP[dk]; }
             q.memAt = q.memAt || {}; if (d > 0) q.memAt[n] = Date.now(); else if (v === 0) delete q.memAt[n];
             if (v) q.memA[n] = v; else delete q.memA[n]; save();
             var y = window.scrollY, ls = list.scrollTop, term0 = srch.value; render(); window.scrollTo(0, y);
@@ -2204,7 +2216,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
               all.forEach(function (g) { var old = q.memA[g.n] || 0, v = done ? Math.min(old, g.a - 1) : Math.max(old, g.b);
                 if (v !== old) { dp += pagesFor(g.n, v - old); if (v) q.memA[g.n] = v; else delete q.memA[g.n];
                   q.memAt = q.memAt || {}; if (v > old) q.memAt[g.n] = Date.now() - (g.n === all[all.length - 1].n ? 0 : 1); else if (!v) delete q.memAt[g.n]; } });
-              if (dp) { q.memLogP[dk] = (q.memLogP[dk] || 0) + dp; if (Math.abs(q.memLogP[dk]) < 1e-6) delete q.memLogP[dk]; }
+              if (dp && !memBackfill) { q.memLogP[dk] = (q.memLogP[dk] || 0) + dp; if (Math.abs(q.memLogP[dk]) < 1e-6) delete q.memLogP[dk]; }
               save(); var y = window.scrollY, ls = list.scrollTop; render(); window.scrollTo(0, y); var l2 = document.querySelector(".mlist"); if (l2) l2.scrollTop = ls;
               if (!done) alertMsg("Juz’ " + j + " marked complete. Mā shāʾ Allāh!");
             };
