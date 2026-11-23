@@ -611,6 +611,7 @@ ul.rtedit li input[type=text]{flex:1;min-width:180px}
 .bfill{display:flex;align-items:center;gap:8px;margin:12px 0 0;font-size:14px;cursor:pointer;padding:8px 12px;border:1px solid var(--line);border-radius:12px;width:fit-content}
 .bfill input{width:18px;height:18px;accent-color:var(--accent,#e0603f)}
 .bfill.on{border-color:var(--accent,#e0603f);font-weight:600}
+.gncount{margin:10px 0 0}
 .gnoteshow{display:flex;align-items:baseline;gap:10px;margin-top:10px;padding:9px 12px;border-radius:12px;background:var(--card);border:1px solid var(--line)}
 .gnotetx{flex:1;font-weight:700;font-size:14px;line-height:1.35}
 .gnotew{display:flex;gap:6px;align-items:center;margin-top:8px}
@@ -1659,17 +1660,31 @@ li.mrow2 .label{display:flex;flex-direction:column}
     b.onclick = go; inp.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); go(); } });
     w.appendChild(b); return w;
   }
-  // Goal note: once saved it shows as text (tap Edit to change it); empty shows the box + Save
-  var noteEditing = null;
-  function goalNote(g, nt){
-    if (g.note && noteEditing !== g) {
-      var w = el("div", "gnoteshow");
-      w.appendChild(el("span", "gnotetx", g.note));
-      var ed = el("button", "linkbtn", "Edit"); ed.onclick = function () { noteEditing = g; render(); }; w.appendChild(ed);
-      return w;
+  // Goal checklist on a page-target card: write goals for this week/month/year and tick them off
+  function goalNote(g, nt, k){
+    var key = periodKeys(new Date())[k];
+    g.list = g.list || {};
+    var L = g.list[key] = g.list[key] || [];
+    if (g.note) { L.push({ id:uid(), text:g.note, done:false }); delete g.note; save(); }
+    var box = el("div", "gnlist");
+    if (L.length) {
+      var dn = L.filter(function (x) { return x.done; }).length;
+      box.appendChild(el("p", "meta gncount", dn + " / " + L.length + " done"));
+      var ul = el("ul", "wgl");
+      L.forEach(function (x) {
+        var li = el("li", x.done ? "done" : null);
+        var cb = el("input"); cb.type = "checkbox"; cb.checked = x.done; cb.setAttribute("aria-label", "Done");
+        cb.onchange = function () { x.done = cb.checked; save(); render(); };
+        li.appendChild(cb); li.appendChild(el("span", "label", x.text));
+        var del = el("button", "iconbtn"); del.title = "Remove goal"; del.appendChild(icon("x"));
+        del.onclick = function () { g.list[key] = L.filter(function (y) { return y !== x; }); save(); render(); };
+        li.appendChild(del); ul.appendChild(li);
+      });
+      box.appendChild(ul);
     }
-    if (noteEditing === g) setTimeout(function () { nt.focus(); nt.select(); }, 0);
-    return withBtn(nt, "Save", function () { g.note = nt.value.trim(); noteEditing = null; save(); render(); });
+    nt.value = ""; nt.placeholder = "+ " + nt.placeholder;
+    box.appendChild(withBtn(nt, "Add", function () { var v = nt.value.trim(); if (!v) { nt.focus(); return false; } L.push({ id:uid(), text:v, done:false }); save(); render(); }));
+    return box;
   }
   var memBackfill = false;   // turned on while entering memorisation done before (not logged to goals)
   function renderHome(){
@@ -2111,7 +2126,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
       var nt = el("input"); nt.type = "text"; nt.maxLength = 120; nt.className = "gnote"; nt.value = g.note || "";
       nt.placeholder = pp.k === "week" ? "e.g. Finish Al-Mulk" : pp.k === "month" ? "e.g. Complete Juz 29" : "e.g. Memorise Juz 28–30";
       nt.setAttribute("aria-label", pp.name + " goal note");
-      card.appendChild(goalNote(g, nt));
+      card.appendChild(goalNote(g, nt, pp.k));
       gg.appendChild(card);
     });
     pg0.appendChild(gg);
@@ -2405,7 +2420,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
       tr.appendChild(ti0); tr.appendChild(el("span", "meta", unit[1])); card.appendChild(tr);
       var nt = el("input"); nt.type = "text"; nt.maxLength = 120; nt.className = "gnote"; nt.value = g.note || "";
       nt.placeholder = (opts.placeholders || {})[pp.k] || "Goal note"; nt.setAttribute("aria-label", pp.name + " goal note");
-      card.appendChild(goalNote(g, nt));
+      card.appendChild(goalNote(g, nt, pp.k));
       gg.appendChild(card);
     });
     pnl.appendChild(gg);
