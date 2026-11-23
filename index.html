@@ -611,6 +611,10 @@ ul.rtedit li input[type=text]{flex:1;min-width:180px}
 .bfill{display:flex;align-items:center;gap:8px;margin:12px 0 0;font-size:14px;cursor:pointer;padding:8px 12px;border:1px solid var(--line);border-radius:12px;width:fit-content}
 .bfill input{width:18px;height:18px;accent-color:var(--accent,#e0603f)}
 .bfill.on{border-color:var(--accent,#e0603f);font-weight:600}
+.gnotew{display:flex;gap:6px;align-items:center;margin-top:8px}
+.gnotew .gnote{flex:1;min-width:0;margin:0}
+.gnoteb{flex:none;font:inherit;font-size:13px;font-weight:700;padding:9px 14px;border-radius:999px;border:0;background:var(--accent,#e0603f);color:#fff;cursor:pointer}
+.gnoteb.ok{background:#3f9a78}
 .fdate{display:inline-flex;align-items:center;gap:5px}
 .fdate span{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.75}
 .fdate.done span{color:#3f9a78;opacity:1}
@@ -1645,6 +1649,14 @@ li.mrow2 .label{display:flex;flex-direction:column}
     r.appendChild(rm); r.appendChild(kp); p.appendChild(r);
     app.appendChild(p);
   }
+  // A text box with its own Save / Add button (Enter works too)
+  function withBtn(inp, label, act){
+    var w = el("div", "gnotew"); w.appendChild(inp);
+    var b = el("button", "gnoteb", label); b.type = "button";
+    var go = function () { if (act() === false) return; b.textContent = label === "Add" ? "Added" : "Saved"; b.classList.add("ok"); setTimeout(function () { b.textContent = label; b.classList.remove("ok"); }, 1400); };
+    b.onclick = go; inp.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); go(); } });
+    w.appendChild(b); return w;
+  }
   var memBackfill = false;   // turned on while entering memorisation done before (not logged to goals)
   function renderHome(){
     seededCard();
@@ -2086,7 +2098,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
       nt.placeholder = pp.k === "week" ? "e.g. Finish Al-Mulk" : pp.k === "month" ? "e.g. Complete Juz 29" : "e.g. Memorise Juz 28–30";
       nt.setAttribute("aria-label", pp.name + " goal note");
       nt.onchange = function () { g.note = nt.value.trim(); save(); };
-      card.appendChild(nt);
+      card.appendChild(withBtn(nt, "Save", function () { g.note = nt.value.trim(); save(); }));
       gg.appendChild(card);
     });
     pg0.appendChild(gg);
@@ -2379,7 +2391,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
       var nt = el("input"); nt.type = "text"; nt.maxLength = 120; nt.className = "gnote"; nt.value = g.note || "";
       nt.placeholder = (opts.placeholders || {})[pp.k] || "Goal note"; nt.setAttribute("aria-label", pp.name + " goal note");
       nt.onchange = function () { g.note = nt.value.trim(); save(); };
-      card.appendChild(nt);
+      card.appendChild(withBtn(nt, "Save", function () { g.note = nt.value.trim(); save(); }));
       gg.appendChild(card);
     });
     pnl.appendChild(gg);
@@ -2929,9 +2941,12 @@ li.mrow2 .label{display:flex;flex-direction:column}
       });
       card.appendChild(ul);
       var ai = el("input"); ai.type = "text"; ai.className = "gnote"; ai.maxLength = 140; ai.placeholder = "+ " + hints[k]; ai.setAttribute("aria-label", "Add a goal for " + meta[k].n.toLowerCase());
-      ai.onkeydown = function (e) { if (e.key === "Enter" && ai.value.trim()) { L.push({ id:uid(), text:ai.value.trim(), done:false }); save(); render();
-        var again = document.querySelector("#" + id + " .goal:nth-child(" + (["week","month","year"].indexOf(k) + 1) + ") .gnote"); if (again) again.focus(); } };
-      card.appendChild(ai);
+      var addG = function (refocus) { if (!ai.value.trim()) { ai.focus(); return false; } L.push({ id:uid(), text:ai.value.trim(), done:false }); save(); render();
+        if (refocus) { var again = document.querySelector("#" + id + " .goal:nth-child(" + (["week","month","year"].indexOf(k) + 1) + ") .gnote"); if (again) again.focus(); } };
+      var aw = el("div", "gnotew"); aw.appendChild(ai);
+      var ab0 = el("button", "gnoteb", "Add"); ab0.type = "button"; ab0.onclick = function () { addG(false); }; aw.appendChild(ab0);
+      ai.onkeydown = function (e) { if (e.key === "Enter") { e.preventDefault(); addG(true); } };
+      card.appendChild(aw);
       var left = (store[prev[k]] || []).filter(function (g) { return !g.done && !L.some(function (x) { return x.text === g.text; }); });
       if (left.length) {
         var cb2 = el("button", "ghost", "Carry over " + left.length + " unfinished"); cb2.style.marginTop = "6px";
