@@ -599,6 +599,16 @@ ul.rtlist label{display:flex;align-items:center;gap:10px;cursor:pointer}
 ul.rtlist input{width:18px;height:18px;flex:none;accent-color:var(--accent,#e0603f)}
 ul.rtlist li.done span{text-decoration:line-through;opacity:.55}
 .rtonly{margin-left:auto;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent,#e0603f)}
+.rtbtns{display:flex;flex-direction:column;gap:8px}
+.rtrow{display:flex;align-items:center;gap:8px}
+.rtck{flex:none;width:26px;height:26px;border-radius:999px;border:2px solid var(--line);background:transparent;padding:0;cursor:pointer;display:grid;place-items:center;color:#fff}
+.rtrow.done .rtck{background:#3f9a78;border-color:#3f9a78}
+.rtck .ic{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:3}
+.rtgo{flex:1;display:flex;align-items:center;gap:8px;font:inherit;font-size:15px;font-weight:700;text-align:left;padding:11px 14px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:inherit;cursor:pointer}
+.rtgo:hover{border-color:var(--accent,#e0603f)}
+.rtgt{flex:1}.rtarrow{color:var(--accent,#e0603f);font-size:17px}
+.rtrow.done .rtgt{text-decoration:line-through;opacity:.55}
+.rtgo .rtonly{margin-left:0}
 .rth{font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin:14px 0 6px}
 ul.rtedit{list-style:none;margin:0 0 8px;padding:0}
 ul.rtedit li{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
@@ -1557,11 +1567,46 @@ li.mrow2 .label{display:flex;flex-direction:column}
     c.appendChild(el("div", "ayref", "Sūrat an-Najm 53:39–42 · Saheeh International"));
     return c;
   }
-  // Daily routine: morning / evening checklists, with items for particular days (e.g. Sunday)
-  var RT_WHEN = [["morning","Morning","sunrise"],["evening","Evening","moon"]];
+  // Daily routine: buttons that take you to the right page at the right time (morning / evening, chosen days)
+  var RT_WHEN = [["morning","Morning"],["evening","Evening"]];
   var RT_DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-  var rtEdit = false, rtNewDays = [];
-  function routineItems(){ return (state.routine = state.routine || []); }
+  var RT_TO = [
+    ["adhkar:morning","Morning adhkar"],["adhkar:evening","Evening adhkar"],["adhkar:sleep","Adhkar before sleep"],["adhkar:salah","Adhkar after ṣalāh"],
+    ["quran","Qur'an"],["quran#q-rev","Qur'an revision"],["quran#q-mem","Qur'an memorisation"],["quran#q-goals","Qur'an goals"],
+    ["tools#tl-muh","Weekly muḥāsabah"],["tools#tl-sleep","Sleep log"],["tools#tl-screen","Phone detox"],["tools#tl-fast","Fasting"],["tools","Focus timer"],
+    ["schedule","Schedule"],["todo","To-do"],["university#UNIGOALS","University goals"],["lectures","Lectures"],["hadith","Hadith"],["arabic","Arabic"],
+    ["naseeha","Naṣīḥah & Khuṭbahs"],["fitness","Fitness"],["finance","Finance"],["tutoring","Tutoring"],["ambitions","Life ambitions"]
+  ];
+  function rtLabel(to){ var f = RT_TO.filter(function (x) { return x[0] === to; })[0]; return f ? f[1] : ""; }
+  function rtGo(to){
+    if (!to) return;
+    var pg = to.split(/[:#]/)[0], sub = to.indexOf(":") > 0 ? to.split(":")[1] : null, anchor = to.indexOf("#") > 0 ? to.split("#")[1] : null;
+    if (anchor === "UNIGOALS") anchor = "g-uni" + (state.uniYear || 1);
+    if (pg === "adhkar" && sub) { state.adTab = sub; if (state.quran && state.quran.collapsed) delete state.quran.collapsed["ad-read"]; anchor = "ad-read"; }
+    if (anchor && state.quran && state.quran.collapsed) delete state.quran.collapsed[anchor];
+    go(pg);
+    if (anchor) setTimeout(function () { scrollTo_(anchor); }, 60);
+  }
+  var rtEdit = false;
+  function routineItems(){
+    var L = state.routine = state.routine || [];
+    if (!state.routineSeeded) {   // a starting routine (edit or delete any of it)
+      state.routineSeeded = 1;
+      if (!L.length) [
+        ["Morning adhkar","morning",[],"adhkar:morning"],["Log last night's sleep","morning",[],"tools#tl-sleep"],["Plan today","morning",[],"schedule"],
+        ["Qur'an revision","evening",[],"quran#q-rev"],["Evening adhkar","evening",[],"adhkar:evening"],["Adhkar before sleep","evening",[],"adhkar:sleep"],
+        ["Weekly muḥāsabah","evening",[0],"tools#tl-muh"],["Set this week's Qur'an goals","evening",[0],"quran#q-goals"],["Set this week's uni goals","evening",[0],"university#UNIGOALS"],["Plan the week","evening",[0],"schedule"]
+      ].forEach(function (r) { L.push({ id:uid(), text:r[0], when:r[1], days:r[2], to:r[3] }); });
+      save();
+    }
+    return L;
+  }
+  function rtToSelect(val, onch){
+    var sel = el("select", "tutsel"); sel.setAttribute("aria-label", "Opens");
+    var o0 = el("option", null, "Opens: nothing (just a tick)"); o0.value = ""; sel.appendChild(o0);
+    RT_TO.forEach(function (t) { var o = el("option", null, "Opens: " + t[1]); o.value = t[0]; sel.appendChild(o); });
+    sel.value = val || ""; sel.onchange = function () { onch(sel.value); }; return sel;
+  }
   function routineEditor(box){
     var L = routineItems();
     RT_WHEN.forEach(function (w) {
@@ -1571,8 +1616,9 @@ li.mrow2 .label{display:flex;flex-direction:column}
       var ul = el("ul", "rtedit");
       its.forEach(function (x, i) {
         var li = el("li");
-        var t = el("input"); t.type = "text"; t.value = x.text; t.maxLength = 120; t.setAttribute("aria-label", "Routine item"); t.onchange = function () { x.text = t.value.trim() || x.text; save(); };
+        var t = el("input"); t.type = "text"; t.value = x.text; t.maxLength = 120; t.setAttribute("aria-label", "Button name"); t.onchange = function () { x.text = t.value.trim() || x.text; save(); };
         li.appendChild(t);
+        li.appendChild(rtToSelect(x.to, function (v) { x.to = v || undefined; if (v && (!x.text || x.text === rtLabel(x.to0))) {} save(); }));
         var dw = el("div", "rtdays");
         var ev = el("button", "rtday" + (!(x.days && x.days.length) ? " on" : ""), "Every day"); ev.onclick = function () { x.days = []; save(); render(); }; dw.appendChild(ev);
         RT_DAYS.forEach(function (d, k) { var on = x.days && x.days.indexOf(k) >= 0; var b = el("button", "rtday" + (on ? " on" : ""), d);
@@ -1585,13 +1631,15 @@ li.mrow2 .label{display:flex;flex-direction:column}
         ul.appendChild(li);
       });
       box.appendChild(ul);
-      var r = el("div", "row"); var ni = el("input"); ni.type = "text"; ni.maxLength = 120; ni.placeholder = w[0] === "morning" ? "e.g. Morning adhkar" : "e.g. Evening adhkar, Sūrat al-Mulk";
+      var r = el("div", "row"); var nTo = "";
+      var ni = el("input"); ni.type = "text"; ni.maxLength = 120; ni.placeholder = w[0] === "morning" ? "Button name, e.g. Morning adhkar" : "Button name, e.g. Evening adhkar";
+      var ns = rtToSelect("", function (v) { nTo = v; if (v && !ni.value.trim()) ni.value = rtLabel(v); });
       var nb = el("button", "cta"); nb.appendChild(icon("plus")); nb.appendChild(document.createTextNode("Add"));
-      nb.onclick = function () { var v = ni.value.trim(); if (!v) { ni.focus(); return; } L.push({ id:uid(), text:v, when:w[0], days:[] }); save(); render(); };
+      nb.onclick = function () { var v = ni.value.trim() || rtLabel(nTo); if (!v) { ni.focus(); return; } L.push({ id:uid(), text:v, when:w[0], days:[], to:nTo || undefined }); save(); render(); };
       ni.onkeydown = function (e) { if (e.key === "Enter") nb.click(); };
-      r.appendChild(ni); r.appendChild(nb); box.appendChild(r);
+      r.appendChild(ni); r.appendChild(ns); r.appendChild(nb); box.appendChild(r);
     });
-    box.appendChild(el("p", "meta", "Each item shows every day unless you pick days, e.g. pick Sun for something you only do on Sundays."));
+    box.appendChild(el("p", "meta", "Each button shows every day unless you pick days. E.g. pick Sun for things you only do on Sunday evening, like weekly muḥāsabah or setting your goals."));
   }
   function routinePanel(){
     var L = routineItems(), now = new Date(), tk = dkey(now), dow = now.getDay();
@@ -1609,25 +1657,30 @@ li.mrow2 .label{display:flex;flex-direction:column}
       var db = el("button", "cta", "Done"); db.onclick = function () { rtEdit = false; render(); }; p.appendChild(db);
       app.appendChild(p); return;
     }
-    if (!L.length) p.appendChild(el("p", "empty", "Set what you need to do each morning and evening, and anything for particular days (like Sunday)."));
+    if (!L.length) p.appendChild(el("p", "empty", "Add buttons for what you do each morning and evening, and anything for particular days (like Sunday)."));
     var cols = el("div", "rtcols"), late = now.getHours() >= 15;
     RT_WHEN.forEach(function (w) {
       var its = today.filter(function (x) { return x.when === w[0]; });
-      if (!its.length && L.length) return;
-      if (!L.length) return;
+      if (!its.length) return;
       var c = el("div", "rtcol" + ((w[0] === "evening") === late ? " now" : ""));
       var h = el("div", "rtlbl"); h.appendChild(el("b", null, w[1])); h.appendChild(el("small", null, its.filter(function (x) { return done[x.id]; }).length + "/" + its.length)); c.appendChild(h);
-      var ul = el("ul", "rtlist");
+      var ul = el("div", "rtbtns");
       its.forEach(function (x) {
-        var li = el("li" , done[x.id] ? "done" : null); var lb = el("label");
-        var cb = el("input"); cb.type = "checkbox"; cb.checked = !!done[x.id]; cb.onchange = function () { if (cb.checked) done[x.id] = 1; else delete done[x.id]; save(); render(); };
-        lb.appendChild(cb); lb.appendChild(el("span", null, x.text));
-        if (x.days && x.days.length && x.days.length < 7) lb.appendChild(el("small", "rtonly", x.days.length === 1 ? RT_DAYS[x.days[0]] + " only" : x.days.map(function (k) { return RT_DAYS[k]; }).join(", ")));
-        li.appendChild(lb); ul.appendChild(li); });
+        var row = el("div", "rtrow" + (done[x.id] ? " done" : ""));
+        var ck = el("button", "rtck"); ck.setAttribute("aria-label", (done[x.id] ? "Untick " : "Tick ") + x.text); ck.title = done[x.id] ? "Done" : "Mark done";
+        ck.innerHTML = done[x.id] ? '<svg viewBox="0 0 24 24" class="ic"><path d="M5 12l5 5L20 7"/></svg>' : "";
+        ck.onclick = function () { if (done[x.id]) delete done[x.id]; else done[x.id] = 1; save(); render(); };
+        row.appendChild(ck);
+        var b = el("button", "rtgo");
+        b.appendChild(el("span", "rtgt", x.text));
+        if (x.days && x.days.length && x.days.length < 7) b.appendChild(el("small", "rtonly", x.days.length === 1 ? RT_DAYS[x.days[0]] : x.days.map(function (k) { return RT_DAYS[k]; }).join(", ")));
+        if (x.to) b.appendChild(el("span", "rtarrow", "→"));
+        b.onclick = function () { if (!x.to) { if (done[x.id]) delete done[x.id]; else done[x.id] = 1; save(); render(); return; } done[x.id] = 1; save(); rtGo(x.to); };
+        row.appendChild(b); ul.appendChild(row); });
       c.appendChild(ul); cols.appendChild(c);
     });
     p.appendChild(cols);
-    var eb = el("button", "linkbtn", L.length ? "Edit routine" : "Set up my routine"); eb.onclick = function () { rtEdit = true; render(); }; p.appendChild(eb);
+    var eb = el("button", "linkbtn", "Edit routine"); eb.onclick = function () { rtEdit = true; render(); }; p.appendChild(eb);
     app.appendChild(p);
     makeCollapsible("routine");
   }
