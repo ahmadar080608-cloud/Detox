@@ -689,7 +689,7 @@ ul.ambsteps .mv .ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-
 .rttime input{font:inherit;font-size:13px;padding:4px 8px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
 .sidelist{display:flex;flex-direction:column}
 .siderow{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--line)}
-.siderow.sub{padding-left:26px}.siderow.off .sidenm,.siderow.off .sideic{opacity:.4}
+.siderow.sub{padding-left:26px}.sidewhy{display:block;font-size:11px;font-weight:500;color:var(--muted)}.siderow .switch:disabled,.siderow .sidepin:disabled{opacity:.35;cursor:not-allowed}.siderow.off .sidenm,.siderow.off .sideic{opacity:.4}
 .sideic .ic{width:18px;height:18px}.sidenm{flex:1;font-weight:600}
 .sidepin{font:inherit;font-size:12px;font-weight:700;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:4px 12px;cursor:pointer}
 .sidepin.on{background:var(--accent,#e0603f);border-color:transparent;color:#fff}
@@ -1499,13 +1499,15 @@ li.mrow2 .label{display:flex;flex-direction:column}
     b.onclick = function () { go(p.id); };
     return b;
   }
+  // hidden if the page or any section above it is switched off
+  function navOff(id){ var H = state.navHidden || {}, p = byId[id]; while (p) { if (H[p.id]) return p.id; p = p.parent ? byId[p.parent] : null; } return null; }
   function renderNav(){
     navEl.innerHTML = "";
-    var HID = state.navHidden || {}, PINS = (state.navPins || []).filter(function (id) { return byId[id] && !HID[id]; });
+    var HID = state.navHidden || {}, PINS = (state.navPins || []).filter(function (id) { return byId[id] && !navOff(id); });
     var sb = el("button", "navsearch"); sb.innerHTML = '<svg viewBox="0 0 24 24" class="ic"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>'; sb.appendChild(el("span", null, "Search")); sb.appendChild(el("kbd", null, "Ctrl K"));
     sb.onclick = openSearch; navEl.appendChild(sb);
     if (PINS.length) { navEl.appendChild(el("div", "navlbl", "Pinned")); PINS.forEach(function (id) { var b = navBtn(byId[id], false); b.classList.add("pinned"); navEl.appendChild(b); }); navEl.appendChild(el("div", "navsep")); }
-    var nb0 = navBtn; navBtn = function (p, child) { if (HID[p.id]) { var x = el("span"); x.hidden = true; return x; } return nb0(p, child); };
+    var nb0 = navBtn; navBtn = function (p, child) { if (navOff(p.id)) { var x = el("span"); x.hidden = true; return x; } return nb0(p, child); };
     PAGES.forEach(function (p) {
       if (p.group) return;
       if (p.id === "settings") navEl.appendChild(el("div", "spacer"));
@@ -2158,13 +2160,15 @@ li.mrow2 .label{display:flex;flex-direction:column}
     var H = state.navHidden = state.navHidden || {}, P = state.navPins = state.navPins || [];
     var ul = el("div", "sidelist");
     PAGES.forEach(function (pg) { if (pg.id === "home" || pg.id === "settings") return;
-      var r = el("div", "siderow" + (pg.group || pg.parent ? " sub" : "") + (H[pg.id] ? " off" : ""));
+      var off = navOff(pg.id), byPar = off && off !== pg.id, dep = 0, a0 = byId[pg.id]; while (a0 && a0.parent && byId[a0.parent]) { dep++; a0 = byId[a0.parent]; }
+      var r = el("div", "siderow" + (off ? " off" : "")); r.style.paddingLeft = (4 + Math.min(dep, 3) * 22) + "px";
       var ic = el("span", "sideic"); ic.appendChild(icon(pg.icon)); r.appendChild(ic);
-      r.appendChild(el("span", "sidenm", pg.name));
+      var nm = el("span", "sidenm", pg.name); if (byPar) nm.appendChild(el("small", "sidewhy", "hidden with " + byId[off].name)); r.appendChild(nm);
       var on = P.indexOf(pg.id) >= 0, pin = el("button", "sidepin" + (on ? " on" : ""), on ? "Pinned" : "Pin");
       pin.onclick = function () { var i = P.indexOf(pg.id); if (i >= 0) P.splice(i, 1); else { if (P.length >= 6) { alertMsg("You can pin up to 6 sections."); return; } P.push(pg.id); } save(); render(); };
+      if (byPar) pin.disabled = true;
       r.appendChild(pin);
-      var sw = el("button", "switch" + (H[pg.id] ? "" : " on")); sw.setAttribute("role", "switch"); sw.setAttribute("aria-checked", H[pg.id] ? "false" : "true"); sw.setAttribute("aria-label", "Show " + pg.name + " in the sidebar");
+      var sw = el("button", "switch" + (off ? "" : " on")); if (byPar) { sw.disabled = true; sw.title = "Switch " + byId[off].name + " back on first"; } sw.setAttribute("role", "switch"); sw.setAttribute("aria-checked", H[pg.id] ? "false" : "true"); sw.setAttribute("aria-label", "Show " + pg.name + " in the sidebar");
       sw.onclick = function () { if (H[pg.id]) delete H[pg.id]; else H[pg.id] = 1; save(); render(); };
       r.appendChild(sw); ul.appendChild(r); });
     p.appendChild(ul);
