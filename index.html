@@ -4507,7 +4507,13 @@ li.mrow2 .label{display:flex;flex-direction:column}
     var sc = Object.keys((state.screen || {}).log || {}).filter(function (k) { return inW(k) && state.screen.log[k].m != null; }).map(function (k) { return state.screen.log[k].m; });
     var fa = Object.keys((state.fast || {}).log || {}).filter(inW).length;
     var wo = ((state.fit || {}).log || []).filter(function (w) { return inW(w.date); });
-    return [["Focus", fb + " blocks · " + mfmt(fm)], ["Tasks done", String(td)], ["Sleep average", sl.length ? hm(sl.reduce(function (x, y) { return x + y; }, 0) / sl.length) : "not logged"],
+    var qq = state.quran || {}, mp = 0, rp = 0;
+    Object.keys(qq.memLogP || {}).forEach(function (k) { if (inW(k)) mp += qq.memLogP[k] || 0; });
+    Object.keys(qq.rev || {}).forEach(function (k) { if (inW(k)) rp += qq.rev[k] || 0; });
+    var wkK = periodKeys(ws).week, gT = 0, gD = 0, cnt = function (st) { ((st || {})[wkK] || []).forEach(function (g) { gT++; if (g.done) gD++; }); };
+    Object.keys(state.sciGoals || {}).forEach(function (k) { cnt(state.sciGoals[k]); }); cnt(state.arGoals);
+    var pg = function (x) { x = Math.max(0, x); return fmtP(x) + (x === 1 ? " page" : " pages"); };
+    return [["Weekly goals", gT ? gD + " of " + gT + " done" : "none set"], ["Qur’an memorised", pg(mp)], ["Qur’an revised", pg(rp)], ["Focus", fb + " blocks · " + mfmt(fm)], ["Tasks done", String(td)], ["Sleep average", sl.length ? hm(sl.reduce(function (x, y) { return x + y; }, 0) / sl.length) : "not logged"],
       ["Phone average", sc.length ? mfmt(sc.reduce(function (x, y) { return x + y; }, 0) / sc.length) + " a day" : "not logged"],
       ["Morning & evening adhkār", ad + " of 7 days"], ["Qur’an read", qr + (qr === 1 ? " page" : " pages")], ["Fasts", String(fa)], ["Workouts", wo.length + " · " + mfmt(wo.reduce(function (x, w) { return x + (w.min || 0); }, 0))]];
   }
