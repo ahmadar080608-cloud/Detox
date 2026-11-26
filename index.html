@@ -655,6 +655,7 @@ ul.ambsteps li.done .ambst{text-decoration:line-through;opacity:.55}
 ul.ambsteps .dateinp{max-width:150px;font-size:13px;padding:4px 8px}
 ul.ambsteps .mv .ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2}
 .ambnext{font-size:13px;color:var(--muted);margin-top:4px}.ambnext span{font-weight:700;color:var(--ink)}
+.nmove{font:inherit;font-size:12px;font-weight:700;color:var(--accent,#e0603f);background:transparent;border:1px solid var(--line);border-radius:999px;padding:3px 8px;max-width:150px;cursor:pointer}
 .rth{font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin:14px 0 6px}
 ul.rtedit{list-style:none;margin:0 0 8px;padding:0}
 ul.rtedit li{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
@@ -4877,6 +4878,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
   // ---------- Advice & notes (every section page) ----------
   state.notes = state.notes || {};
   var notesTab = {}, noteEdit = null;
+  var noteMsg = {};
   function renderNotes(sec){
     var N = state.notes[sec] = state.notes[sec] || { advice:[], notes:[] };
     var tab = notesTab[sec] || "advice", tk = dkey(new Date());
@@ -4904,6 +4906,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     ab.onclick = add; ta.onkeydown = function (e) { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) add(); };
     r.appendChild(ab); box.appendChild(r); p.appendChild(box);
 
+    if (noteMsg[sec]) { p.appendChild(el("p", "toast", noteMsg[sec])); noteMsg[sec] = null; }
     if (!L.length) p.appendChild(el("p", "empty", tab === "advice" ? "No advice saved yet." : "No notes yet."));
     var list = el("div", "nlist");
     L.slice().sort(function (a, b) { return (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0); }).forEach(function (x) {
@@ -4930,7 +4933,20 @@ li.mrow2 .label{display:flex;flex-direction:column}
         del.onclick = function () { if (!armed) { armed = true; del.classList.add("armed"); del.title = "Press again to delete"; return; }
           if (tab === "advice") N.advice = N.advice.filter(function (y) { return y.id !== x.id; }); else N.notes = N.notes.filter(function (y) { return y.id !== x.id; });
           save(); render(); };
-        m.appendChild(ed); m.appendChild(pb); m.appendChild(del);
+        var mvs = el("select", "nmove"); mvs.setAttribute("aria-label", "Move to another section"); mvs.title = "Move to another section";
+        var om = el("option", null, "Move to…"); om.value = ""; mvs.appendChild(om);
+        var other = tab === "advice" ? "notes" : "advice";
+        var oSw = el("option", null, "This page · " + (other === "advice" ? "Advice" : "Notes")); oSw.value = sec + "|" + other; mvs.appendChild(oSw);
+        var NO_NOTES = { home:1, schedule:1, todo:1, islamic:1, tools:1, settings:1, weekgoals:1 };
+        var og = el("optgroup"); og.label = "Another section (" + (tab === "advice" ? "Advice" : "Notes") + ")";
+        PAGES.forEach(function (pg) { if (NO_NOTES[pg.id] || pg.id === sec) return; var o = el("option", null, pg.name); o.value = pg.id + "|" + tab; og.appendChild(o); });
+        mvs.appendChild(og);
+        mvs.onchange = function () { if (!mvs.value) return; var a = mvs.value.split("|"), to = a[0], kind = a[1];
+          N[tab] = N[tab].filter(function (y) { return y.id !== x.id; });
+          var T = state.notes[to] = state.notes[to] || { advice:[], notes:[] }; T[kind] = T[kind] || []; T[kind].unshift(x);
+          noteMsg[sec] = "Moved to " + (to === sec ? "" : (byId[to] ? byId[to].name : to) + " · ") + (kind === "advice" ? "Advice" : "Notes") + ".";
+          save(); render(); };
+        m.appendChild(ed); m.appendChild(mvs); m.appendChild(pb); m.appendChild(del);
         c.appendChild(m);
       }
       list.appendChild(c);
