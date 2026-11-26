@@ -121,6 +121,9 @@ SY.choose = (which) => {
   if (which === "cloud") { backupLocal("This device before signing in"); take(a.s, a.t, "Loaded your data from your Google account. What was on this device is kept as a backup in Settings."); }
   else { ready = true; push(); }
 };
+// Offline: keep working on this device, then send changes when the connection comes back
+window.addEventListener("offline", () => { if (SY.user) { SY.status = "offline"; paint(); } });
+window.addEventListener("online", () => { if (!SY.user) return; if (ready) { clearTimeout(timer); push(); } else pull(true); });
 document.addEventListener("visibilitychange", () => {
   if (!SY.user) return;
   if (document.visibilityState === "hidden") { if (timer) { clearTimeout(timer); timer = null; push(); } }

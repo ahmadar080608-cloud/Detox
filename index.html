@@ -9,6 +9,7 @@
 <link rel="icon" href="logo.svg?v=2" type="image/svg+xml">
 <link rel="icon" href="favicon-32.png?v=2" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
+<link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#131816">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -656,6 +657,42 @@ ul.ambsteps .dateinp{max-width:150px;font-size:13px;padding:4px 8px}
 ul.ambsteps .mv .ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2}
 .ambnext{font-size:13px;color:var(--muted);margin-top:4px}.ambnext span{font-weight:700;color:var(--ink)}
 .nmove{font:inherit;font-size:12px;font-weight:700;color:var(--accent,#e0603f);background:transparent;border:1px solid var(--line);border-radius:999px;padding:3px 8px;max-width:150px;cursor:pointer}
+.qstreaks{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:-4px 0 18px}
+.qstk{display:flex;align-items:center;gap:12px;text-align:left;font:inherit;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 14px;cursor:pointer}
+.qstk .qfl{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--line);color:var(--muted)}
+.qstk .qfl svg{width:22px;height:22px;fill:currentColor}
+.qstk.on .qfl{background:#e0603f;color:#fff}.qstk.risk .qfl{background:rgba(224,96,63,.18);color:#e0603f}
+.qstk b{display:block;font-size:20px;line-height:1.1}.qstk span{font-size:13px;color:var(--muted);font-weight:600}.qstk small{display:block;font-size:12px;color:#e0603f;margin-top:2px}
+@media (max-width:599px){.qstreaks{grid-template-columns:1fr}}
+.srch-ov{position:fixed;inset:0;background:rgba(10,12,16,.45);z-index:200;display:flex;justify-content:center;align-items:flex-start;padding:8vh 14px 14px}
+.srch-box{width:min(680px,100%);max-height:80vh;display:flex;flex-direction:column;background:var(--bg);border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden}
+.srch-top{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.srch-ic svg,.hdrsearch svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2}
+.srch-top input{flex:1;border:0;background:transparent;font:inherit;font-size:18px;padding:8px 2px;color:var(--ink);outline:none}
+.srch-res{overflow-y:auto;padding:6px}
+.srch-hint{padding:14px}
+.srch-item{display:block;width:100%;text-align:left;font:inherit;color:inherit;border:0;background:transparent;padding:10px 12px;border-radius:12px;cursor:pointer}
+.srch-item.on,.srch-item:hover{background:var(--card)}
+.srch-t{font-weight:600;font-size:15px;line-height:1.35}.srch-t mark{background:rgba(224,96,63,.25);color:inherit;border-radius:3px;padding:0 1px}
+.srch-w{font-size:12px;color:var(--muted);margin-top:2px}
+.navsearch{display:flex;align-items:center;gap:10px;width:100%;font:inherit;font-size:14px;font-weight:600;color:rgba(255,255,255,.75);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:9px 12px;margin-bottom:10px;cursor:pointer}
+.navsearch .ic{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2.2}
+.navsearch span{flex:1;text-align:left}.navsearch kbd{font:inherit;font-size:10px;opacity:.6;border:1px solid rgba(255,255,255,.25);border-radius:5px;padding:1px 5px}
+.navlbl{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.45);margin:4px 0 2px 12px}
+.navsep{height:1px;background:rgba(255,255,255,.1);margin:8px 0}
+.hdrsearch{display:none;border:0;background:transparent;color:#fff;padding:8px;margin-left:auto;cursor:pointer}
+@media (max-width:899px){.hdrsearch{display:block}.navsearch,.navlbl,.navsep{display:none}}
+.rtbanner{display:flex;align-items:center;gap:10px;padding:10px 12px 10px 16px;margin:0 0 14px;border-radius:16px;background:var(--accent-soft);font-weight:700}
+.rtbanner .rtbt{flex:1}.rtbanner .cta{padding:7px 16px}
+.rtat{font-size:11px;font-weight:700;color:var(--muted)}
+.rttime{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.rttime input{font:inherit;font-size:13px;padding:4px 8px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.sidelist{display:flex;flex-direction:column}
+.siderow{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--line)}
+.siderow.sub{padding-left:26px}.siderow.off .sidenm,.siderow.off .sideic{opacity:.4}
+.sideic .ic{width:18px;height:18px}.sidenm{flex:1;font-weight:600}
+.sidepin{font:inherit;font-size:12px;font-weight:700;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:4px 12px;cursor:pointer}
+.sidepin.on{background:var(--accent,#e0603f);border-color:transparent;color:#fff}
 .rth{font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin:14px 0 6px}
 ul.rtedit{list-style:none;margin:0 0 8px;padding:0}
 ul.rtedit li{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
@@ -925,7 +962,7 @@ body.arfull #arFrame{height:calc(100vh - 70px);min-height:0}
 .prset input[type=text]{min-width:120px}
 /* tools: countdowns */
 .syncdot{display:inline-block;width:8px;height:8px;border-radius:50%;vertical-align:middle;margin-left:4px;background:transparent}
-.syncdot.synced{background:#3f9a78}.syncdot.syncing{background:#d9a33a}.syncdot.error{background:#d93c3c}.syncdot.out{background:rgba(255,255,255,.25)}
+.syncdot.synced{background:#3f9a78}.syncdot.syncing{background:#d9a33a}.syncdot.error{background:#d93c3c}.syncdot.out{background:rgba(255,255,255,.25)}.syncdot.offline{background:#8a94a6}
 .gbtn{display:inline-flex;align-items:center;gap:10px}
 .glogo{display:inline-flex;background:#fff;border-radius:50%;padding:3px}
 .accwho{display:flex;align-items:center;gap:12px;margin-bottom:12px}
@@ -1273,6 +1310,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
 <body>
 <header>
   <div class="brand" id="brand"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="var(--accent)"/><path d="M28 24l-4-4a7 7 0 0 0-10 10l4 4M36 40l4 4a7 7 0 0 0 10-10l-4-4" fill="none" stroke="#f4f1ec" stroke-width="3.6" stroke-linecap="round"/><path d="M27 37l-3 3M37 27l3-3M31 18v-4M33 50v-4" stroke="#131816" stroke-width="3" stroke-linecap="round"/></svg><div><div class="t1" lang="ar">حرص <span id="syncdot" class="syncdot"></span></div><div class="t2">Focus Hub</div></div></div>
+  <button class="hdrsearch" id="hdrSearch" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
   <nav id="nav"></nav>
   <div id="memSide"></div>
   <div class="side-one" id="sideOne"></div>
@@ -1286,7 +1324,8 @@ li.mrow2 .label{display:flex;flex-direction:column}
 
 <script src="schedule.js?v=20261123d"></script>
 <script src="adhkar.js?v=20261120b"></script>
-<script type="module" src="sync.js?v=3"></script>
+<script type="module" src="sync.js?v=4"></script>
+<script>if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(function () {});</script>
 <script>
 (function () {
   // ---------- icons (line icons, Lucide-style) ----------
@@ -1462,6 +1501,11 @@ li.mrow2 .label{display:flex;flex-direction:column}
   }
   function renderNav(){
     navEl.innerHTML = "";
+    var HID = state.navHidden || {}, PINS = (state.navPins || []).filter(function (id) { return byId[id] && !HID[id]; });
+    var sb = el("button", "navsearch"); sb.innerHTML = '<svg viewBox="0 0 24 24" class="ic"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>'; sb.appendChild(el("span", null, "Search")); sb.appendChild(el("kbd", null, "Ctrl K"));
+    sb.onclick = openSearch; navEl.appendChild(sb);
+    if (PINS.length) { navEl.appendChild(el("div", "navlbl", "Pinned")); PINS.forEach(function (id) { var b = navBtn(byId[id], false); b.classList.add("pinned"); navEl.appendChild(b); }); navEl.appendChild(el("div", "navsep")); }
+    var nb0 = navBtn; navBtn = function (p, child) { if (HID[p.id]) { var x = el("span"); x.hidden = true; return x; } return nb0(p, child); };
     PAGES.forEach(function (p) {
       if (p.group) return;
       if (p.id === "settings") navEl.appendChild(el("div", "spacer"));
@@ -1509,6 +1553,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
         });
       }
     });
+    navBtn = nb0;
     var ms = document.getElementById("memSide"); if (ms) { ms.innerHTML = ""; if (state.tab !== "home") ms.appendChild(mementoEl()); }
     var side = document.getElementById("sideOne"); side.innerHTML = ""; side.hidden = !state.showOne;
     var t = oneThing();
@@ -1517,6 +1562,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     if (t && t.section && byId[t.section]) side.appendChild(el("div", "sec", byId[t.section].name));
   }
   document.getElementById("brand").onclick = function () { go("home"); };
+  document.getElementById("hdrSearch").onclick = function () { openSearch(); };
   function go(id){ var was = state.tab; state.tab = id; addingIn = null; save(); render(); window.scrollTo(0,0);
     var area = function (t) { if (!byId[t]) return null; if (t === "islamic" || byId[t].group === "islamic") return "islamic"; return isUnder(t, "university") ? "university" : isUnder(t, "work") ? "work" : null; };
     var a = area(id); if (a && a !== area(was) && state.intentionOn !== false) intentionPopup(a); }
@@ -1715,6 +1761,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     RT_TO.forEach(function (t) { var o = el("option", null, "Opens: " + t[1]); o.value = t[0]; sel.appendChild(o); });
     sel.value = val || ""; sel.onchange = function () { onch(sel.value); }; return sel;
   }
+  function askNotify(){ try { if (typeof Notification !== "undefined" && Notification.permission === "default") Notification.requestPermission(); } catch (e) {} }
   function routineEditor(box){
     var L = routineItems();
     RT_WHEN.forEach(function (w) {
@@ -1726,7 +1773,11 @@ li.mrow2 .label{display:flex;flex-direction:column}
         var li = el("li");
         var t = el("input"); t.type = "text"; t.value = x.text; t.maxLength = 120; t.setAttribute("aria-label", "Button name"); t.onchange = function () { x.text = t.value.trim() || x.text; save(); };
         li.appendChild(t);
-        li.appendChild(rtToSelect(x.to, function (v) { x.to = v || undefined; if (v && (!x.text || x.text === rtLabel(x.to0))) {} save(); }));
+        li.appendChild(rtToSelect(x.to, function (v) { x.to = v || undefined; save(); }));
+        var tw = el("label", "rttime"); tw.appendChild(el("span", null, "Remind at")); var ti0 = el("input"); ti0.type = "time"; ti0.value = x.at || ""; ti0.setAttribute("aria-label", "Reminder time");
+        ti0.onchange = function () { x.at = ti0.value || undefined; if (x.at) askNotify(); save(); }; tw.appendChild(ti0);
+        if (x.at) { var cx = el("button", "linkbtn", "Off"); cx.onclick = function () { delete x.at; save(); render(); }; tw.appendChild(cx); }
+        li.appendChild(tw);
         var dw = el("div", "rtdays");
         var ev = el("button", "rtday" + (!(x.days && x.days.length) ? " on" : ""), "Every day"); ev.onclick = function () { x.days = []; save(); render(); }; dw.appendChild(ev);
         RT_DAYS.forEach(function (d, k) { var on = x.days && x.days.indexOf(k) >= 0; var b = el("button", "rtday" + (on ? " on" : ""), d);
@@ -1748,6 +1799,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
       r.appendChild(ni); r.appendChild(ns); r.appendChild(nb); box.appendChild(r);
     });
     box.appendChild(el("p", "meta", "Each button shows every day unless you pick days. E.g. pick Sun for things you only do on Sunday evening, like weekly muḥāsabah or setting your goals."));
+    box.appendChild(el("p", "meta", "Remind at: you get a notification at that time while the app is open (in a tab, or in the background on your laptop). If the app is closed, the reminder shows at the top of Overview when you next open it, for up to 90 minutes after."));
   }
   function routinePanel(){
     rtMigrate(routineItems()); rtMigrate3(routineItems());
@@ -1783,6 +1835,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
         var b = el("button", "rtgo");
         b.appendChild(el("span", "rtgt", x.text));
         if (x.days && x.days.length && x.days.length < 7) b.appendChild(el("small", "rtonly", x.days.length === 1 ? RT_DAYS[x.days[0]] : x.days.map(function (k) { return RT_DAYS[k]; }).join(", ")));
+        if (x.at) b.appendChild(el("small", "rtat", fmt12(x.at)));
         if (x.to) b.appendChild(el("span", "rtarrow", "→"));
         b.onclick = function () { if (!x.to) { if (done[x.id]) delete done[x.id]; else done[x.id] = 1; save(); render(); return; } done[x.id] = 1; save(); rtGo(x.to); };
         row.appendChild(b); ul.appendChild(row); });
@@ -1975,10 +2028,153 @@ li.mrow2 .label{display:flex;flex-direction:column}
     w.appendChild(el("p", "meta", "Saves as you type."));
     return w;
   }
+  // Qur'an streaks: a day counts if you logged new memorisation / did any revision that day
+  function streakOf(has){
+    var d = new Date(), i, cur = 0, best = 0, run = 0, today = has(dkey(d));
+    var start = today ? 0 : 1;               // today not done yet: the streak is still alive from yesterday
+    for (i = start; i < 500; i++) { var dd = new Date(); dd.setDate(dd.getDate() - i); if (has(dkey(dd))) cur++; else break; }
+    for (i = 0; i < 500; i++) { var de = new Date(); de.setDate(de.getDate() - i); if (has(dkey(de))) { run++; if (run > best) best = run; } else run = 0; }
+    return { cur: cur, best: best, today: today };
+  }
+  function memStreak(q){ q = q || state.quran || {}; var M = q.memLogP || {}; return streakOf(function (k) { return (M[k] || 0) > 0; }); }
+  function revStreak(q){ q = q || state.quran || {}; var R = q.rev || {}, SD = q.shortDone || {}; return streakOf(function (k) { return (R[k] || 0) > 0 || !!SD[k]; }); }
+  function quranStreaks(q){
+    var w = el("div", "qstreaks");
+    [["Memorisation", memStreak(q), "q-mem", "Memorise something new today to keep it going"], ["Revision", revStreak(q), "q-rev", "Tick off some revision today to keep it going"]].forEach(function (x) {
+      var st = x[1], b = el("button", "qstk" + (st.today ? " on" : st.cur ? " risk" : ""));
+      var fl = el("span", "qfl"); fl.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5.3 2 1.3 3 2.5 3-1.5-3 0-6.5.5-9.5z"/></svg>'; b.appendChild(fl);
+      var t = el("div"); t.appendChild(el("b", null, st.cur + (st.cur === 1 ? " day" : " days")));
+      t.appendChild(el("span", null, x[0] + " streak" + (st.best > st.cur ? " · best " + st.best : "")));
+      if (!st.today) t.appendChild(el("small", null, st.cur ? x[3] : "Start a streak today"));
+      b.appendChild(t);
+      b.onclick = function () { var qq = state.quran; if (qq.collapsed && qq.collapsed[x[2]]) { delete qq.collapsed[x[2]]; save(); render(); } var e = document.getElementById(x[2]); if (e) e.scrollIntoView({ behavior:"smooth", block:"start" }); };
+      w.appendChild(b); });
+    return w;
+  }
+
+  // ---------- search everything ----------
+  function searchIndex(){
+    var R = [], add = function (text, where, to, anchor, sub) { if (text && String(text).trim()) R.push({ t:String(text), w:where, to:to, a:anchor, sub:sub || "" }); };
+    var nm = function (id) { return byId[id] ? byId[id].name : id; };
+    PAGES.forEach(function (p) { if (p.id !== "settings") add(p.name, "Section", p.id); });
+    add("Settings", "Section", "settings");
+    (state.tasks || []).forEach(function (t) { add(t.text, nm(t.section) + " · task" + (t.done ? " (done)" : ""), t.section); });
+    (state.todos || []).forEach(function (t) { add(t.text, "To-do" + (t.done ? " (done)" : ""), "todo"); });
+    Object.keys(state.notes || {}).forEach(function (sec) { var N = state.notes[sec] || {};
+      (N.advice || []).forEach(function (x) { add(x.text, nm(sec) + " · advice", sec, "n-" + sec, x.from ? "— " + x.from : ""); });
+      (N.notes || []).forEach(function (x) { add(x.text, nm(sec) + " · note", sec, "n-" + sec); }); });
+    Object.keys(state.trk || {}).forEach(function (sec) { (state.trk[sec] || []).forEach(function (x) {
+      add(x.title, nm(sec) + (x.date ? " · " + new Date(x.date + "T12:00").toLocaleDateString(undefined, { day:"numeric", month:"short" }) : ""), sec, "t-" + sec, x.notes || "");
+      ["notes","why","vision","dua"].forEach(function (k) { if (x[k]) add(x[k], nm(sec) + " · " + x.title, sec, "t-" + sec); });
+      (x.steps || []).forEach(function (z) { add(z.text, nm(sec) + " · step of " + x.title, sec, "t-" + sec); }); }); });
+    Object.keys(state.sciFiles || {}).forEach(function (sec) { (state.sciFiles[sec] || []).forEach(function (x) { add(x.title, nm(sec) + " · PDF", sec, "f-" + sec, x.notes || ""); }); });
+    (state.naseeha || []).forEach(function (x) { add(x.topic, "Naṣīḥah & Khuṭbahs" + (x.date ? " · " + x.date : ""), "naseeha", "ns-log");
+      if (x.quotes) add(x.quotes, "Naṣīḥah · " + x.topic, "naseeha", "ns-log"); if (x.action) add(x.action, "Naṣīḥah · " + x.topic, "naseeha", "ns-log"); });
+    (state.myDuas || []).forEach(function (x) { add(x.t || x.en || x.ar, "My du‘ā’ list", "adhkar", "ad-mine", x.en || ""); if (x.en && x.t) add(x.en, "My du‘ā’ · " + x.t, "adhkar", "ad-mine"); });
+    (state.countdowns || []).forEach(function (c) { add(c.title, "Exams & deadlines · " + c.date, c.scope && /^uni/.test(c.scope) ? "university" : c.scope && byId[c.scope] ? c.scope : "home"); });
+    ((state.sched || {}).items || []).forEach(function (it) { add(it.title, "Schedule" + (it.start ? " · " + it.start : ""), "schedule"); });
+    Object.keys(state.sciGoals || {}).forEach(function (k) { var G = state.sciGoals[k] || {}, sec = /^uni@/.test(k) ? "university" : k;
+      Object.keys(G).forEach(function (pk0) { (Array.isArray(G[pk0]) ? G[pk0] : []).forEach(function (g) { add(g.text, nm(sec) + " · goal", sec); }); }); });
+    (state.routine || []).forEach(function (x) { add(x.text, "Today's routine", "home", "routine"); });
+    if (typeof SURAH !== "undefined") SURAH.forEach(function (n, i) { add("Sūrah " + n + " (" + (i + 1) + ")", "Qur'an · memorisation", "quran", "q-mem"); });
+    return R;
+  }
+  function openSearch(){
+    if (document.querySelector(".srch-ov")) return;
+    var ov = el("div", "srch-ov"), box = el("div", "srch-box");
+    var top = el("div", "srch-top"); var ic = el("span", "srch-ic"); ic.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>'; top.appendChild(ic);
+    var inp = el("input"); inp.type = "search"; inp.placeholder = "Search notes, lectures, tasks, ambitions, files, du‘ās…"; inp.setAttribute("aria-label", "Search"); top.appendChild(inp);
+    var cl = el("button", "iconbtn"); cl.appendChild(icon("x")); cl.setAttribute("aria-label", "Close search"); top.appendChild(cl);
+    box.appendChild(top);
+    var res = el("div", "srch-res"); box.appendChild(res);
+    ov.appendChild(box); document.body.appendChild(ov);
+    var IDX = searchIndex(), sel = 0, shown = [];
+    var key;
+    var close = function () { ov.remove(); document.removeEventListener("keydown", key); };
+    var open = function (r) { close(); var g = function () { if (r.a) { if (state.quran && state.quran.collapsed && state.quran.collapsed[r.a]) { delete state.quran.collapsed[r.a]; save(); render(); } var e = document.getElementById(r.a); if (e) e.scrollIntoView({ block:"start" }); } };
+      if (r.to === state.tab) g(); else { go(r.to); setTimeout(g, 80); } };
+    var norm = function (x) { return String(x).toLowerCase().normalize("NFD").replace(/[̀-ͯ'‘’ʿʾ]/g, ""); };
+    var hl = function (txt, ws) { var s0 = txt.length > 160 ? txt.slice(0, 160) + "…" : txt, out = el("span"), low = s0.toLowerCase(), marks = [];
+      ws.forEach(function (w) { var i = low.indexOf(w); if (i >= 0) marks.push([i, i + w.length]); });
+      marks.sort(function (a, b) { return a[0] - b[0]; }); var at = 0;
+      marks.forEach(function (m) { if (m[0] < at) return; out.appendChild(document.createTextNode(s0.slice(at, m[0]))); out.appendChild(el("mark", null, s0.slice(m[0], m[1]))); at = m[1]; });
+      out.appendChild(document.createTextNode(s0.slice(at))); return out; };
+    var run = function () {
+      var q0 = inp.value.trim().toLowerCase(); res.innerHTML = ""; shown = []; sel = 0;
+      if (q0.length < 2) { res.appendChild(el("p", "meta srch-hint", "Type at least 2 letters. Searches every section: notes, advice, lectures, tasks, to-dos, ambitions, files, du‘ās, naṣīḥah, schedule and goals.")); return; }
+      var ws = q0.split(/\s+/).filter(Boolean), wn = ws.map(norm), hits = [];
+      IDX.forEach(function (r) { var h = norm(r.t + " " + r.sub + " " + r.w); if (wn.every(function (w) { return h.indexOf(w) >= 0; })) {
+        var nt = norm(r.t), sc = r.w === "Section" ? -1 : nt.indexOf(wn[0]) === 0 ? 0 : nt.indexOf(wn[0]) >= 0 ? 1 : 2; hits.push([sc, r]); } });
+      hits.sort(function (a, b) { return a[0] - b[0]; }); shown = hits.slice(0, 60).map(function (x) { return x[1]; });
+      if (!shown.length) { res.appendChild(el("p", "meta srch-hint", "Nothing found for “" + inp.value.trim() + "”.")); return; }
+      shown.forEach(function (r, i) { var b = el("button", "srch-item" + (i === 0 ? " on" : ""));
+        var t = el("div", "srch-t"); t.appendChild(hl(r.t, ws)); b.appendChild(t);
+        b.appendChild(el("div", "srch-w", r.w)); b.onclick = function () { open(r); }; res.appendChild(b); });
+      if (hits.length > 60) res.appendChild(el("p", "meta srch-hint", "Showing the first 60 of " + hits.length + ". Add another word to narrow it down."));
+    };
+    key = function (e) { if (e.key === "Escape") close();
+      else if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); var its = res.querySelectorAll(".srch-item"); if (!its.length) return;
+        its[sel].classList.remove("on"); sel = (sel + (e.key === "ArrowDown" ? 1 : -1) + its.length) % its.length; its[sel].classList.add("on"); its[sel].scrollIntoView({ block:"nearest" }); }
+      else if (e.key === "Enter" && shown[sel]) { e.preventDefault(); open(shown[sel]); } };
+    document.addEventListener("keydown", key);
+    inp.oninput = run; cl.onclick = close; ov.onclick = function (e) { if (e.target === ov) close(); };
+    run(); setTimeout(function () { inp.focus(); }, 0);
+  }
+  window.addEventListener("keydown", function (e) { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); openSearch(); } });
+
+  // ---------- routine reminders ----------
+  var rtBanner = null;
+  function fmt12(hm0){ var a = hm0.split(":"), h = +a[0]; return (h % 12 || 12) + ":" + a[1] + (h < 12 ? " am" : " pm"); }
+  function routineTick(){
+    var L = state.routine || [], now = new Date(), tk = dkey(now), dow = now.getDay(), m = now.getHours() * 60 + now.getMinutes();
+    state.routineFired = state.routineFired || {}; Object.keys(state.routineFired).forEach(function (k) { if (k < tk) delete state.routineFired[k]; });
+    var F = state.routineFired[tk] = state.routineFired[tk] || {}, done = (state.routineDone || {})[tk] || {}, changed = false;
+    L.forEach(function (x) {
+      if (!x.at || F[x.id] || done[x.id]) return;
+      if (x.days && x.days.length && x.days.indexOf(dow) < 0) return;
+      var a = x.at.split(":"), am = +a[0] * 60 + +a[1];
+      if (m < am || m > am + 90) return;
+      F[x.id] = 1; changed = true; rtBanner = x;
+      try { if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+        var title = "حرص · " + x.text, opt = { body:"It's " + fmt12(x.at) + ": time for " + x.text, icon:"icon-512.png", tag:"rt-" + x.id };
+        if (navigator.serviceWorker && navigator.serviceWorker.controller) navigator.serviceWorker.ready.then(function (r) { r.showNotification(title, opt); });
+        else { var n = new Notification(title, opt); n.onclick = function () { window.focus(); if (x.to) rtGo(x.to); }; } } } catch (e) {}
+    });
+    if (changed) { save(); if (state.tab === "home" && !document.activeElement.matches("input,textarea,select")) render(); }
+  }
+  setInterval(routineTick, 30000); setTimeout(routineTick, 2500);
+  function rtBannerEl(){
+    if (!rtBanner) return null; var x = rtBanner;
+    var b = el("div", "rtbanner"); b.appendChild(el("span", "rtbt", (x.at ? fmt12(x.at) + " · " : "") + x.text));
+    if (x.to) { var g = el("button", "cta", "Open"); g.onclick = function () { rtBanner = null; var d = state.routineDone = state.routineDone || {}; (d[dkey(new Date())] = d[dkey(new Date())] || {})[x.id] = 1; save(); rtGo(x.to); }; b.appendChild(g); }
+    var c = el("button", "iconbtn"); c.appendChild(icon("x")); c.setAttribute("aria-label", "Dismiss"); c.onclick = function () { rtBanner = null; render(); }; b.appendChild(c);
+    return b;
+  }
+
+  // ---------- sidebar: hide sections, pin favourites ----------
+  function sidebarPanel(){
+    var p = el("div", "panel"); p.id = "set-side"; p.appendChild(el("h2", null, "Sidebar"));
+    p.appendChild(el("p", "meta", "Pin up to 6 sections you use most so they sit at the top, and switch off the ones you don't use. Hidden sections keep their data, and search still finds them."));
+    var H = state.navHidden = state.navHidden || {}, P = state.navPins = state.navPins || [];
+    var ul = el("div", "sidelist");
+    PAGES.forEach(function (pg) { if (pg.id === "home" || pg.id === "settings") return;
+      var r = el("div", "siderow" + (pg.group || pg.parent ? " sub" : "") + (H[pg.id] ? " off" : ""));
+      var ic = el("span", "sideic"); ic.appendChild(icon(pg.icon)); r.appendChild(ic);
+      r.appendChild(el("span", "sidenm", pg.name));
+      var on = P.indexOf(pg.id) >= 0, pin = el("button", "sidepin" + (on ? " on" : ""), on ? "Pinned" : "Pin");
+      pin.onclick = function () { var i = P.indexOf(pg.id); if (i >= 0) P.splice(i, 1); else { if (P.length >= 6) { alertMsg("You can pin up to 6 sections."); return; } P.push(pg.id); } save(); render(); };
+      r.appendChild(pin);
+      var sw = el("button", "switch" + (H[pg.id] ? "" : " on")); sw.setAttribute("role", "switch"); sw.setAttribute("aria-checked", H[pg.id] ? "false" : "true"); sw.setAttribute("aria-label", "Show " + pg.name + " in the sidebar");
+      sw.onclick = function () { if (H[pg.id]) delete H[pg.id]; else H[pg.id] = 1; save(); render(); };
+      r.appendChild(sw); ul.appendChild(r); });
+    p.appendChild(ul);
+    app.appendChild(p); makeCollapsible("set-side");
+  }
   function renderHome(){
     seededCard();
     var toprow = el("div", "toprow"); toprow.appendChild(ayahCard()); toprow.appendChild(mementoEl("card")); app.appendChild(toprow);
     var cds = countdownStrip(); if (cds) app.appendChild(cds);
+    var rb = rtBannerEl(); if (rb) app.appendChild(rb);
     rightNowCard();
     routinePanel();
     var t = oneThing();
@@ -2451,6 +2647,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
       sum.appendChild(b);
     });
     app.appendChild(sum);
+    app.appendChild(quranStreaks(q));
 
     // ---- memorisation (by ayah, counted from ayah 1) ----
     var pm = el("div", "panel"); pm.id = "q-mem";
@@ -2919,6 +3116,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
     var rp = el("div", "panel"); rp.id = "set-routine"; rp.appendChild(el("h2", null, "Daily routine"));
     rp.appendChild(el("p", "meta", "Shown at the top of Overview each day. Tick items off there; ticks reset every morning."));
     routineEditor(rp); app.appendChild(rp); makeCollapsible("set-routine");
+    sidebarPanel();
 
     // theme
     var p = el("div", "panel"); p.appendChild(el("h2", null, "Theme"));
@@ -3040,7 +3238,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
       ab.appendChild(el("p", "meta", "Whichever you don't pick is kept: this device's data as a backup below, or your account's data until the next save."));
       p.appendChild(ab);
     }
-    var stx = Y.status === "synced" ? "Synced " + new Date(Y.last).toLocaleTimeString(undefined, { hour:"2-digit", minute:"2-digit" }) : Y.status === "syncing" ? "Syncing…" : Y.status === "error" ? "Not synced" : Y.status === "ask" ? "Waiting for your choice" : "Connecting…";
+    var stx = Y.status === "synced" ? "Synced " + new Date(Y.last).toLocaleTimeString(undefined, { hour:"2-digit", minute:"2-digit" }) : Y.status === "syncing" ? "Syncing…" : Y.status === "error" ? "Not synced" : Y.status === "offline" ? "Offline · your changes are saved on this device and will sync when you're back online" : Y.status === "ask" ? "Waiting for your choice" : "Connecting…";
     var sr = el("div", "accrow"); var sl = el("div"); sl.appendChild(el("b", null, "Sync")); sl.appendChild(el("span", "meta", stx + (Y.status === "synced" ? " · changes save to your account within a few seconds" : ""))); sr.appendChild(sl);
     var sn = el("button", "ghost sm", "Sync now"); sn.onclick = function () { Y.syncNow(); }; sr.appendChild(sn); p.appendChild(sr);
     if (Y.err) p.appendChild(el("p", "toast", Y.err));
@@ -3086,7 +3284,7 @@ li.mrow2 .label{display:flex;flex-direction:column}
   var lastSyncUser = undefined;
   function paintSyncDot(){ var b = document.getElementById("syncdot"); if (!b) return; var Y = window.DetoxSync;
     var st = !Y ? "" : Y.user ? Y.status : "out"; b.className = "syncdot " + st;
-    b.title = !Y ? "" : !Y.user ? "Not signed in: data is only on this device" : st === "synced" ? "Synced with your Google account" : st === "syncing" ? "Syncing…" : st === "error" ? "Sync problem: open Settings" : "Signed in"; }
+    b.title = !Y ? "" : !Y.user ? "Not signed in: data is only on this device" : st === "synced" ? "Synced with your Google account" : st === "syncing" ? "Syncing…" : st === "error" ? "Sync problem: open Settings" : st === "offline" ? "Offline: changes will sync when you're back online" : "Signed in"; }
   (function () { try { var m = sessionStorage.getItem("detox.syncMsg"); if (m) { sessionStorage.removeItem("detox.syncMsg"); setTimeout(function () { alertMsg(m); }, 600); } } catch (e) {} })();
   function renderSchedule(){
     if (!window.DetoxSchedule) { app.appendChild(el("p", "empty", "The schedule didn't load. Refresh the page.")); return; }
